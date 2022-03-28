@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>torchtime.collate &mdash; torchtime</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html" class="icon icon-home"> torchtime
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">torchtime</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>torchtime.collate</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for torchtime.collate</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+
+
+<div class="viewcode-block" id="sort_by_length"><a class="viewcode-back" href="../../api.html#torchtime.collate.sort_by_length">[docs]</a><span class="k">def</span> <span class="nf">sort_by_length</span><span class="p">(</span><span class="n">batch_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Collates a batch and sorts by decending length.</span>
+
+<span class="sd">    Data sets of variable length can be efficiently represented in a</span>
+<span class="sd">    `PackedSequence</span>
+<span class="sd">    &lt;https://pytorch.org/docs/stable/generated/torch.nn.utils.rnn.PackedSequence.html&gt;`_</span>
+<span class="sd">    object. These are formed using</span>
+<span class="sd">    `pack_padded_sequence()</span>
+<span class="sd">    &lt;https://pytorch.org/docs/stable/generated/torch.nn.utils.rnn.pack_padded_sequence.html#torch.nn.utils.rnn.pack_padded_sequence&gt;`_</span>
+<span class="sd">    which by default expects the input batch to be sorted by decending length. Pass this</span>
+<span class="sd">    collate function to a DataLoader to automatically sort the batch before calling</span>
+<span class="sd">    pack_padded_sequence() in the forward method of your model.</span>
+
+<span class="sd">    Example:</span>
+<span class="sd">    The CharacterTrajectories data set features trajectories of varying length. The</span>
+<span class="sd">    ``sort_by_length()`` collate function sorts the batch::</span>
+
+<span class="sd">        from torch.utils.data import DataLoader</span>
+<span class="sd">        from torchtime.data import UEA</span>
+<span class="sd">        from torchtime.collate import sort_by_length</span>
+
+<span class="sd">        char_traj = UEA(</span>
+<span class="sd">            dataset=&quot;CharacterTrajectories&quot;,</span>
+<span class="sd">            split=&quot;train&quot;,</span>
+<span class="sd">            train_split=0.7,</span>
+<span class="sd">            val_split=0.2,</span>
+<span class="sd">        )</span>
+<span class="sd">        dataloader = DataLoader(</span>
+<span class="sd">            char_traj,</span>
+<span class="sd">            batch_size=32,</span>
+<span class="sd">            collate_fn=sort_by_length,</span>
+<span class="sd">        )</span>
+
+<span class="sd">        &gt;&gt; next(iter(dataloader))[&quot;length&quot;]</span>
+
+<span class="sd">        tensor([146, 145, 143, 136, 136, 135, 132, 131, 131, 130, 130, 129, 125, 125,</span>
+<span class="sd">                124, 124, 122, 121, 119, 119, 116, 115, 115, 114, 111, 109, 106, 105,</span>
+<span class="sd">                103,  98,  88,  78])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">batch_data</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">batch_data</span><span class="p">])</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">batch_data</span><span class="p">])</span>
+    <span class="n">length</span><span class="p">,</span> <span class="n">sorted_index</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">descending</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sorted_index</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sorted_index</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;X&quot;</span><span class="p">:</span> <span class="n">X</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">length</span><span class="p">}</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Philip Darke.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

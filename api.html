@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API &mdash; torchtime</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Time series data sets for PyTorch" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> torchtime
+          </a>
+              <div class="version">
+                0.1.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-torchtime.data"><code class="docutils literal notranslate"><span class="pre">torchtime.data</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-torchtime.collate"><code class="docutils literal notranslate"><span class="pre">torchtime.collate</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">torchtime</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>API</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/philipdarke/torchtime/blob/main/docs/source/api.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api">
+<h1>API<a class="headerlink" href="#api" title="Permalink to this headline"></a></h1>
+<section id="module-torchtime.data">
+<span id="torchtime-data"></span><h2><code class="docutils literal notranslate"><span class="pre">torchtime.data</span></code><a class="headerlink" href="#module-torchtime.data" title="Permalink to this headline"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="torchtime.data.PhysioNet2019">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchtime.data.</span></span><span class="sig-name descname"><span class="pre">PhysioNet2019</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./data'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/torchtime/data.html#PhysioNet2019"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.data.PhysioNet2019" title="Permalink to this definition"></a></dt>
+<dd><p>Creates and returns the PhysioNet Challenge 2019 data as a PyTorch DataSet. See
+<a class="reference external" href="https://physionet.org/content/challenge-2019/1.0.0/">https://physionet.org/content/challenge-2019/1.0.0/</a> for more details.</p>
+<p>Data are downloaded, unpacked and saved in the <code class="docutils literal notranslate"><span class="pre">path</span></code> directory (default
+<code class="docutils literal notranslate"><span class="pre">./data</span></code>). The size of the training, validation and (optional) test splits are
+controlled with the <code class="docutils literal notranslate"><span class="pre">train_split</span></code> and <code class="docutils literal notranslate"><span class="pre">val_split</span></code> arguments. For example
+<code class="docutils literal notranslate"><span class="pre">train_split</span> <span class="pre">=</span> <span class="pre">0.7</span></code>, <code class="docutils literal notranslate"><span class="pre">val_split</span> <span class="pre">=</span> <span class="pre">0.2</span></code> generates a 70/20/10%
+train/validation/test split, whilst <code class="docutils literal notranslate"><span class="pre">train_split</span> <span class="pre">=</span> <span class="pre">0.8</span></code>, <code class="docutils literal notranslate"><span class="pre">val_split</span> <span class="pre">=</span> <span class="pre">0.2</span></code>
+generates a 80/20% train/validation split. Splits are formed using stratified
+sampling. Randomness is controlled with the <code class="docutils literal notranslate"><span class="pre">seed</span></code> argument.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> attributes correspond to the split specified by the
+<code class="docutils literal notranslate"><span class="pre">split</span></code> argument. However training, validation and test data are available by
+accessing the <code class="docutils literal notranslate"><span class="pre">X_[train/val/test]</span></code>, <code class="docutils literal notranslate"><span class="pre">y_[train/val/test]</span></code> and
+<code class="docutils literal notranslate"><span class="pre">length__[train/val/test]</span></code> attributes regardless of the split specified in
+<code class="docutils literal notranslate"><span class="pre">split</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The data split to return, either ‘train’, ‘val’ (validation) or ‘test’.</p></li>
+<li><p><strong>train_split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the training set.</p></li>
+<li><p><strong>val_split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the validation set.</p></li>
+<li><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Save path for downloaded data (default <code class="docutils literal notranslate"><span class="pre">./data</span></code>).</p></li>
+<li><p><strong>seed</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Random seed for reproducibility (optional).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="torchtime.data.PhysioNet2019.X">
+<span class="sig-name descname"><span class="pre">X</span></span><a class="headerlink" href="#torchtime.data.PhysioNet2019.X" title="Permalink to this definition"></a></dt>
+<dd><p>A tensor of shape (<em>n</em>, <em>s</em>, <em>c</em>) where <em>n</em> = number of
+trajectories, <em>s</em> = (maximum) trajectory length and <em>c</em> = number of channels
+plus 1. The first channel is a time stamp. The remaining channels are the
+PhysioNet data (<em>including</em> the <code class="docutils literal notranslate"><span class="pre">ICULOS</span></code> time stamp). Note that PhysioNet
+trajectories are of unequal length and are therefore padded with <code class="docutils literal notranslate"><span class="pre">NaNs</span></code> to
+the length of the longest trajectory in the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="torchtime.data.PhysioNet2019.y">
+<span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#torchtime.data.PhysioNet2019.y" title="Permalink to this definition"></a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">SepsisLabel</span></code> for each time point. A tensor of shape (<em>n</em>, <em>s</em>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="torchtime.data.PhysioNet2019.length">
+<span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#torchtime.data.PhysioNet2019.length" title="Permalink to this definition"></a></dt>
+<dd><p>Length of each trajectory prior to padding. A tensor of shape
+(<em>n</em>, 1).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A PyTorch DataSet object which can be passed to a
+DataLoader.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>torch.utils.data.Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="torchtime.data.UEA">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchtime.data.</span></span><span class="sig-name descname"><span class="pre">UEA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/torchtime/data.html#UEA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.data.UEA" title="Permalink to this definition"></a></dt>
+<dd><p>Creates and returns a time series classification data set from the UEA/UCR
+repository as a PyTorch DataSet. See <a class="reference external" href="http://www.timeseriesclassification.com">http://www.timeseriesclassification.com</a> for
+more details and the available data sets.</p>
+<p>Data are downloaded using the <code class="docutils literal notranslate"><span class="pre">sktime</span></code> package. The size of the training,
+validation and (optional) test splits are controlled with the <code class="docutils literal notranslate"><span class="pre">train_split</span></code> and
+<code class="docutils literal notranslate"><span class="pre">val_split</span></code> arguments. For example <code class="docutils literal notranslate"><span class="pre">train_split</span> <span class="pre">=</span> <span class="pre">0.7</span></code>, <code class="docutils literal notranslate"><span class="pre">val_split</span> <span class="pre">=</span> <span class="pre">0.2</span></code>
+generates a 70/20/10% train/validation/test split, whilst <code class="docutils literal notranslate"><span class="pre">train_split</span> <span class="pre">=</span> <span class="pre">0.8</span></code>,
+<code class="docutils literal notranslate"><span class="pre">val_split</span> <span class="pre">=</span> <span class="pre">0.2</span></code> generates a 80/20% train/validation split. Splits are formed
+using stratified sampling.</p>
+<p>Missing data can be simulated using the <code class="docutils literal notranslate"><span class="pre">missing</span></code> argument. Randomness is
+controlled with the <code class="docutils literal notranslate"><span class="pre">seed</span></code> argument.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> attributes correspond to the split specified by the
+<code class="docutils literal notranslate"><span class="pre">split</span></code> argument. However training, validation and test data are available by
+accessing the <code class="docutils literal notranslate"><span class="pre">X_[train/val/test]</span></code>, <code class="docutils literal notranslate"><span class="pre">y_[train/val/test]</span></code> and
+<code class="docutils literal notranslate"><span class="pre">length__[train/val/test]</span></code> attributes regardless of the split specified in
+<code class="docutils literal notranslate"><span class="pre">split</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The data set to return.</p></li>
+<li><p><strong>split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The data split to return, either ‘train’, ‘val’ (validation) or ‘test’.</p></li>
+<li><p><strong>train_split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the training set.</p></li>
+<li><p><strong>val_split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the validation set.</p></li>
+<li><p><strong>missing</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – The proportion of data to drop at random. If <code class="docutils literal notranslate"><span class="pre">missing</span></code> is a single
+value, data is dropped from all channels. To drop data at different rates
+for each channel, pass a list of rates with the proportion missing for each
+channel (default 0).</p></li>
+<li><p><strong>seed</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Random seed for reproducibility (optional).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="torchtime.data.UEA.X">
+<span class="sig-name descname"><span class="pre">X</span></span><a class="headerlink" href="#torchtime.data.UEA.X" title="Permalink to this definition"></a></dt>
+<dd><p>A tensor of shape (<em>n</em>, <em>s</em>, <em>c</em>) where <em>n</em> = number of
+trajectories, <em>s</em> = (maximum) trajectory length and <em>c</em> = number of channels
+plus 1. The first channel is a time stamp. The remaining channels are as
+documented in the UEA/UCR repository for the data set. Where trajectories
+are of unequal lengths they are padded with <code class="docutils literal notranslate"><span class="pre">NaNs</span></code> to the length of the
+longest trajectory in the data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="torchtime.data.UEA.y">
+<span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#torchtime.data.UEA.y" title="Permalink to this definition"></a></dt>
+<dd><p>One-hot encoded label data. A tensor of shape (<em>n</em>, <em>l</em>) where <em>l</em>
+is the number of classes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="torchtime.data.UEA.length">
+<span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#torchtime.data.UEA.length" title="Permalink to this definition"></a></dt>
+<dd><p>Length of each trajectory prior to padding. A tensor of shape
+(<em>n</em>, 1).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type</dt>
+<dd class="field-odd"><p>Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A PyTorch DataSet object which can be passed to a
+DataLoader.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>torch.utils.data.Dataset</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-torchtime.collate">
+<span id="torchtime-collate"></span><h2><code class="docutils literal notranslate"><span class="pre">torchtime.collate</span></code><a class="headerlink" href="#module-torchtime.collate" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="torchtime.collate.sort_by_length">
+<span class="sig-prename descclassname"><span class="pre">torchtime.collate.</span></span><span class="sig-name descname"><span class="pre">sort_by_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/torchtime/collate.html#sort_by_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.collate.sort_by_length" title="Permalink to this definition"></a></dt>
+<dd><p>Collates a batch and sorts by decending length.</p>
+<p>Data sets of variable length can be efficiently represented in a
+<a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.utils.rnn.PackedSequence.html">PackedSequence</a>
+object. These are formed using
+<a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.utils.rnn.pack_padded_sequence.html#torch.nn.utils.rnn.pack_padded_sequence">pack_padded_sequence()</a>
+which by default expects the input batch to be sorted by decending length. Pass this
+collate function to a DataLoader to automatically sort the batch before calling
+pack_padded_sequence() in the forward method of your model.</p>
+<p>Example:
+The CharacterTrajectories data set features trajectories of varying length. The
+<code class="docutils literal notranslate"><span class="pre">sort_by_length()</span></code> collate function sorts the batch:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
+<span class="kn">from</span> <span class="nn">torchtime.collate</span> <span class="kn">import</span> <span class="n">sort_by_length</span>
+
+<span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">train_split</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">val_split</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+    <span class="n">char_traj</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">collate_fn</span><span class="o">=</span><span class="n">sort_by_length</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="o">&gt;&gt;</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span>
+
+<span class="n">tensor</span><span class="p">([</span><span class="mi">146</span><span class="p">,</span> <span class="mi">145</span><span class="p">,</span> <span class="mi">143</span><span class="p">,</span> <span class="mi">136</span><span class="p">,</span> <span class="mi">136</span><span class="p">,</span> <span class="mi">135</span><span class="p">,</span> <span class="mi">132</span><span class="p">,</span> <span class="mi">131</span><span class="p">,</span> <span class="mi">131</span><span class="p">,</span> <span class="mi">130</span><span class="p">,</span> <span class="mi">130</span><span class="p">,</span> <span class="mi">129</span><span class="p">,</span> <span class="mi">125</span><span class="p">,</span> <span class="mi">125</span><span class="p">,</span>
+        <span class="mi">124</span><span class="p">,</span> <span class="mi">124</span><span class="p">,</span> <span class="mi">122</span><span class="p">,</span> <span class="mi">121</span><span class="p">,</span> <span class="mi">119</span><span class="p">,</span> <span class="mi">119</span><span class="p">,</span> <span class="mi">116</span><span class="p">,</span> <span class="mi">115</span><span class="p">,</span> <span class="mi">115</span><span class="p">,</span> <span class="mi">114</span><span class="p">,</span> <span class="mi">111</span><span class="p">,</span> <span class="mi">109</span><span class="p">,</span> <span class="mi">106</span><span class="p">,</span> <span class="mi">105</span><span class="p">,</span>
+        <span class="mi">103</span><span class="p">,</span>  <span class="mi">98</span><span class="p">,</span>  <span class="mi">88</span><span class="p">,</span>  <span class="mi">78</span><span class="p">])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Time series data sets for PyTorch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Philip Darke.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
