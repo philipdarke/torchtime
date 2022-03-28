@@ -1,0 +1,43 @@
+name: build
+on: ["push", "pull_request"]
+
+jobs:
+  ci:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.8]
+        poetry-version: [1.1.13]
+        os: [ubuntu-20.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Poetry
+        run: pip install poetry==${{ matrix.poetry-version }}
+      - name: Install package and dependencies
+        run: |
+          python3 -m poetry install
+          python3 -m poetry run pip3 uninstall flake8-html -y
+      - name: Lint code
+        run: |
+          python3 -m poetry run black . --check
+          python3 -m poetry run isort . --check
+          python3 -m poetry run flake8 .
+      - name: Run unit tests
+        run: python3 -m poetry run pytest -v --cov=torchtime --cov-report=xml
+      - name: Build documentation
+        run: |
+          python3 -m poetry run make html --directory docs/
+          python3 -m poetry run genbadge coverage -v -i coverage.xml -o docs/_build/html/assets/coverage-badge.svg
+      - name: Update GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/_build/html
+
