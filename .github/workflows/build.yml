@@ -40,4 +40,10 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/_build/html
-
+      - name: Release if tag
+        uses: docker://antonyurchenko/git-release:latest
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CHANGELOG_FILE: "CHANGELOG.md"
+          ALLOW_EMPTY_CHANGELOG: "false"

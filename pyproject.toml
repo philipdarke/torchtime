@@ -1,10 +1,13 @@
 [tool.poetry]
 name = "torchtime"
-version = "0.1.0"
+version = "0.1.1"
 description = "Time series data sets for PyTorch"
 authors = ["Philip Darke <hello@philipdarke.com>"]
 license = "MIT"
 readme = "README.md"
+homepage = "https://philipdarke.com/torchtime"
+repository = "https://github.com/philipdarke/torchtime"
+documentation = "https://philipdarke.com/torchtime"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
