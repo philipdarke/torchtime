@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="API" href="api.html" /> 
+    <link rel="next" title="Tutorial" href="tutorial.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -30,7 +30,7 @@
             <a href="#" class="icon icon-home"> torchtime
           </a>
               <div class="version">
-                0.1.0
+                0.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -41,6 +41,7 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
 </ul>
 
@@ -70,16 +71,15 @@
              
   <section id="time-series-data-sets-for-pytorch">
 <h1>Time series data sets for PyTorch<a class="headerlink" href="#time-series-data-sets-for-pytorch" title="Permalink to this headline"></a></h1>
-<p><img alt="PyPi" src="https://img.shields.io/pypi/v/torchtime" />
+<p><a class="reference external" href="https://pypi.org/project/torchtime"><img alt="PyPi" src="https://img.shields.io/pypi/v/torchtime" /></a>
 <a class="reference external" href="https://github.com/philipdarke/torchtime/actions/workflows/build.yml"><img alt="Build status" src="https://img.shields.io/github/workflow/status/philipdarke/torchtime/build.svg" /></a>
 <img alt="Coverage" src="https://philipdarke.com/torchtime/assets/coverage-badge.svg" />
 <a class="reference external" href="https://github.com/philipdarke/torchtime/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/philipdarke/torchtime.svg" /></a></p>
 <p><code class="docutils literal notranslate"><span class="pre">torchtime</span></code> provides ready-to-go time series data sets for use in PyTorch. The current list of supported data sets is:</p>
 <ul class="simple">
 <li><p>All data sets in the UEA/UCR classification repository <a class="reference external" href="https://www.timeseriesclassification.com/">[link]</a></p></li>
-<li><p>PhysioNet Challenge 2019 <a class="reference external" href="https://physionet.org/content/challenge-2019/1.0.0/">[link]</a></p></li>
+<li><p>PhysioNet Challenge 2019 (early prediction of sepsis) <a class="reference external" href="https://physionet.org/content/challenge-2019/1.0.0/">[link]</a></p></li>
 </ul>
-<p>The package follows the <em>batch first</em> convention. Data tensors are therefore of shape (<em>n</em>, <em>s</em>, <em>c</em>) where <em>n</em> is batch size, <em>s</em> is trajectory length and <em>c</em> are the number of channels.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ pip install torchtime
@@ -88,8 +88,8 @@
 </section>
 <section id="using-torchtime">
 <h2>Using <code class="docutils literal notranslate"><span class="pre">torchtime</span></code><a class="headerlink" href="#using-torchtime" title="Permalink to this headline"></a></h2>
-<p>The example below uses the <code class="docutils literal notranslate"><span class="pre">torchtime.data.UEA</span></code> class. The data set is specified using the <code class="docutils literal notranslate"><span class="pre">dataset</span></code> argument (see list <a class="reference external" href="https://www.timeseriesclassification.com/dataset.php">here</a>). The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines whether training, validation or test data are returned. The size of the splits are controlled with the <code class="docutils literal notranslate"><span class="pre">train_split</span></code> and <code class="docutils literal notranslate"><span class="pre">val_split</span></code> arguments.</p>
-<p>For example, to load training data for the <a class="reference external" href="https://www.timeseriesclassification.com/description.php?Dataset=ArrowHead">ArrowHead</a> data set with a 70% training, 20% validation and 10% testing split:</p>
+<p>The example below uses the <code class="docutils literal notranslate"><span class="pre">torchtime.data.UEA</span></code> class. The data set is specified using the <code class="docutils literal notranslate"><span class="pre">dataset</span></code> argument (see list of data sets <a class="reference external" href="https://www.timeseriesclassification.com/dataset.php">here</a>). The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines whether training, validation or test data are returned. The size of the splits are controlled with the <code class="docutils literal notranslate"><span class="pre">train_split</span></code> and <code class="docutils literal notranslate"><span class="pre">val_split</span></code> arguments. Reproducibility is achieved using the <code class="docutils literal notranslate"><span class="pre">seed</span></code> argument.</p>
+<p>For example, to load training data for the <a class="reference external" href="https://www.timeseriesclassification.com/description.php?Dataset=ArrowHead">ArrowHead</a> data set with a 70/30% training/validation split:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
 
@@ -97,65 +97,76 @@
     <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;ArrowHead&quot;</span><span class="p">,</span>
     <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
     <span class="n">train_split</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
-    <span class="n">val_split</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">456789</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">arrowhead</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Batches are dictionaries of tensors <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code>. <code class="docutils literal notranslate"><span class="pre">X</span></code> are the time series data with an additional time stamp in the first channel, <code class="docutils literal notranslate"><span class="pre">y</span></code> are one-hot encoded labels and <code class="docutils literal notranslate"><span class="pre">length</span></code> are the length of each trajectory.</p>
-<p>ArrowHead is a univariate time series with 251 observations in each trajectory. <code class="docutils literal notranslate"><span class="pre">X</span></code> therefore has two channels, the time stamp followed by the time series. A batch size of 32 was specified above therefore <code class="docutils literal notranslate"><span class="pre">X</span></code> has shape (32, 251, 2).</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;X&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+<p>The DataLoader returns batches as a dictionary of tensors <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code>. <code class="docutils literal notranslate"><span class="pre">X</span></code> are the time series data. By default, a time stamp is appended to the data as the first channel. This package follows the <em>batch first</em> convention therefore <code class="docutils literal notranslate"><span class="pre">X</span></code> has shape (<em>n</em>, <em>s</em>, <em>c</em>) where <em>n</em> is batch size, <em>s</em> is trajectory length and <em>c</em> is the number of channels.</p>
+<p>ArrowHead is a univariate time series with 251 observations in each trajectory. <code class="docutils literal notranslate"><span class="pre">X</span></code> therefore has two channels, the time stamp followed by the time series.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;X&quot;</span><span class="p">]</span>
 
-<span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
-
-<span class="o">&gt;&gt;</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;X&quot;</span><span class="p">]</span>
-
-<span class="n">tensor</span><span class="p">([[[</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8295</span><span class="p">],</span>
-         <span class="p">[</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8238</span><span class="p">],</span>
-         <span class="p">[</span>  <span class="mf">2.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8101</span><span class="p">],</span>
+<span class="n">tensor</span><span class="p">([[[</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8302</span><span class="p">],</span>
+         <span class="p">[</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8123</span><span class="p">],</span>
+         <span class="p">[</span>  <span class="mf">2.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8122</span><span class="p">],</span>
          <span class="o">...</span><span class="p">,</span>
-         <span class="p">[</span><span class="mf">248.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.7759</span><span class="p">],</span>
-         <span class="p">[</span><span class="mf">249.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8088</span><span class="p">],</span>
-         <span class="p">[</span><span class="mf">250.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8110</span><span class="p">]],</span>
+         <span class="p">[</span><span class="mf">248.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.7821</span><span class="p">],</span>
+         <span class="p">[</span><span class="mf">249.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.7971</span><span class="p">],</span>
+         <span class="p">[</span><span class="mf">250.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8280</span><span class="p">]],</span>
 
         <span class="o">...</span><span class="p">,</span>
 
-        <span class="p">[[</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">2.0147</span><span class="p">],</span>
-         <span class="p">[</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">2.0311</span><span class="p">],</span>
-         <span class="p">[</span>  <span class="mf">2.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.9471</span><span class="p">],</span>
+        <span class="p">[[</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8392</span><span class="p">],</span>
+         <span class="p">[</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8314</span><span class="p">],</span>
+         <span class="p">[</span>  <span class="mf">2.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8125</span><span class="p">],</span>
          <span class="o">...</span><span class="p">,</span>
-         <span class="p">[</span><span class="mf">248.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.9901</span><span class="p">],</span>
-         <span class="p">[</span><span class="mf">249.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.9913</span><span class="p">],</span>
-         <span class="p">[</span><span class="mf">250.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">2.0109</span><span class="p">]]])</span>
+         <span class="p">[</span><span class="mf">248.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8359</span><span class="p">],</span>
+         <span class="p">[</span><span class="mf">249.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8202</span><span class="p">],</span>
+         <span class="p">[</span><span class="mf">250.0000</span><span class="p">,</span>  <span class="o">-</span><span class="mf">1.8387</span><span class="p">]]])</span>
 </pre></div>
 </div>
-<p>There are three classes therefore <code class="docutils literal notranslate"><span class="pre">y</span></code> has shape (32, 3).</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
-
-<span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
-
-<span class="o">&gt;&gt;</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
+<p>Labels <code class="docutils literal notranslate"><span class="pre">y</span></code> are one-hot encoded and have shape (<em>n</em>, <em>l</em>) where <em>l</em> is the number of classes.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span>
 
 <span class="n">tensor</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+
         <span class="o">...</span><span class="p">,</span>
+
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
         <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+
 </pre></div>
 </div>
-<p>Finally, <code class="docutils literal notranslate"><span class="pre">length</span></code> is the length of each trajectory (before any padding for data sets of irregular length) and therefore has shape (32).</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+<p>The <code class="docutils literal notranslate"><span class="pre">length</span></code> of each trajectory (before padding if the data set is of irregular length) is provided as a tensor of shape (<em>n</em>).</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span>
 
-<span class="n">torch</span><span class="o">.</span><span class="n">Size</span><span class="p">([</span><span class="mi">32</span><span class="p">])</span>
-
-<span class="o">&gt;&gt;</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span>
-
-<span class="n">tensor</span><span class="p">([</span><span class="mi">251</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="mi">251</span><span class="p">])</span>
+<span class="n">tensor</span><span class="p">([</span><span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span>
+        <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span>
+        <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">,</span> <span class="mi">251</span><span class="p">])</span>
 </pre></div>
 </div>
 </section>
 <section id="learn-more">
 <h2>Learn more<a class="headerlink" href="#learn-more" title="Permalink to this headline"></a></h2>
-<p>Other features include missing data simulation for UEA data sets. See the <a class="reference internal" href="api.html"><span class="doc std std-doc">API</span></a> for more information.</p>
-<p>This work is based on some of the data processing ideas in Kidger et al, 2020 <a class="reference external" href="https://arxiv.org/abs/2005.08926">[link]</a> and Che et al, 2018 <a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">[link]</a>.</p>
+<p>Missing data can be simulated using the <code class="docutils literal notranslate"><span class="pre">missing</span></code> argument. In addition, missing data/observational masks and time delta channels can be appended using the <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> arguments. See the <a class="reference external" href="https://philipdarke.com/torchtime/tutorial.html">tutorial</a> and <a class="reference external" href="https://philipdarke.com/torchtime/api.html">API</a> for more information.</p>
+<p>This work is based on some of the data processing ideas in Kidger et al, 2020 <a class="reference external" href="https://arxiv.org/abs/2005.08926">[1]</a> and Che et al, 2018 <a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">[2]</a>.</p>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline"></a></h2>
+<ol class="arabic simple">
+<li><p>Kidger, P, Morrill, J, Foster, J, <em>et al</em>. Neural Controlled Differential Equations for Irregular Time Series. <em>arXiv</em> 2005.08926 (2020). <a class="reference external" href="https://arxiv.org/abs/2005.08926">[arXiv]</a></p></li>
+<li><p>Che, Z, Purushotham, S, Cho, K, <em>et al</em>. Recurrent Neural Networks for Multivariate Time Series with Missing Values. <em>Sci Rep</em> 8, 6085 (2018). <a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">[doi]</a></p></li>
+<li><p>Reyna M, Josef C, Jeter R, <em>et al</em>. Early Prediction of Sepsis From Clinical Data: The PhysioNet/Computing in Cardiology Challenge. <em>Critical Care Medicine</em> 48 2: 210-217 (2019). <a class="reference external" href="https://doi.org/10.1097/CCM.0000000000004145">[doi]</a></p></li>
+<li><p>Reyna, M, Josef, C, Jeter, R, <em>et al</em>. Early Prediction of Sepsis from Clinical Data: The PhysioNet/Computing in Cardiology Challenge 2019 (version 1.0.0). <em>PhysioNet</em> (2019). <a class="reference external" href="https://doi.org/10.13026/v64v-d857">[doi]</a></p></li>
+<li><p>Goldberger, A, Amaral, L, Glass, L, <em>et al</em>. PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. <em>Circulation</em> 101 (23), pp. e215–e220 (2000). <a class="reference external" href="https://doi.org/10.1161/01.cir.101.23.e215">[doi]</a></p></li>
+</ol>
+</section>
+<section id="funding">
+<h2>Funding<a class="headerlink" href="#funding" title="Permalink to this headline"></a></h2>
+<p>This work was supported by the Engineering and Physical Sciences Research Council, Centre for Doctoral Training in Cloud Computing for Big Data, Newcastle University (grant number EP/L015358/1).</p>
 </section>
 <section id="license">
 <h2>License<a class="headerlink" href="#license" title="Permalink to this headline"></a></h2>
@@ -169,7 +180,7 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="api.html" class="btn btn-neutral float-right" title="API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tutorial.html" class="btn btn-neutral float-right" title="Tutorial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

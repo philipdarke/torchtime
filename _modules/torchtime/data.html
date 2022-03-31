@@ -28,7 +28,7 @@
             <a href="../../index.html" class="icon icon-home"> torchtime
           </a>
               <div class="version">
-                0.1.0
+                0.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -39,6 +39,7 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
 </ul>
 
@@ -84,18 +85,172 @@
 <span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
 
+<span class="k">def</span> <span class="nf">_missing</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">missing</span><span class="p">,</span> <span class="n">seed</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Simulate missing data.&quot;&quot;&quot;</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">generator</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">Xi</span> <span class="ow">in</span> <span class="n">X</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+            <span class="n">n_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">length</span> <span class="o">*</span> <span class="n">missing</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">)[:</span><span class="n">n_samples</span><span class="p">]</span>
+            <span class="n">Xi</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">Xi</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="n">missing</span>
+            <span class="p">),</span> <span class="s2">&quot;argument &#39;missing&#39; must be same length as number of channels </span><span class="se">\</span>
+<span class="s2">                (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="n">Xi</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">channel</span><span class="p">,</span> <span class="n">rate</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">missing</span><span class="p">):</span>
+                <span class="n">n_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">length</span> <span class="o">*</span> <span class="n">rate</span><span class="p">)</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">)[:</span><span class="n">n_samples</span><span class="p">]</span>
+                <span class="n">Xi</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">channel</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">X</span>
+
+
+<span class="k">def</span> <span class="nf">_add_time</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add time stamp in channel 1.&quot;&quot;&quot;</span>
+    <span class="n">time_stamp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">time_stamp</span> <span class="o">=</span> <span class="n">time_stamp</span><span class="o">.</span><span class="n">tile</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">time_stamp</span><span class="p">,</span> <span class="n">X</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_add_mask</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add missing data mask after trajectory data.&quot;&quot;&quot;</span>
+    <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">time</span><span class="p">:]))</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">X</span><span class="p">,</span> <span class="n">mask</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">X</span>
+
+
+<span class="k">def</span> <span class="nf">_add_time_delta</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add time delta calculated as in Che et al, 2018, see</span>
+<span class="sd">    https://www.nature.com/articles/s41598-018-24271-9. Assumes X includes a time stamp</span>
+<span class="sd">    and a missing data mask.&quot;&quot;&quot;</span>
+    <span class="c1"># Add time and mask to X as required</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">time</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">_add_time</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">mask</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">_add_mask</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="ow">not</span> <span class="n">time</span><span class="p">)</span>
+    <span class="n">n_channels</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="c1"># Calculate time delta channels</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># shape (n, c, s)</span>
+    <span class="n">time_stamp</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_channels</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">time_delta</span> <span class="o">=</span> <span class="n">time_stamp</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+    <span class="n">time_mask</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="o">-</span><span class="n">n_channels</span><span class="p">:]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+    <span class="n">time_delta</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># first time delta is zero by definition</span>
+    <span class="n">time_mask</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">time_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cummax</span><span class="p">(</span><span class="n">time_mask</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">time_delta</span> <span class="o">=</span> <span class="n">time_delta</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+        <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">time_mask</span>
+    <span class="p">)</span>  <span class="c1"># time of previous observation if data missing</span>
+    <span class="n">time_delta</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span>
+        <span class="p">(</span>
+            <span class="n">time_delta</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span>
+            <span class="n">time_stamp</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">-</span> <span class="n">time_delta</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+        <span class="p">),</span>
+        <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span>  <span class="c1"># convert to delta</span>
+    <span class="c1"># Remove time/mask from X as required</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="nb">int</span><span class="p">(</span><span class="ow">not</span> <span class="n">time</span><span class="p">)</span> <span class="p">:</span> <span class="p">(</span><span class="n">n_channels</span> <span class="o">*</span> <span class="o">-~</span><span class="n">mask</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="c1"># Add time delta and return</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">((</span><span class="n">X</span><span class="p">,</span> <span class="n">time_delta</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># shape (n, s, c)</span>
+
+
+<span class="k">def</span> <span class="nf">_split_data</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">stratify</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">val_split</span><span class="p">,</span> <span class="n">test_split</span><span class="p">,</span> <span class="n">seed</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Split data (X, y, length) into training, validation and (optional) test sets</span>
+<span class="sd">    using stratified sampling.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">test_split</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">:</span>
+        <span class="c1"># Test split</span>
+        <span class="n">test_nontest_split</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">length</span><span class="p">,</span>
+            <span class="n">stratify</span><span class="p">,</span>
+            <span class="n">train_size</span><span class="o">=</span><span class="n">test_split</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">stratify</span><span class="o">=</span><span class="n">stratify</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="p">(</span>
+            <span class="n">X_test</span><span class="p">,</span>
+            <span class="n">X_nontest</span><span class="p">,</span>
+            <span class="n">y_test</span><span class="p">,</span>
+            <span class="n">y_nontest</span><span class="p">,</span>
+            <span class="n">length_test</span><span class="p">,</span>
+            <span class="n">length_nontest</span><span class="p">,</span>
+            <span class="n">_</span><span class="p">,</span>
+            <span class="n">stratify_nontest</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">test_nontest_split</span>
+        <span class="c1"># Validation/train split</span>
+        <span class="n">val_train_split</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+            <span class="n">X_nontest</span><span class="p">,</span>
+            <span class="n">y_nontest</span><span class="p">,</span>
+            <span class="n">length_nontest</span><span class="p">,</span>
+            <span class="n">train_size</span><span class="o">=</span><span class="n">val_split</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">stratify</span><span class="o">=</span><span class="n">stratify_nontest</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">X_val</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">length_val</span><span class="p">,</span> <span class="n">length_train</span> <span class="o">=</span> <span class="n">val_train_split</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Validation/train split</span>
+        <span class="n">val_train_split</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
+            <span class="n">X</span><span class="p">,</span>
+            <span class="n">y</span><span class="p">,</span>
+            <span class="n">length</span><span class="p">,</span>
+            <span class="n">train_size</span><span class="o">=</span><span class="n">val_split</span><span class="p">,</span>
+            <span class="n">random_state</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">stratify</span><span class="o">=</span><span class="n">stratify</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">X_val</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">length_val</span><span class="p">,</span> <span class="n">length_train</span> <span class="o">=</span> <span class="n">val_train_split</span>
+        <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">length_test</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">)</span>
+    <span class="c1"># Return splits</span>
+    <span class="k">if</span> <span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X_test</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y_test</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">length_test</span>
+    <span class="k">elif</span> <span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X_train</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y_train</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">length_train</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">X_val</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">y_val</span>
+        <span class="n">length</span> <span class="o">=</span> <span class="n">length_val</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">X_train</span><span class="p">,</span>
+        <span class="n">y_train</span><span class="p">,</span>
+        <span class="n">length_train</span><span class="p">,</span>
+        <span class="n">X_val</span><span class="p">,</span>
+        <span class="n">y_val</span><span class="p">,</span>
+        <span class="n">length_val</span><span class="p">,</span>
+        <span class="n">X_test</span><span class="p">,</span>
+        <span class="n">y_test</span><span class="p">,</span>
+        <span class="n">length_test</span><span class="p">,</span>
+        <span class="n">X</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">,</span>
+        <span class="n">length</span><span class="p">,</span>
+    <span class="p">)</span>
+
+
 <div class="viewcode-block" id="UEA"><a class="viewcode-back" href="../../api.html#torchtime.data.UEA">[docs]</a><span class="k">class</span> <span class="nc">UEA</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates and returns a time series classification data set from the UEA/UCR</span>
-<span class="sd">    repository as a PyTorch DataSet. See http://www.timeseriesclassification.com for</span>
-<span class="sd">    more details and the available data sets.</span>
+<span class="sd">    repository as a PyTorch DataSet. See the `repository</span>
+<span class="sd">    &lt;http://www.timeseriesclassification.com&gt;`_ for more details and the available data</span>
+<span class="sd">    sets.</span>
 
 <span class="sd">    Data are downloaded using the ``sktime`` package. The size of the training,</span>
-<span class="sd">    validation and (optional) test splits are controlled with the ``train_split`` and</span>
-<span class="sd">    ``val_split`` arguments. For example ``train_split = 0.7``, ``val_split = 0.2``</span>
-<span class="sd">    generates a 70/20/10% train/validation/test split, whilst ``train_split = 0.8``,</span>
-<span class="sd">    ``val_split = 0.2`` generates a 80/20% train/validation split. Splits are formed</span>
-<span class="sd">    using stratified sampling.</span>
+<span class="sd">    validation and (optional) test splits are controlled using the ``train_split`` and</span>
+<span class="sd">    ``val_split`` arguments. For a training/validation split use ``train_split`` only.</span>
+<span class="sd">    For a training/validation/test split specify both ``train_split`` and</span>
+<span class="sd">    ``val_split``. For example ``train_split = 0.8`` generates a 80/20%</span>
+<span class="sd">    train/validation split and ``train_split = 0.7``, ``val_split = 0.2`` generates a</span>
+<span class="sd">    70/20/10% train/validation/test split. Splits are formed using stratified sampling.</span>
 
 <span class="sd">    Missing data can be simulated using the ``missing`` argument. Randomness is</span>
 <span class="sd">    controlled with the ``seed`` argument.</span>
@@ -106,24 +261,39 @@
 <span class="sd">    ``length__[train/val/test]`` attributes regardless of the split specified in</span>
 <span class="sd">    ``split``.</span>
 
+<span class="sd">    The ``time``, ``mask`` and ``delta`` arguments are used to append a time stamp</span>
+<span class="sd">    channel (added by default as the first channel), missing data mask and time delta</span>
+<span class="sd">    channels. The time delta represents the time since the previous observation</span>
+<span class="sd">    calculated as in `Che et al (2018) &lt;https://doi.org/10.1038/s41598-018-24271-9&gt;`_.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        dataset: The data set to return.</span>
 <span class="sd">        split: The data split to return, either &#39;train&#39;, &#39;val&#39; (validation) or &#39;test&#39;.</span>
 <span class="sd">        train_split: Proportion of data in the training set.</span>
-<span class="sd">        val_split: Proportion of data in the validation set.</span>
+<span class="sd">        val_split: Proportion of data in the validation set (optional, see above).</span>
 <span class="sd">        missing: The proportion of data to drop at random. If ``missing`` is a single</span>
 <span class="sd">            value, data is dropped from all channels. To drop data at different rates</span>
 <span class="sd">            for each channel, pass a list of rates with the proportion missing for each</span>
-<span class="sd">            channel (default 0).</span>
+<span class="sd">            channel (default None).</span>
+<span class="sd">        time: Add time stamp in the first channel (default True).</span>
+<span class="sd">        mask: Add missing data mask (default False).</span>
+<span class="sd">        delta: Add time delta (default False).</span>
 <span class="sd">        seed: Random seed for reproducibility (optional).</span>
 
 <span class="sd">    Attributes:</span>
-<span class="sd">        X (Tensor): A tensor of shape (*n*, *s*, *c*) where *n* = number of</span>
-<span class="sd">            trajectories, *s* = (maximum) trajectory length and *c* = number of channels</span>
-<span class="sd">            plus 1. The first channel is a time stamp. The remaining channels are as</span>
-<span class="sd">            documented in the UEA/UCR repository for the data set. Where trajectories</span>
-<span class="sd">            are of unequal lengths they are padded with ``NaNs`` to the length of the</span>
-<span class="sd">            longest trajectory in the data.</span>
+<span class="sd">        X (Tensor): A tensor of default shape (*n*, *s*, *c* + 1) where *n* = number of</span>
+<span class="sd">            trajectories, *s* = (maximum) trajectory length and *c* = number of</span>
+<span class="sd">            channels. By default, a time stamp is appended as the first channel. If</span>
+<span class="sd">            ``time`` is False, the time stamp is omitted and the tensor has shape</span>
+<span class="sd">            (*n*, *s*, *c*).</span>
+
+<span class="sd">            A missing data mask and/or time delta channels can be added with the</span>
+<span class="sd">            ``mask`` and ``delta`` arguments. These each have the same number of</span>
+<span class="sd">            channels as the data set. For example, if ``time``, ``mask`` and</span>
+<span class="sd">            ``delta`` are all True, ``X`` has shape (*n*, *s*, 3 * *c* + 1).</span>
+
+<span class="sd">            Where trajectories are of unequal lengths they are padded with ``NaNs`` to</span>
+<span class="sd">            the length of the longest trajectory in the data.</span>
 <span class="sd">        y (Tensor): One-hot encoded label data. A tensor of shape (*n*, *l*) where *l*</span>
 <span class="sd">            is the number of classes.</span>
 <span class="sd">        length (Tensor): Length of each trajectory prior to padding. A tensor of shape</span>
@@ -139,21 +309,26 @@
         <span class="n">dataset</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">split</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">train_split</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">val_split</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">missing</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">val_split</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">missing</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">delta</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="c1"># Class variables</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">missing</span> <span class="o">=</span> <span class="n">missing</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">train_split</span> <span class="o">-</span> <span class="n">val_split</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">val_split</span> <span class="o">=</span> <span class="n">val_split</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="c1"># Data splits</span>
+        <span class="k">if</span> <span class="n">val_split</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">test_split</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">val_split</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">train_split</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">test_split</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">train_split</span> <span class="o">-</span> <span class="n">val_split</span>
+            <span class="n">val_split</span> <span class="o">=</span> <span class="n">val_split</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">test_split</span><span class="p">)</span>
         <span class="c1"># Check arguments</span>
         <span class="n">splits</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">test_split</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">:</span>
             <span class="n">splits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">splits</span><span class="p">,</span> <span class="s2">&quot;argument &#39;split&#39; must be one of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">splits</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">missing</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">missing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s2">&quot;argument &#39;missing&#39; must be a int/float or a list&quot;</span><span class="p">)</span>
         <span class="c1"># Get data and form tensors</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">X_raw</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_raw</span> <span class="o">=</span> <span class="n">load_UCR_UEA_dataset</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
@@ -174,25 +349,15 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">-=</span> <span class="mi">1</span>  <span class="c1"># start class labels from zero</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">one_hot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
         <span class="c1"># Simulate missing data</span>
-        <span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">generator</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">Xi</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">missing</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
-                <span class="n">n_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_length</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">missing</span><span class="p">)</span>
-                <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="n">max_length</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">)[:</span><span class="n">n_samples</span><span class="p">]</span>
-                <span class="n">Xi</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="p">(</span>
-                    <span class="n">Xi</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">missing</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-                <span class="p">),</span> <span class="s2">&quot;argument &#39;missing&#39; must be same length as number of channels </span><span class="se">\</span>
-<span class="s2">                    (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
-                    <span class="n">Xi</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-                <span class="p">)</span>
-                <span class="k">for</span> <span class="n">channel</span><span class="p">,</span> <span class="n">rate</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">missing</span><span class="p">):</span>
-                    <span class="n">n_samples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">max_length</span> <span class="o">*</span> <span class="n">rate</span><span class="p">)</span>
-                    <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randperm</span><span class="p">(</span><span class="n">max_length</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">)[:</span><span class="n">n_samples</span><span class="p">]</span>
-                    <span class="n">Xi</span><span class="p">[</span><span class="n">mask</span><span class="p">,</span> <span class="n">channel</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">missing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">_missing</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">missing</span><span class="p">,</span> <span class="n">seed</span><span class="p">)</span>
+        <span class="c1"># Add time stamp/mask/time delta channels</span>
+        <span class="k">if</span> <span class="n">time</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">_add_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">_add_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">delta</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">_add_time_delta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
         <span class="c1"># Form test/train/validation splits</span>
         <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">X_train</span><span class="p">,</span>
@@ -204,99 +369,22 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">X_test</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">y_test</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">length_test</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_test</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_test</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_test</span>
-        <span class="k">elif</span> <span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_train</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_train</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_train</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_val</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_val</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_val</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">_split_data</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">split</span><span class="p">,</span> <span class="n">val_split</span><span class="p">,</span> <span class="n">test_split</span><span class="p">,</span> <span class="n">seed</span>
+        <span class="p">)</span>
+        <span class="c1"># Remove test data if no test split</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_test</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_test</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_test</span>
 
     <span class="k">def</span> <span class="nf">_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Xi</span><span class="p">,</span> <span class="n">to</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Pad trajectories to length &#39;to&#39; and add time channel.&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Pad trajectories to length &#39;to&#39;.&quot;&quot;&quot;</span>
         <span class="n">Xi</span> <span class="o">=</span> <span class="n">pad_sequence</span><span class="p">([</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">Xij</span><span class="p">)</span> <span class="k">for</span> <span class="n">Xij</span> <span class="ow">in</span> <span class="n">Xi</span><span class="p">])</span>
-        <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">to</span><span class="p">,</span> <span class="n">Xi</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">))</span>  <span class="c1"># shape (s, c+1)</span>
-        <span class="n">out</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">to</span><span class="p">)</span>  <span class="c1"># channel 1 is time</span>
-        <span class="n">out</span><span class="p">[</span><span class="mi">0</span> <span class="p">:</span> <span class="n">Xi</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">Xi</span>  <span class="c1"># add trajectories</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">to</span><span class="p">,</span> <span class="n">Xi</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">))</span>  <span class="c1"># shape (s, c)</span>
+        <span class="n">out</span><span class="p">[</span><span class="mi">0</span> <span class="p">:</span> <span class="n">Xi</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">Xi</span>  <span class="c1"># add trajectories</span>
         <span class="k">return</span> <span class="n">out</span>
-
-    <span class="k">def</span> <span class="nf">_split_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Split data into test, training and validation sets using stratified</span>
-<span class="sd">        sampling.&quot;&quot;&quot;</span>
-        <span class="n">strat</span> <span class="o">=</span> <span class="n">y</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">:</span>
-            <span class="c1"># Test split</span>
-            <span class="n">test_nontest_split</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
-                <span class="n">X</span><span class="p">,</span>
-                <span class="n">y</span><span class="p">,</span>
-                <span class="n">length</span><span class="p">,</span>
-                <span class="n">strat</span><span class="p">,</span>
-                <span class="n">train_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_split</span><span class="p">,</span>
-                <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
-                <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">stratify</span><span class="o">=</span><span class="n">strat</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="p">(</span>
-                <span class="n">X_test</span><span class="p">,</span>
-                <span class="n">X_nontest</span><span class="p">,</span>
-                <span class="n">y_test</span><span class="p">,</span>
-                <span class="n">y_nontest</span><span class="p">,</span>
-                <span class="n">length_test</span><span class="p">,</span>
-                <span class="n">length_nontest</span><span class="p">,</span>
-                <span class="n">_</span><span class="p">,</span>
-                <span class="n">strat_nontest</span><span class="p">,</span>
-            <span class="p">)</span> <span class="o">=</span> <span class="n">test_nontest_split</span>
-            <span class="c1"># Validation/train split</span>
-            <span class="n">val_train_split</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
-                <span class="n">X_nontest</span><span class="p">,</span>
-                <span class="n">y_nontest</span><span class="p">,</span>
-                <span class="n">length_nontest</span><span class="p">,</span>
-                <span class="n">train_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">val_split</span><span class="p">,</span>
-                <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
-                <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">stratify</span><span class="o">=</span><span class="n">strat_nontest</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">X_val</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">length_val</span><span class="p">,</span> <span class="n">length_train</span> <span class="o">=</span> <span class="n">val_train_split</span>
-            <span class="k">return</span> <span class="p">(</span>
-                <span class="n">X_train</span><span class="p">,</span>
-                <span class="n">y_train</span><span class="p">,</span>
-                <span class="n">length_train</span><span class="p">,</span>
-                <span class="n">X_val</span><span class="p">,</span>
-                <span class="n">y_val</span><span class="p">,</span>
-                <span class="n">length_val</span><span class="p">,</span>
-                <span class="n">X_test</span><span class="p">,</span>
-                <span class="n">y_test</span><span class="p">,</span>
-                <span class="n">length_test</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Validation/train split</span>
-            <span class="n">val_train_split</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
-                <span class="n">X</span><span class="p">,</span>
-                <span class="n">y</span><span class="p">,</span>
-                <span class="n">length</span><span class="p">,</span>
-                <span class="n">train_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">val_split</span><span class="p">,</span>
-                <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
-                <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">stratify</span><span class="o">=</span><span class="n">strat</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">X_val</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">length_val</span><span class="p">,</span> <span class="n">length_train</span> <span class="o">=</span> <span class="n">val_train_split</span>
-            <span class="k">return</span> <span class="p">(</span>
-                <span class="n">X_train</span><span class="p">,</span>
-                <span class="n">y_train</span><span class="p">,</span>
-                <span class="n">length_train</span><span class="p">,</span>
-                <span class="n">X_val</span><span class="p">,</span>
-                <span class="n">y_val</span><span class="p">,</span>
-                <span class="n">length_val</span><span class="p">,</span>
-                <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span>
-                <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span>
-                <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span>
-            <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -307,16 +395,19 @@
 
 <div class="viewcode-block" id="PhysioNet2019"><a class="viewcode-back" href="../../api.html#torchtime.data.PhysioNet2019">[docs]</a><span class="k">class</span> <span class="nc">PhysioNet2019</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates and returns the PhysioNet Challenge 2019 data as a PyTorch DataSet. See</span>
-<span class="sd">    https://physionet.org/content/challenge-2019/1.0.0/ for more details.</span>
+<span class="sd">    Creates and returns the PhysioNet Challenge 2019</span>
+<span class="sd">    `data &lt;https://physionet.org/content/challenge-2019/1.0.0/&gt;`_ as a PyTorch</span>
+<span class="sd">    DataSet.</span>
 
 <span class="sd">    Data are downloaded, unpacked and saved in the ``path`` directory (default</span>
-<span class="sd">    ``./data``). The size of the training, validation and (optional) test splits are</span>
-<span class="sd">    controlled with the ``train_split`` and ``val_split`` arguments. For example</span>
+<span class="sd">    ``./data/physionet2019``). The size of the training, validation and (optional)</span>
+<span class="sd">    test splits are controlled using the ``train_split`` and ``val_split`` arguments.</span>
+<span class="sd">    For a training/validation split use ``train_split`` only. For a</span>
+<span class="sd">    training/validation/test split specify both ``train_split`` and ``val_split``. For</span>
+<span class="sd">    example ``train_split = 0.8`` generates a 80/20% train/validation split and</span>
 <span class="sd">    ``train_split = 0.7``, ``val_split = 0.2`` generates a 70/20/10%</span>
-<span class="sd">    train/validation/test split, whilst ``train_split = 0.8``, ``val_split = 0.2``</span>
-<span class="sd">    generates a 80/20% train/validation split. Splits are formed using stratified</span>
-<span class="sd">    sampling. Randomness is controlled with the ``seed`` argument.</span>
+<span class="sd">    train/validation/test split. Splits are formed using stratified sampling.</span>
+<span class="sd">    Randomness is controlled with the ``seed`` argument.</span>
 
 <span class="sd">    The ``X``, ``y`` and ``length`` attributes correspond to the split specified by the</span>
 <span class="sd">    ``split`` argument. However training, validation and test data are available by</span>
@@ -324,20 +415,35 @@
 <span class="sd">    ``length__[train/val/test]`` attributes regardless of the split specified in</span>
 <span class="sd">    ``split``.</span>
 
+<span class="sd">    The ``time``, ``mask`` and ``delta`` arguments are used to append a time stamp</span>
+<span class="sd">    channel (added by default as the first channel), missing data mask and time delta</span>
+<span class="sd">    channels. The time delta represents the time since the previous observation</span>
+<span class="sd">    calculated as in `Che et al (2018) &lt;https://doi.org/10.1038/s41598-018-24271-9&gt;`_.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        split: The data split to return, either &#39;train&#39;, &#39;val&#39; (validation) or &#39;test&#39;.</span>
 <span class="sd">        train_split: Proportion of data in the training set.</span>
-<span class="sd">        val_split: Proportion of data in the validation set.</span>
+<span class="sd">        val_split: Proportion of data in the validation set (optional, see above).</span>
+<span class="sd">        time: Add time stamp in the first channel (default True).</span>
+<span class="sd">        mask: Add missing data mask (default False).</span>
+<span class="sd">        delta: Add time delta (default False).</span>
 <span class="sd">        path: Save path for downloaded data (default ``./data``).</span>
 <span class="sd">        seed: Random seed for reproducibility (optional).</span>
 
 <span class="sd">    Attributes:</span>
-<span class="sd">        X (Tensor): A tensor of shape (*n*, *s*, *c*) where *n* = number of</span>
+<span class="sd">        X (Tensor): A tensor of default shape (*n*, *s*, *c* + 1) where *n* = number of</span>
 <span class="sd">            trajectories, *s* = (maximum) trajectory length and *c* = number of channels</span>
-<span class="sd">            plus 1. The first channel is a time stamp. The remaining channels are the</span>
-<span class="sd">            PhysioNet data (*including* the ``ICULOS`` time stamp). Note that PhysioNet</span>
-<span class="sd">            trajectories are of unequal length and are therefore padded with ``NaNs`` to</span>
-<span class="sd">            the length of the longest trajectory in the data.</span>
+<span class="sd">            in the PhysioNet data (*including* the ``ICULOS`` time stamp). By default, a</span>
+<span class="sd">            time stamp is appended as the first channel. If ``time`` is False, the</span>
+<span class="sd">            time stamp is omitted and the tensor has shape (*n*, *s*, *c*).</span>
+
+<span class="sd">            A missing data mask and/or time delta channels can be added with the</span>
+<span class="sd">            ``mask`` and ``delta`` arguments. These each have the same number of</span>
+<span class="sd">            channels as the PhysioNet data. For example, if ``time``, ``mask`` and</span>
+<span class="sd">            ``delta`` are all True, ``X`` has shape (*n*, *s*, 3 * *c* + 1 = 121).</span>
+
+<span class="sd">            Note that PhysioNet trajectories are of unequal length and are therefore</span>
+<span class="sd">            padded with ``NaNs`` to the length of the longest trajectory in the data.</span>
 <span class="sd">        y (Tensor): ``SepsisLabel`` for each time point. A tensor of shape (*n*, *s*).</span>
 <span class="sd">        length (Tensor): Length of each trajectory prior to padding. A tensor of shape</span>
 <span class="sd">            (*n*, 1).</span>
@@ -352,20 +458,27 @@
         <span class="n">split</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">train_split</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
         <span class="n">val_split</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./data&quot;</span><span class="p">,</span>
+        <span class="n">time</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">delta</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./data/physionet2019&quot;</span><span class="p">,</span>
         <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">DATASETS</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;training&quot;</span><span class="p">:</span> <span class="s2">&quot;https://archive.physionet.org/users/shared/challenge-2019/training_setA.zip&quot;</span><span class="p">,</span>  <span class="c1"># noqa: E501</span>
             <span class="s2">&quot;training_setB&quot;</span><span class="p">:</span> <span class="s2">&quot;https://archive.physionet.org/users/shared/challenge-2019/training_setB.zip&quot;</span><span class="p">,</span>  <span class="c1"># noqa: E501</span>
         <span class="p">}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">train_split</span> <span class="o">-</span> <span class="n">val_split</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">val_split</span> <span class="o">=</span> <span class="n">val_split</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">()</span> <span class="o">/</span> <span class="n">path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+        <span class="c1"># Data splits</span>
+        <span class="k">if</span> <span class="n">val_split</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">test_split</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">val_split</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">train_split</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">test_split</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">train_split</span> <span class="o">-</span> <span class="n">val_split</span>
+            <span class="n">val_split</span> <span class="o">=</span> <span class="n">val_split</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">test_split</span><span class="p">)</span>
         <span class="c1"># Check inputs</span>
         <span class="n">splits</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;val&quot;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">test_split</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">:</span>
             <span class="n">splits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">splits</span><span class="p">,</span> <span class="s2">&quot;argument &#39;split&#39; must be one of </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">splits</span><span class="p">)</span>
         <span class="c1"># Get data</span>
@@ -380,10 +493,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">X</span> <span class="k">for</span> <span class="n">X</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">all_data</span><span class="p">])</span>  <span class="c1"># may fail if data is updated</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">length</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">length</span> <span class="ow">in</span> <span class="n">all_data</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[:,</span> <span class="p">:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">time_stamp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="n">time_stamp</span> <span class="o">=</span> <span class="n">time_stamp</span><span class="o">.</span><span class="n">tile</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">time_stamp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># add time stamp</span>
-        <span class="c1"># Test/train/validation splits</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">[:,</span> <span class="p">:,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># Add time stamp/mask/time delta channels</span>
+        <span class="k">if</span> <span class="n">time</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">_add_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mask</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">_add_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">delta</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="n">_add_time_delta</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
+        <span class="c1"># Form test/train/validation splits</span>
+        <span class="n">stratify</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
         <span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">X_train</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">y_train</span><span class="p">,</span>
@@ -394,19 +513,22 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">X_test</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">y_test</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">length_test</span><span class="p">,</span>
-        <span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;test&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_test</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_test</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_test</span>
-        <span class="k">elif</span> <span class="n">split</span> <span class="o">==</span> <span class="s2">&quot;train&quot;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_train</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_train</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_train</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_val</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_val</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_val</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="n">_split_data</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+            <span class="n">stratify</span><span class="p">,</span>
+            <span class="n">split</span><span class="p">,</span>
+            <span class="n">val_split</span><span class="p">,</span>
+            <span class="n">test_split</span><span class="p">,</span>
+            <span class="n">seed</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="c1"># Remove test data if no test split</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_test</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">X_test</span><span class="p">):</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">X_test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">y_test</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_test</span>
 
     <span class="k">def</span> <span class="nf">_download_zip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Download and extract a .zip file from &#39;url&#39;.&quot;&quot;&quot;</span>
@@ -445,78 +567,6 @@
                     <span class="k">if</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                         <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xij</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">X</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_split_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">length</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Split data into test, training and validation sets using stratified</span>
-<span class="sd">        sampling.&quot;&quot;&quot;</span>
-        <span class="n">strat</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nansum</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_split</span> <span class="o">&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span><span class="p">:</span>
-            <span class="c1"># Test split</span>
-            <span class="n">test_nontest_split</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
-                <span class="n">X</span><span class="p">,</span>
-                <span class="n">y</span><span class="p">,</span>
-                <span class="n">length</span><span class="p">,</span>
-                <span class="n">strat</span><span class="p">,</span>
-                <span class="n">train_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">test_split</span><span class="p">,</span>
-                <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
-                <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">stratify</span><span class="o">=</span><span class="n">strat</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="p">(</span>
-                <span class="n">X_test</span><span class="p">,</span>
-                <span class="n">X_nontest</span><span class="p">,</span>
-                <span class="n">y_test</span><span class="p">,</span>
-                <span class="n">y_nontest</span><span class="p">,</span>
-                <span class="n">length_test</span><span class="p">,</span>
-                <span class="n">length_nontest</span><span class="p">,</span>
-                <span class="n">_</span><span class="p">,</span>
-                <span class="n">strat_nontest</span><span class="p">,</span>
-            <span class="p">)</span> <span class="o">=</span> <span class="n">test_nontest_split</span>
-            <span class="c1"># Validation/train split</span>
-            <span class="n">val_train_split</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
-                <span class="n">X_nontest</span><span class="p">,</span>
-                <span class="n">y_nontest</span><span class="p">,</span>
-                <span class="n">length_nontest</span><span class="p">,</span>
-                <span class="n">train_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">val_split</span><span class="p">,</span>
-                <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
-                <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">stratify</span><span class="o">=</span><span class="n">strat_nontest</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">X_val</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">length_val</span><span class="p">,</span> <span class="n">length_train</span> <span class="o">=</span> <span class="n">val_train_split</span>
-            <span class="k">return</span> <span class="p">(</span>
-                <span class="n">X_train</span><span class="p">,</span>
-                <span class="n">y_train</span><span class="p">,</span>
-                <span class="n">length_train</span><span class="p">,</span>
-                <span class="n">X_val</span><span class="p">,</span>
-                <span class="n">y_val</span><span class="p">,</span>
-                <span class="n">length_val</span><span class="p">,</span>
-                <span class="n">X_test</span><span class="p">,</span>
-                <span class="n">y_test</span><span class="p">,</span>
-                <span class="n">length_test</span><span class="p">,</span>
-            <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Validation/train split</span>
-            <span class="n">val_train_split</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span>
-                <span class="n">X</span><span class="p">,</span>
-                <span class="n">y</span><span class="p">,</span>
-                <span class="n">length</span><span class="p">,</span>
-                <span class="n">train_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">val_split</span><span class="p">,</span>
-                <span class="n">random_state</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">,</span>
-                <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">stratify</span><span class="o">=</span><span class="n">strat</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">X_val</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_val</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">length_val</span><span class="p">,</span> <span class="n">length_train</span> <span class="o">=</span> <span class="n">val_train_split</span>
-            <span class="k">return</span> <span class="p">(</span>
-                <span class="n">X_train</span><span class="p">,</span>
-                <span class="n">y_train</span><span class="p">,</span>
-                <span class="n">length_train</span><span class="p">,</span>
-                <span class="n">X_val</span><span class="p">,</span>
-                <span class="n">y_val</span><span class="p">,</span>
-                <span class="n">length_val</span><span class="p">,</span>
-                <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span>
-                <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span>
-                <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">),</span>
-            <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>

@@ -28,7 +28,7 @@
             <a href="../../index.html" class="icon icon-home"> torchtime
           </a>
               <div class="version">
-                0.1.0
+                0.1.1
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -39,6 +39,7 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorial.html">Tutorial</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API</a></li>
 </ul>
 
@@ -68,24 +69,16 @@
              
   <h1>Source code for torchtime.collate</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch.nn.utils.rnn</span> <span class="kn">import</span> <span class="n">pack_padded_sequence</span>
 
 
 <div class="viewcode-block" id="sort_by_length"><a class="viewcode-back" href="../../api.html#torchtime.collate.sort_by_length">[docs]</a><span class="k">def</span> <span class="nf">sort_by_length</span><span class="p">(</span><span class="n">batch_data</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Collates a batch and sorts by decending length.</span>
 
-<span class="sd">    Data sets of variable length can be efficiently represented in a</span>
-<span class="sd">    `PackedSequence</span>
-<span class="sd">    &lt;https://pytorch.org/docs/stable/generated/torch.nn.utils.rnn.PackedSequence.html&gt;`_</span>
-<span class="sd">    object. These are formed using</span>
-<span class="sd">    `pack_padded_sequence()</span>
-<span class="sd">    &lt;https://pytorch.org/docs/stable/generated/torch.nn.utils.rnn.pack_padded_sequence.html#torch.nn.utils.rnn.pack_padded_sequence&gt;`_</span>
-<span class="sd">    which by default expects the input batch to be sorted by decending length. Pass this</span>
-<span class="sd">    collate function to a DataLoader to automatically sort the batch before calling</span>
-<span class="sd">    pack_padded_sequence() in the forward method of your model.</span>
+<span class="sd">    If passed to a DataLoader, the batch is sorted by length and</span>
+<span class="sd">    ``pack_padded_sequence()`` can be called in the forward method of the model.</span>
 
-<span class="sd">    Example:</span>
-<span class="sd">    The CharacterTrajectories data set features trajectories of varying length. The</span>
-<span class="sd">    ``sort_by_length()`` collate function sorts the batch::</span>
+<span class="sd">    Example::</span>
 
 <span class="sd">        from torch.utils.data import DataLoader</span>
 <span class="sd">        from torchtime.data import UEA</span>
@@ -95,7 +88,7 @@
 <span class="sd">            dataset=&quot;CharacterTrajectories&quot;,</span>
 <span class="sd">            split=&quot;train&quot;,</span>
 <span class="sd">            train_split=0.7,</span>
-<span class="sd">            val_split=0.2,</span>
+<span class="sd">            seed=456789,</span>
 <span class="sd">        )</span>
 <span class="sd">        dataloader = DataLoader(</span>
 <span class="sd">            char_traj,</span>
@@ -105,9 +98,9 @@
 
 <span class="sd">        &gt;&gt; next(iter(dataloader))[&quot;length&quot;]</span>
 
-<span class="sd">        tensor([146, 145, 143, 136, 136, 135, 132, 131, 131, 130, 130, 129, 125, 125,</span>
-<span class="sd">                124, 124, 122, 121, 119, 119, 116, 115, 115, 114, 111, 109, 106, 105,</span>
-<span class="sd">                103,  98,  88,  78])</span>
+<span class="sd">        tensor([182, 155, 148, 147, 145, 141, 139, 138, 138, 137, 137, 136, 135, 131,</span>
+<span class="sd">                131, 130, 129, 124, 123, 121, 115, 114, 110, 110, 107, 104,  94,  94,</span>
+<span class="sd">                92,  86,  73,  73])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">batch_data</span><span class="p">],</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">i</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">batch_data</span><span class="p">])</span>
@@ -116,6 +109,63 @@
     <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sorted_index</span><span class="p">)</span>
     <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">index_select</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sorted_index</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;X&quot;</span><span class="p">:</span> <span class="n">X</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">y</span><span class="p">,</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">length</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="packed_sequence"><a class="viewcode-back" href="../../api.html#torchtime.collate.packed_sequence">[docs]</a><span class="k">def</span> <span class="nf">packed_sequence</span><span class="p">(</span><span class="n">batch_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Collates a batch and returns a PackedSequence.</span>
+
+<span class="sd">    If passed to a DataLoader, ``X`` is returned as a PaddedSequence object.</span>
+
+<span class="sd">    Example::</span>
+
+<span class="sd">        from torch.utils.data import DataLoader</span>
+<span class="sd">        from torchtime.data import UEA</span>
+<span class="sd">        from torchtime.collate import packed_sequence</span>
+
+<span class="sd">        char_traj = UEA(</span>
+<span class="sd">            dataset=&quot;CharacterTrajectories&quot;,</span>
+<span class="sd">            split=&quot;train&quot;,</span>
+<span class="sd">            train_split=0.7,</span>
+<span class="sd">            seed=456789,</span>
+<span class="sd">        )</span>
+<span class="sd">        dataloader = DataLoader(</span>
+<span class="sd">            char_traj,</span>
+<span class="sd">            batch_size=32,</span>
+<span class="sd">            collate_fn=packed_sequence,</span>
+<span class="sd">        )</span>
+
+<span class="sd">        &gt;&gt; next(iter(dataloader))[&quot;X&quot;]</span>
+
+<span class="sd">        PackedSequence(</span>
+<span class="sd">            data=tensor([[ 0.0000e+00,  2.1401e-01,  1.6085e-01,  3.3961e-01],</span>
+<span class="sd">                         [ 0.0000e+00,  6.4870e-03, -3.4780e-02,  2.3045e-01],</span>
+<span class="sd">                         [ 0.0000e+00,  2.1153e-01, -7.7158e-02, -8.6610e-03],</span>
+<span class="sd">                         ...,</span>
+<span class="sd">                         [ 1.7900e+02,  3.5498e-01,  5.1161e-01, -1.7406e+00],</span>
+<span class="sd">                         [ 1.8000e+02,  3.0671e-01,  4.4205e-01, -1.5039e+00],</span>
+<span class="sd">                         [ 1.8100e+02,  2.3810e-01,  3.4316e-01, -1.1675e+00]]),</span>
+<span class="sd">            batch_sizes=tensor([32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32</span>
+<span class="sd">                                32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,</span>
+<span class="sd">                                32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,</span>
+<span class="sd">                                32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,</span>
+<span class="sd">                                32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,</span>
+<span class="sd">                                32, 32, 32, 32, 32, 32, 32, 32, 30, 30, 30, 30, 30,</span>
+<span class="sd">                                30, 30, 30, 30, 30, 30, 30, 30, 29, 29, 29, 29, 29,</span>
+<span class="sd">                                29, 28, 28, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26,</span>
+<span class="sd">                                25, 25, 25, 24, 24, 24, 22, 22, 22, 22, 21, 20, 20,</span>
+<span class="sd">                                20, 20, 20, 20, 19, 19, 18, 17, 17, 17, 17, 17, 16,</span>
+<span class="sd">                                15, 13, 13, 13, 13, 12, 11,  9,  7,  6,  6,  5,  5,</span>
+<span class="sd">                                 5,  5,  4,  4,  3,  2,  2,  2,  2,  2,  2,  2,  1,</span>
+<span class="sd">                                 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,</span>
+<span class="sd">                                 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1]),</span>
+<span class="sd">            sorted_indices=None,</span>
+<span class="sd">            unsorted_indices=None</span>
+<span class="sd">        )</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">batch_data</span> <span class="o">=</span> <span class="n">sort_by_length</span><span class="p">(</span><span class="n">batch_data</span><span class="p">)</span>
+    <span class="n">length</span> <span class="o">=</span> <span class="n">batch_data</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">pack_padded_sequence</span><span class="p">(</span><span class="n">batch_data</span><span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">],</span> <span class="n">length</span><span class="p">,</span> <span class="n">batch_first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;X&quot;</span><span class="p">:</span> <span class="n">X</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span> <span class="n">batch_data</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">],</span> <span class="s2">&quot;length&quot;</span><span class="p">:</span> <span class="n">length</span><span class="p">}</span></div>
 </pre></div>
 
            </div>
