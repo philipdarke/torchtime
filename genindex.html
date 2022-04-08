@@ -28,7 +28,7 @@
             <a href="index.html" class="icon icon-home"> torchtime
           </a>
               <div class="version">
-                0.1.1
+                0.2.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -39,8 +39,8 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">API</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/index.html">Tutorials</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API</a></li>
 </ul>
 
         </div>
@@ -71,9 +71,11 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#L"><strong>L</strong></a>
+ <a href="#F"><strong>F</strong></a>
+ | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
@@ -81,13 +83,23 @@
  | <a href="#Y"><strong>Y</strong></a>
  
 </div>
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/impute.html#torchtime.impute.forward_impute">forward_impute() (in module torchtime.impute)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="L">L</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#torchtime.data.PhysioNet2019.length">length (torchtime.data.PhysioNet2019 attribute)</a>
+      <li><a href="api/data.html#torchtime.data.PhysioNet2019.length">length (torchtime.data.PhysioNet2019 attribute)</a>
 
       <ul>
-        <li><a href="api.html#torchtime.data.UEA.length">(torchtime.data.UEA attribute)</a>
+        <li><a href="api/data.html#torchtime.data.TensorTimeSeriesDataset.length">(torchtime.data.TensorTimeSeriesDataset attribute)</a>
+</li>
+        <li><a href="api/data.html#torchtime.data.UEA.length">(torchtime.data.UEA attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -100,9 +112,11 @@
     module
 
       <ul>
-        <li><a href="api.html#module-torchtime.collate">torchtime.collate</a>
+        <li><a href="api/collate.html#module-torchtime.collate">torchtime.collate</a>
 </li>
-        <li><a href="api.html#module-torchtime.data">torchtime.data</a>
+        <li><a href="api/data.html#module-torchtime.data">torchtime.data</a>
+</li>
+        <li><a href="api/impute.html#module-torchtime.impute">torchtime.impute</a>
 </li>
       </ul></li>
   </ul></td>
@@ -111,11 +125,19 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#torchtime.collate.packed_sequence">packed_sequence() (in module torchtime.collate)</a>
+      <li><a href="api/collate.html#torchtime.collate.packed_sequence">packed_sequence() (in module torchtime.collate)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#torchtime.data.PhysioNet2019">PhysioNet2019 (class in torchtime.data)</a>
+      <li><a href="api/data.html#torchtime.data.PhysioNet2019">PhysioNet2019 (class in torchtime.data)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/impute.html#torchtime.impute.replace_missing">replace_missing() (in module torchtime.impute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -123,7 +145,7 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#torchtime.collate.sort_by_length">sort_by_length() (in module torchtime.collate)</a>
+      <li><a href="api/collate.html#torchtime.collate.sort_by_length">sort_by_length() (in module torchtime.collate)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -131,11 +153,13 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/data.html#torchtime.data.TensorTimeSeriesDataset">TensorTimeSeriesDataset (class in torchtime.data)</a>
+</li>
       <li>
     torchtime.collate
 
       <ul>
-        <li><a href="api.html#module-torchtime.collate">module</a>
+        <li><a href="api/collate.html#module-torchtime.collate">module</a>
 </li>
       </ul></li>
   </ul></td>
@@ -144,7 +168,14 @@
     torchtime.data
 
       <ul>
-        <li><a href="api.html#module-torchtime.data">module</a>
+        <li><a href="api/data.html#module-torchtime.data">module</a>
+</li>
+      </ul></li>
+      <li>
+    torchtime.impute
+
+      <ul>
+        <li><a href="api/impute.html#module-torchtime.impute">module</a>
 </li>
       </ul></li>
   </ul></td>
@@ -153,7 +184,7 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#torchtime.data.UEA">UEA (class in torchtime.data)</a>
+      <li><a href="api/data.html#torchtime.data.UEA">UEA (class in torchtime.data)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -161,10 +192,12 @@
 <h2 id="X">X</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#torchtime.data.PhysioNet2019.X">X (torchtime.data.PhysioNet2019 attribute)</a>
+      <li><a href="api/data.html#torchtime.data.PhysioNet2019.X">X (torchtime.data.PhysioNet2019 attribute)</a>
 
       <ul>
-        <li><a href="api.html#torchtime.data.UEA.X">(torchtime.data.UEA attribute)</a>
+        <li><a href="api/data.html#torchtime.data.TensorTimeSeriesDataset.X">(torchtime.data.TensorTimeSeriesDataset attribute)</a>
+</li>
+        <li><a href="api/data.html#torchtime.data.UEA.X">(torchtime.data.UEA attribute)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -173,10 +206,12 @@
 <h2 id="Y">Y</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api.html#torchtime.data.PhysioNet2019.y">y (torchtime.data.PhysioNet2019 attribute)</a>
+      <li><a href="api/data.html#torchtime.data.PhysioNet2019.y">y (torchtime.data.PhysioNet2019 attribute)</a>
 
       <ul>
-        <li><a href="api.html#torchtime.data.UEA.y">(torchtime.data.UEA attribute)</a>
+        <li><a href="api/data.html#torchtime.data.TensorTimeSeriesDataset.y">(torchtime.data.TensorTimeSeriesDataset attribute)</a>
+</li>
+        <li><a href="api/data.html#torchtime.data.UEA.y">(torchtime.data.UEA attribute)</a>
 </li>
       </ul></li>
   </ul></td>

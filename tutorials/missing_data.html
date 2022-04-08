@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Working with missing data &mdash; torchtime</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Time series of unequal lengths" href="unequal_lengths.html" />
+    <link rel="prev" title="Getting started" href="getting_started.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> torchtime
+          </a>
+              <div class="version">
+                0.2.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="getting_started.html">Getting started</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Working with missing data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="unequal_lengths.html">Time series of unequal lengths</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">torchtime</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Tutorials</a> &raquo;</li>
+      <li>Working with missing data</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/philipdarke/torchtime/blob/main/docs/source/tutorials/missing_data.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="working-with-missing-data">
+<h1>Working with missing data<a class="headerlink" href="#working-with-missing-data" title="Permalink to this headline"></a></h1>
+<p><em>This tutorial covers the <code class="docutils literal notranslate"><span class="pre">torchtime.data.UEA</span></code> class for data sets held in the UEA/UCR classification repository <a class="reference external" href="https://www.timeseriesclassification.com/">[link]</a> however the imputation examples also apply to other data sets.</em></p>
+<section id="simulating-missing-data">
+<h2>Simulating missing data<a class="headerlink" href="#simulating-missing-data" title="Permalink to this headline"></a></h2>
+<p>Most UEA/UCR data sets are regularly sampled and fully observed. However we often need to work with time series that are irregularly sampled, partially observed and of unequal length. To aid research and model development in this area, missing data can be simulated in UEA/UCR data sets using the <code class="docutils literal notranslate"><span class="pre">missing</span></code> argument. Data are dropped at random.</p>
+<section id="regularly-sampled-with-missing-time-points">
+<h3>Regularly sampled with missing time points<a class="headerlink" href="#regularly-sampled-with-missing-time-points" title="Permalink to this headline"></a></h3>
+<p>If <code class="docutils literal notranslate"><span class="pre">missing</span></code> is a single value, data are dropped across all channels. This simulates regularly sampled data where some time points are not recorded. Using the <a class="reference external" href="http://timeseriesclassification.com/description.php?Dataset=CharacterTrajectories">CharacterTrajectories</a> data set as an example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
+
+<span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">missing</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">char_traj</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+<span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;X&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tensor</span><span class="p">([[</span> <span class="mf">0.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1849</span><span class="p">,</span>  <span class="mf">0.1978</span><span class="p">,</span>  <span class="mf">0.3263</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">1.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">2.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.3744</span><span class="p">,</span>  <span class="mf">0.2511</span><span class="p">,</span>  <span class="mf">0.4260</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">3.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">4.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">5.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">6.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">7.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0270</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1670</span><span class="p">,</span>  <span class="mf">0.2144</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">8.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">9.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.3501</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4994</span><span class="p">,</span>  <span class="mf">0.2447</span><span class="p">]])</span>
+</pre></div>
+</div>
+</section>
+<section id="regularly-sampled-and-partially-observed">
+<h3>Regularly sampled and partially observed<a class="headerlink" href="#regularly-sampled-and-partially-observed" title="Permalink to this headline"></a></h3>
+<p>Alternatively, data can be dropped independently for each channel by passing a list representing the proportion missing for each channel. This simulates regularly sampled data with partial observation i.e. not all channels are recorded at each time point.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
+
+<span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">missing</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">char_traj</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+<span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;X&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tensor</span><span class="p">([[</span> <span class="mf">0.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.1978</span><span class="p">,</span>  <span class="mf">0.3263</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">1.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.2399</span><span class="p">,</span>     <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">2.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.2511</span><span class="p">,</span>     <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">3.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.4016</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">4.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.3410</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">5.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.0824</span><span class="p">,</span>  <span class="mf">0.2739</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">6.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0302</span><span class="p">,</span>  <span class="mf">0.2281</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">7.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1670</span><span class="p">,</span>  <span class="mf">0.2144</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">8.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">9.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.3501</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4994</span><span class="p">,</span>  <span class="mf">0.2447</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>Note that each time point has a varying number of observations.</p>
+</section>
+</section>
+<section id="missing-data-masks">
+<h2>Missing data masks<a class="headerlink" href="#missing-data-masks" title="Permalink to this headline"></a></h2>
+<p>In some applications, the presence (or absence) of data can itself be informative. For example, a doctor may be more likely to order a particular diagnostic test if they believe the patient has a medical condition. Missing data/observational masks can be used to inform models of missing data. These are appended by setting <code class="docutils literal notranslate"><span class="pre">mask</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
+
+<span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">missing</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+    <span class="n">mask</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">char_traj</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+<span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;X&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tensor</span><span class="p">([[</span> <span class="mf">0.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.1978</span><span class="p">,</span>  <span class="mf">0.3263</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">1.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.2399</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">2.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.2511</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">3.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.4016</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">4.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.3410</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">5.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.0824</span><span class="p">,</span>  <span class="mf">0.2739</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">6.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0302</span><span class="p">,</span>  <span class="mf">0.2281</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">7.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1670</span><span class="p">,</span>  <span class="mf">0.2144</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">8.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">9.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.3501</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4994</span><span class="p">,</span>  <span class="mf">0.2447</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>Note the final three channels indicate whether data were recorded.</p>
+</section>
+<section id="time-deltas">
+<h2>Time deltas<a class="headerlink" href="#time-deltas" title="Permalink to this headline"></a></h2>
+<p>Some models require the time since the previous observation as an input e.g. GRU-D. This can be added using the <code class="docutils literal notranslate"><span class="pre">delta</span></code> argument. See <a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">Che et al, 2018</a> for implementation details.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
+
+<span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">missing</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+    <span class="n">delta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">char_traj</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+<span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;X&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tensor</span><span class="p">([[</span> <span class="mf">0.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.1978</span><span class="p">,</span>  <span class="mf">0.3263</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">1.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.2399</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">2.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.2511</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">2.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">2.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">3.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.4016</span><span class="p">,</span>  <span class="mf">3.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">3.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">4.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.3410</span><span class="p">,</span>  <span class="mf">4.0000</span><span class="p">,</span>  <span class="mf">2.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">5.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.0824</span><span class="p">,</span>  <span class="mf">0.2739</span><span class="p">,</span>  <span class="mf">5.0000</span><span class="p">,</span>  <span class="mf">3.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">6.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0302</span><span class="p">,</span>  <span class="mf">0.2281</span><span class="p">,</span>  <span class="mf">6.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">7.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1670</span><span class="p">,</span>  <span class="mf">0.2144</span><span class="p">,</span>  <span class="mf">7.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">8.0000</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">8.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">9.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.3501</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4994</span><span class="p">,</span>  <span class="mf">0.2447</span><span class="p">,</span>  <span class="mf">9.0000</span><span class="p">,</span>  <span class="mf">2.0000</span><span class="p">,</span>  <span class="mf">2.0000</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>Note the second channel is observed at times 2 and 5 therefore the time delta at time 5 is 3 i.e. 3 time units since last observation. Note that time delta is 0 at time 0 by definition.</p>
+</section>
+<section id="combining-output-options">
+<h2>Combining output options<a class="headerlink" href="#combining-output-options" title="Permalink to this headline"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> arguments can be combined as required:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
+
+<span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">missing</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+    <span class="n">time</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">mask</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">delta</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">char_traj</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+<span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;X&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tensor</span><span class="p">([[</span>    <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.1978</span><span class="p">,</span>  <span class="mf">0.3263</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">],</span>
+        <span class="p">[</span>    <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.2399</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span>    <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.2511</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">2.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">2.0000</span><span class="p">],</span>
+        <span class="p">[</span>    <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.4016</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">3.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">3.0000</span><span class="p">],</span>
+        <span class="p">[</span>    <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.3410</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">4.0000</span><span class="p">,</span>  <span class="mf">2.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span>    <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.0824</span><span class="p">,</span>  <span class="mf">0.2739</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">5.0000</span><span class="p">,</span>  <span class="mf">3.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span>    <span class="n">nan</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0302</span><span class="p">,</span>  <span class="mf">0.2281</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">6.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span>    <span class="n">nan</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1670</span><span class="p">,</span>  <span class="mf">0.2144</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">7.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span>    <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>     <span class="n">nan</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">8.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">],</span>
+        <span class="p">[</span><span class="o">-</span><span class="mf">1.3501</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4994</span><span class="p">,</span>  <span class="mf">0.2447</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">9.0000</span><span class="p">,</span>  <span class="mf">2.0000</span><span class="p">,</span>  <span class="mf">2.0000</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>Note the initial time channel is not returned but the missing data and time delta channels are appended to the data.</p>
+</section>
+<section id="imputing-missing-data">
+<h2>Imputing missing data<a class="headerlink" href="#imputing-missing-data" title="Permalink to this headline"></a></h2>
+<p>Missing data can be imputed using the <code class="docutils literal notranslate"><span class="pre">impute</span></code> argument. <code class="docutils literal notranslate"><span class="pre">torchtime</span></code> currently supports mean and forward imputation as well as custom imputation functions.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Imputation has no impact on the missing data mask or time delta channels!</p>
+</div>
+<section id="mean-imputation">
+<h3>Mean imputation<a class="headerlink" href="#mean-imputation" title="Permalink to this headline"></a></h3>
+<p>Under mean imputation, missing data are replaced with the training data channel mean:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
+
+<span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">missing</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+    <span class="n">impute</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">char_traj</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+<span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;X&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tensor</span><span class="p">([[</span> <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span>  <span class="mf">0.1978</span><span class="p">,</span>  <span class="mf">0.3263</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span>  <span class="mf">0.2399</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2935</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">2.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span>  <span class="mf">0.2511</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2935</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">3.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0722</span><span class="p">,</span>  <span class="mf">0.4016</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">4.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0722</span><span class="p">,</span>  <span class="mf">0.3410</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">5.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span>  <span class="mf">0.0824</span><span class="p">,</span>  <span class="mf">0.2739</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">6.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0302</span><span class="p">,</span>  <span class="mf">0.2281</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">7.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1670</span><span class="p">,</span>  <span class="mf">0.2144</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">8.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0722</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.2935</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">9.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.3501</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4994</span><span class="p">,</span>  <span class="mf">0.2447</span><span class="p">]])</span>
+</pre></div>
+</div>
+</section>
+<section id="forward-imputation">
+<h3>Forward imputation<a class="headerlink" href="#forward-imputation" title="Permalink to this headline"></a></h3>
+<p>Under forward imputation, missing values are replaced with the previous channel observation. Note that this approach does not impute any initial missing values, therefore these are replaced with the training data channel mean.</p>
+<p>This approach ensures that knowledge of the time series at times <em>t &gt; i</em> is not used when imputing values at time <em>i</em>. This is required when developing models that make online predictions.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
+
+<span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">missing</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+    <span class="n">impute</span><span class="o">=</span><span class="s2">&quot;forward&quot;</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">char_traj</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+<span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;X&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tensor</span><span class="p">([[</span> <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span>  <span class="mf">0.1978</span><span class="p">,</span>  <span class="mf">0.3263</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span>  <span class="mf">0.2399</span><span class="p">,</span>  <span class="mf">0.3263</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">2.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span>  <span class="mf">0.2511</span><span class="p">,</span>  <span class="mf">0.3263</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">3.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span>  <span class="mf">0.2511</span><span class="p">,</span>  <span class="mf">0.4016</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">4.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span>  <span class="mf">0.2511</span><span class="p">,</span>  <span class="mf">0.3410</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">5.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span>  <span class="mf">0.0824</span><span class="p">,</span>  <span class="mf">0.2739</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">6.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0302</span><span class="p">,</span>  <span class="mf">0.2281</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">7.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1670</span><span class="p">,</span>  <span class="mf">0.2144</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">8.0000</span><span class="p">,</span>  <span class="mf">0.1163</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1670</span><span class="p">,</span>  <span class="mf">0.2144</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">9.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.3501</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4994</span><span class="p">,</span>  <span class="mf">0.2447</span><span class="p">]])</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><code class="docutils literal notranslate"><span class="pre">torchtime.impute</span></code> includes imputation functions for tensors with missing data. See the <a class="reference external" href="../api/impute.html">API</a> for more information.</p>
+</div>
+</section>
+<section id="custom-imputation-functions">
+<h3>Custom imputation functions<a class="headerlink" href="#custom-imputation-functions" title="Permalink to this headline"></a></h3>
+<p>Alternatively a custom imputation function can be passed to <code class="docutils literal notranslate"><span class="pre">impute</span></code>. This must accept <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> tensors with the raw time series and labels respectively and return both tensors post imputation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
+
+<span class="k">def</span> <span class="nf">zero_imputation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set missing values to 0.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">y</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">missing</span><span class="o">=</span><span class="p">[</span><span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span>
+    <span class="n">impute</span><span class="o">=</span><span class="n">zero_imputation</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">char_traj</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+<span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;X&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Output:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tensor</span><span class="p">([[</span> <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.1978</span><span class="p">,</span>  <span class="mf">0.3263</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">1.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.2399</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">2.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.2511</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">3.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.4016</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">4.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.3410</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">5.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0824</span><span class="p">,</span>  <span class="mf">0.2739</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">6.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.0302</span><span class="p">,</span>  <span class="mf">0.2281</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">7.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1670</span><span class="p">,</span>  <span class="mf">0.2144</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">8.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">,</span>  <span class="mf">0.0000</span><span class="p">],</span>
+        <span class="p">[</span> <span class="mf">9.0000</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.3501</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.4994</span><span class="p">,</span>  <span class="mf">0.2447</span><span class="p">]])</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="unequal_lengths.html" class="btn btn-neutral float-right" title="Time series of unequal lengths" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Philip Darke.</p>
+  </div>
+
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
