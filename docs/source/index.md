@@ -4,8 +4,8 @@
 ```{eval-rst}
 .. toctree::
    :hidden:
-   :maxdepth: 2
+   :maxdepth: 1
 
-   tutorial
-   api
+   tutorials/index
+   api/index
 ```

@@ -11,8 +11,8 @@ class TestCollateFunctions:
         dataset = UEA(
             dataset="CharacterTrajectories",
             split="train",
-            train_split=0.7,
-            val_split=0.2,
+            train_prop=0.7,
+            val_prop=0.2,
         )
         loader = DataLoader(
             dataset, batch_size=32, shuffle=True, collate_fn=sort_by_length
@@ -26,8 +26,8 @@ class TestCollateFunctions:
         dataset = UEA(
             dataset="CharacterTrajectories",
             split="train",
-            train_split=0.7,
-            val_split=0.2,
+            train_prop=0.7,
+            val_prop=0.2,
         )
         loader = DataLoader(
             dataset, batch_size=32, shuffle=True, collate_fn=packed_sequence
