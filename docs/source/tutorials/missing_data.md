@@ -4,9 +4,14 @@
 
 ## Simulating missing data
 
-Most UEA/UCR data sets are regularly sampled and fully observed. However we often need to work with time series that are irregularly sampled, partially observed and of unequal length. To aid research and model development in this area, missing data can be simulated in UEA/UCR data sets using the `missing` argument. Data are dropped at random.
+Most UEA/UCR data sets are regularly sampled and fully observed. However we often need to work with time series that are irregularly sampled, partially observed and of unequal length. To aid research and model development in this area, missing data can be simulated in UEA/UCR data sets using the `missing` argument.
 
-### Regularly sampled with missing time points
+```{eval-rst}
+.. note::
+   Data are dropped at random. The ``missing`` argument is the probability that data are missing. Results can be reproduced using the ``seed`` argument.
+```
+
+### Regularly sampled data with missing time points
 
 If `missing` is a single value, data are dropped across all channels. This simulates regularly sampled data where some time points are not recorded. Using the [CharacterTrajectories](http://timeseriesclassification.com/description.php?Dataset=CharacterTrajectories) data set as an example:
 
@@ -18,7 +23,7 @@ char_traj = UEA(
     dataset="CharacterTrajectories",
     split="train",
     train_prop=0.7,
-    missing=0.5,
+    missing=0.5,  # 50% missing
     seed=123,
 )
 dataloader = DataLoader(char_traj, batch_size=32)
@@ -40,7 +45,7 @@ tensor([[ 0.0000, -0.1849,  0.1978,  0.3263],
         [ 9.0000, -1.3501, -0.4994,  0.2447]])
 ```
 
-### Regularly sampled and partially observed
+### Regularly sampled data with partial observation
 
 Alternatively, data can be dropped independently for each channel by passing a list representing the proportion missing for each channel. This simulates regularly sampled data with partial observation i.e. not all channels are recorded at each time point.
 
@@ -52,7 +57,7 @@ char_traj = UEA(
     dataset="CharacterTrajectories",
     split="train",
     train_prop=0.7,
-    missing=[0.8, 0.2, 0.5],
+    missing=[0.8, 0.2, 0.5],  # 80/20/50% missing respectively
     seed=123,
 )
 dataloader = DataLoader(char_traj, batch_size=32)

@@ -2,13 +2,15 @@
 
 [![PyPi](https://img.shields.io/pypi/v/torchtime)](https://pypi.org/project/torchtime)
 [![Build status](https://img.shields.io/github/workflow/status/philipdarke/torchtime/build.svg)](https://github.com/philipdarke/torchtime/actions/workflows/build.yml)
-![Coverage](https://philipdarke.com/torchtime/assets/coverage-badge.svg)
+![Coverage](https://philipdarke.com/torchtime/assets/coverage-badge.svg?dummy=8484744)
 [![License](https://img.shields.io/github/license/philipdarke/torchtime.svg)](https://github.com/philipdarke/torchtime/blob/main/LICENSE)
 [![DOI](https://zenodo.org/badge/475093888.svg)](https://zenodo.org/badge/latestdoi/475093888)
 
 Ready-to-go PyTorch data sets for supervised time series prediction problems. `torchtime` currently supports:
 
 * All data sets in the UEA/UCR classification repository [[link]](https://www.timeseriesclassification.com/)
+
+* PhysioNet Challenge 2012 (in-hospital mortality) [[link]](https://physionet.org/content/challenge-2012/1.0.0/)
 
 * PhysioNet Challenge 2019 (sepsis prediction) [[link]](https://physionet.org/content/challenge-2019/1.0.0/)
 
@@ -32,7 +34,6 @@ arrowhead = UEA(
     dataset="ArrowHead",
     split="train",
     train_prop=0.7,
-    seed=123
 )
 dataloader = DataLoader(arrowhead, batch_size=32)
 ```
@@ -41,16 +42,16 @@ Batches are dictionaries of tensors `X`, `y` and `length`.
 
 `X` are the time series data. The package follows the *batch first* convention therefore `X` has shape (*n*, *s*, *c*) where *n* is batch size, *s* is (maximum) trajectory length and *c* is the number of channels. By default, a time stamp is appended to the time series data as the first channel.
 
-`y` are one-hot encoded labels of shape (*n*, *l*) where *l* is the number of classes and `length` are the length of each trajectory (before padding if series are of irregular length) i.e. a tensor of shape (*n*).
+`y` are one-hot encoded labels of shape (*n*, *l*) where *l* is the number of classes and `length` are the length of each trajectory (before padding if sequences are of irregular length) i.e. a tensor of shape (*n*).
 
 ArrowHead is a univariate time series therefore `X` has two channels, the time stamp followed by the time series (*c* = 2). Each series has 251 observations (*s* = 251) and there are three classes (*l* = 3).
 
 ```python
 next_batch = next(iter(dataloader))
 
-next_batch["X"].shape  # (32, 251, 2)
-next_batch["y"].shape  # (32, 3)
-next_batch["length"].shape  # (32)
+next_batch["X"].shape       # torch.Size([32, 251, 2])
+next_batch["y"].shape       # torch.Size([32, 3])
+next_batch["length"].shape  # torch.Size([32])
 ```
 
 ## Additional options
@@ -59,11 +60,11 @@ next_batch["length"].shape  # (32)
 
 * Missing data can be imputed by setting `impute` to *mean* (replace with training data channel means) or *forward* (replace with previous observation). Alternatively a custom imputation function can be used.
 
-* A time stamp, missing data mask and the time since previous observation can be appended to the time series data with the boolean arguments ``time``, ``mask`` and ``delta`` respectively.
+* A time stamp, missing data mask and the time since previous observation can be appended with the boolean arguments ``time``, ``mask`` and ``delta`` respectively.
 
 * For reproducibility, an optional random `seed` can be specified.
 
-Most UEA/UCR data sets are regularly sampled and fully observed. Missing data can be simulated using the `missing` argument to drop data at random from UEA/UCR data sets. See the [tutorials](https://philipdarke.com/torchtime/tutorials/index.html) and [API](https://philipdarke.com/torchtime/api/index.html) for more information.
+Most UEA/UCR data sets are regularly sampled and fully observed. Missing data can be simulated using the `missing` argument to drop data at random from UEA/UCR data sets. See the [tutorials](https://philipdarke.com/torchtime/tutorials/) and [API](https://philipdarke.com/torchtime/api/) for more information.
 
 ## Acknowledgements
 
@@ -76,6 +77,8 @@ This work is supported by the Engineering and Physical Sciences Research Council
 1. Kidger, P, Morrill, J, Foster, J, *et al*. Neural Controlled Differential Equations for Irregular Time Series. *arXiv* 2005.08926 (2020). [[arXiv]](https://arxiv.org/abs/2005.08926)
 
 1. Che, Z, Purushotham, S, Cho, K, *et al*. Recurrent Neural Networks for Multivariate Time Series with Missing Values. *Sci Rep* 8, 6085 (2018). [[doi]](https://doi.org/10.1038/s41598-018-24271-9)
+
+1. Silva, I, Moody, G, Scott, DJ, *et al*. Predicting In-Hospital Mortality of ICU Patients: The PhysioNet/Computing in Cardiology Challenge 2012. *Comput Cardiol* 2012;39:245-248 (2010). [[hdl]](http://hdl.handle.net/1721.1/93166)
 
 1. Reyna, M, Josef, C, Jeter, R, *et al*. Early Prediction of Sepsis From Clinical Data: The PhysioNet/Computing in Cardiology Challenge. *Critical Care Medicine* 48 2: 210-217 (2019). [[doi]](https://doi.org/10.1097/CCM.0000000000004145)
 

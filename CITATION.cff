@@ -5,7 +5,7 @@ authors:
   given-names: "Philip"
   orcid: "https://orcid.org/0000-0002-9033-2767"
 title: "torchtime: Time series data sets for PyTorch"
-version: 0.2.0
+version: 0.3.0
 doi: 10.5281/zenodo.6402406
 date-released: 2022-03-31
-url: "https://github.com/philipdarke/torchtime/tree/v0.1.1"
+url: "https://github.com/philipdarke/torchtime/"

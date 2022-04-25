@@ -23,7 +23,7 @@ arrowhead = UEA(
     dataset="ArrowHead",
     split="train",
     train_prop=0.7,
-    seed=123,
+    seed=123,  # for reproducibility
 )
 ```
 
