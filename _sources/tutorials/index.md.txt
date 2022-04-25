@@ -6,5 +6,5 @@
 
    getting_started
    missing_data
-   unequal_lengths
+   unequal_length
 ```

@@ -30,7 +30,7 @@
             <a href="#" class="icon icon-home"> torchtime
           </a>
               <div class="version">
-                0.2.0
+                0.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -73,12 +73,13 @@
 <h1>Time series data sets for PyTorch<a class="headerlink" href="#time-series-data-sets-for-pytorch" title="Permalink to this headline"></a></h1>
 <p><a class="reference external" href="https://pypi.org/project/torchtime"><img alt="PyPi" src="https://img.shields.io/pypi/v/torchtime" /></a>
 <a class="reference external" href="https://github.com/philipdarke/torchtime/actions/workflows/build.yml"><img alt="Build status" src="https://img.shields.io/github/workflow/status/philipdarke/torchtime/build.svg" /></a>
-<img alt="Coverage" src="https://philipdarke.com/torchtime/assets/coverage-badge.svg" />
+<img alt="Coverage" src="https://philipdarke.com/torchtime/assets/coverage-badge.svg?dummy=8484744" />
 <a class="reference external" href="https://github.com/philipdarke/torchtime/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/philipdarke/torchtime.svg" /></a>
 <a class="reference external" href="https://zenodo.org/badge/latestdoi/475093888"><img alt="DOI" src="https://zenodo.org/badge/475093888.svg" /></a></p>
 <p>Ready-to-go PyTorch data sets for supervised time series prediction problems. <code class="docutils literal notranslate"><span class="pre">torchtime</span></code> currently supports:</p>
 <ul class="simple">
 <li><p>All data sets in the UEA/UCR classification repository <a class="reference external" href="https://www.timeseriesclassification.com/">[link]</a></p></li>
+<li><p>PhysioNet Challenge 2012 (in-hospital mortality) <a class="reference external" href="https://physionet.org/content/challenge-2012/1.0.0/">[link]</a></p></li>
 <li><p>PhysioNet Challenge 2019 (sepsis prediction) <a class="reference external" href="https://physionet.org/content/challenge-2019/1.0.0/">[link]</a></p></li>
 </ul>
 <section id="installation">
@@ -98,20 +99,19 @@
     <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;ArrowHead&quot;</span><span class="p">,</span>
     <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
     <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
-    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span>
 <span class="p">)</span>
 <span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">arrowhead</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Batches are dictionaries of tensors <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">X</span></code> are the time series data. The package follows the <em>batch first</em> convention therefore <code class="docutils literal notranslate"><span class="pre">X</span></code> has shape (<em>n</em>, <em>s</em>, <em>c</em>) where <em>n</em> is batch size, <em>s</em> is (maximum) trajectory length and <em>c</em> is the number of channels. By default, a time stamp is appended to the time series data as the first channel.</p>
-<p><code class="docutils literal notranslate"><span class="pre">y</span></code> are one-hot encoded labels of shape (<em>n</em>, <em>l</em>) where <em>l</em> is the number of classes and <code class="docutils literal notranslate"><span class="pre">length</span></code> are the length of each trajectory (before padding if series are of irregular length) i.e. a tensor of shape (<em>n</em>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">y</span></code> are one-hot encoded labels of shape (<em>n</em>, <em>l</em>) where <em>l</em> is the number of classes and <code class="docutils literal notranslate"><span class="pre">length</span></code> are the length of each trajectory (before padding if sequences are of irregular length) i.e. a tensor of shape (<em>n</em>).</p>
 <p>ArrowHead is a univariate time series therefore <code class="docutils literal notranslate"><span class="pre">X</span></code> has two channels, the time stamp followed by the time series (<em>c</em> = 2). Each series has 251 observations (<em>s</em> = 251) and there are three classes (<em>l</em> = 3).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">next_batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))</span>
 
-<span class="n">next_batch</span><span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># (32, 251, 2)</span>
-<span class="n">next_batch</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># (32, 3)</span>
-<span class="n">next_batch</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># (32)</span>
+<span class="n">next_batch</span><span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>       <span class="c1"># torch.Size([32, 251, 2])</span>
+<span class="n">next_batch</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>       <span class="c1"># torch.Size([32, 3])</span>
+<span class="n">next_batch</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># torch.Size([32])</span>
 </pre></div>
 </div>
 </section>
@@ -120,10 +120,10 @@
 <ul class="simple">
 <li><p>The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines whether training, validation or test data are returned. The size of the splits are controlled with the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code> arguments.</p></li>
 <li><p>Missing data can be imputed by setting <code class="docutils literal notranslate"><span class="pre">impute</span></code> to <em>mean</em> (replace with training data channel means) or <em>forward</em> (replace with previous observation). Alternatively a custom imputation function can be used.</p></li>
-<li><p>A time stamp, missing data mask and the time since previous observation can be appended to the time series data with the boolean arguments <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> respectively.</p></li>
+<li><p>A time stamp, missing data mask and the time since previous observation can be appended with the boolean arguments <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> respectively.</p></li>
 <li><p>For reproducibility, an optional random <code class="docutils literal notranslate"><span class="pre">seed</span></code> can be specified.</p></li>
 </ul>
-<p>Most UEA/UCR data sets are regularly sampled and fully observed. Missing data can be simulated using the <code class="docutils literal notranslate"><span class="pre">missing</span></code> argument to drop data at random from UEA/UCR data sets. See the <a class="reference external" href="https://philipdarke.com/torchtime/tutorials/index.html">tutorials</a> and <a class="reference external" href="https://philipdarke.com/torchtime/api/index.html">API</a> for more information.</p>
+<p>Most UEA/UCR data sets are regularly sampled and fully observed. Missing data can be simulated using the <code class="docutils literal notranslate"><span class="pre">missing</span></code> argument to drop data at random from UEA/UCR data sets. See the <a class="reference external" href="https://philipdarke.com/torchtime/tutorials/">tutorials</a> and <a class="reference external" href="https://philipdarke.com/torchtime/api/">API</a> for more information.</p>
 </section>
 <section id="acknowledgements">
 <h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline"></a></h2>
@@ -135,6 +135,7 @@
 <ol class="arabic simple">
 <li><p>Kidger, P, Morrill, J, Foster, J, <em>et al</em>. Neural Controlled Differential Equations for Irregular Time Series. <em>arXiv</em> 2005.08926 (2020). <a class="reference external" href="https://arxiv.org/abs/2005.08926">[arXiv]</a></p></li>
 <li><p>Che, Z, Purushotham, S, Cho, K, <em>et al</em>. Recurrent Neural Networks for Multivariate Time Series with Missing Values. <em>Sci Rep</em> 8, 6085 (2018). <a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">[doi]</a></p></li>
+<li><p>Silva, I, Moody, G, Scott, DJ, <em>et al</em>. Predicting In-Hospital Mortality of ICU Patients: The PhysioNet/Computing in Cardiology Challenge 2012. <em>Comput Cardiol</em> 2012;39:245-248 (2010). <a class="reference external" href="http://hdl.handle.net/1721.1/93166">[hdl]</a></p></li>
 <li><p>Reyna, M, Josef, C, Jeter, R, <em>et al</em>. Early Prediction of Sepsis From Clinical Data: The PhysioNet/Computing in Cardiology Challenge. <em>Critical Care Medicine</em> 48 2: 210-217 (2019). <a class="reference external" href="https://doi.org/10.1097/CCM.0000000000004145">[doi]</a></p></li>
 <li><p>Reyna, M, Josef, C, Jeter, R, <em>et al</em>. Early Prediction of Sepsis from Clinical Data: The PhysioNet/Computing in Cardiology Challenge 2019 (version 1.0.0). <em>PhysioNet</em> (2019). <a class="reference external" href="https://doi.org/10.13026/v64v-d857">[doi]</a></p></li>
 <li><p>Goldberger, A, Amaral, L, Glass, L, <em>et al</em>. PhysioBank, PhysioToolkit, and PhysioNet: Components of a new research resource for complex physiologic signals. <em>Circulation</em> 101 (23), pp. e215–e220 (2000). <a class="reference external" href="https://doi.org/10.1161/01.cir.101.23.e215">[doi]</a></p></li>

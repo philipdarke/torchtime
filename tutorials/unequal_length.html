@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Time series of unequal lengths &mdash; torchtime</title>
+  <title>Time series of unequal length &mdash; torchtime</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
       <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -31,7 +31,7 @@
             <a href="../index.html" class="icon icon-home"> torchtime
           </a>
               <div class="version">
-                0.2.0
+                0.3.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -45,7 +45,7 @@
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Tutorials</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="getting_started.html">Getting started</a></li>
 <li class="toctree-l2"><a class="reference internal" href="missing_data.html">Working with missing data</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Time series of unequal lengths</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Time series of unequal length</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../api/index.html">API</a></li>
@@ -66,9 +66,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="index.html">Tutorials</a> &raquo;</li>
-      <li>Time series of unequal lengths</li>
+      <li>Time series of unequal length</li>
       <li class="wy-breadcrumbs-aside">
-              <a href="https://github.com/philipdarke/torchtime/blob/main/docs/source/tutorials/unequal_lengths.md" class="fa fa-github"> Edit on GitHub</a>
+              <a href="https://github.com/philipdarke/torchtime/blob/main/docs/source/tutorials/unequal_length.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
   </ul>
   <hr/>
@@ -76,9 +76,12 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="time-series-of-unequal-lengths">
-<h1>Time series of unequal lengths<a class="headerlink" href="#time-series-of-unequal-lengths" title="Permalink to this headline"></a></h1>
-<p>The <code class="docutils literal notranslate"><span class="pre">length</span></code> of each trajectory is provided as a tensor of shape (<em>n</em>). Some data sets, for example <a class="reference external" href="http://timeseriesclassification.com/description.php?Dataset=CharacterTrajectories">CharacterTrajectories</a>, feature sequences of unequal length:</p>
+  <section id="time-series-of-unequal-length">
+<h1>Time series of unequal length<a class="headerlink" href="#time-series-of-unequal-length" title="Permalink to this headline"></a></h1>
+<p><em>This tutorial covers the <code class="docutils literal notranslate"><span class="pre">torchtime.data.UEA</span></code> class for data sets held in the UEA/UCR classification repository <a class="reference external" href="https://www.timeseriesclassification.com/">[link]</a> however the examples also apply to other data sets with sequences of unequal length.</em></p>
+<section id="data-structure">
+<h2>Data structure<a class="headerlink" href="#data-structure" title="Permalink to this headline"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">length</span></code> of each sequence is provided as a tensor of shape (<em>n</em>). Some data sets, for example <a class="reference external" href="http://timeseriesclassification.com/description.php?Dataset=CharacterTrajectories">CharacterTrajectories</a>, feature sequences of unequal length.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
 
@@ -92,13 +95,13 @@
 <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>Output:</p>
+<p>The length of each sequence in the batch is:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">tensor</span><span class="p">([</span><span class="mi">150</span><span class="p">,</span> <span class="mi">136</span><span class="p">,</span> <span class="mi">124</span><span class="p">,</span> <span class="mi">108</span><span class="p">,</span>  <span class="mi">61</span><span class="p">,</span> <span class="mi">157</span><span class="p">,</span> <span class="mi">113</span><span class="p">,</span> <span class="mi">133</span><span class="p">,</span>  <span class="mi">74</span><span class="p">,</span> <span class="mi">121</span><span class="p">,</span> <span class="mi">129</span><span class="p">,</span> <span class="mi">138</span><span class="p">,</span> <span class="mi">102</span><span class="p">,</span> <span class="mi">130</span><span class="p">,</span>
          <span class="mi">83</span><span class="p">,</span> <span class="mi">124</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">151</span><span class="p">,</span> <span class="mi">129</span><span class="p">,</span> <span class="mi">127</span><span class="p">,</span> <span class="mi">126</span><span class="p">,</span> <span class="mi">135</span><span class="p">,</span>  <span class="mi">98</span><span class="p">,</span> <span class="mi">105</span><span class="p">,</span> <span class="mi">121</span><span class="p">,</span> <span class="mi">151</span><span class="p">,</span>
         <span class="mi">106</span><span class="p">,</span> <span class="mi">118</span><span class="p">,</span> <span class="mi">138</span><span class="p">,</span>  <span class="mi">74</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>Trajectories are padded with <code class="docutils literal notranslate"><span class="pre">NaNs</span></code> to the length of the longest trajectory if the data set is of irregular length:</p>
+<p>Sequences are padded with <code class="docutils literal notranslate"><span class="pre">NaNs</span></code> to the length of the longest sequence if the data set is of irregular length. For example, the first sequence in CharacterTrajectories:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
 
@@ -130,6 +133,7 @@
 </pre></div>
 </div>
 <p>Note the time series has been padded with <code class="docutils literal notranslate"><span class="pre">NaNs</span></code> from <em>t</em> = 150.</p>
+</section>
 <section id="packedsequence-objects">
 <h2>PackedSequence objects<a class="headerlink" href="#packedsequence-objects" title="Permalink to this headline"></a></h2>
 <p>Data sets of variable length can be efficiently represented in PyTorch using a <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.utils.rnn.PackedSequence.html"><code class="docutils literal notranslate"><span class="pre">PackedSequence</span></code></a> object. These are formed using
@@ -145,6 +149,7 @@
 </div>
 <section id="sort-by-length">
 <h3><code class="docutils literal notranslate"><span class="pre">sort_by_length()</span></code><a class="headerlink" href="#sort-by-length" title="Permalink to this headline"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">sort_by_length()</span></code> sorts batches by length. For example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
 <span class="kn">from</span> <span class="nn">torchtime.collate</span> <span class="kn">import</span> <span class="n">sort_by_length</span>
@@ -168,11 +173,11 @@
          <span class="mi">83</span><span class="p">,</span>  <span class="mi">74</span><span class="p">,</span>  <span class="mi">74</span><span class="p">,</span>  <span class="mi">61</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>Each batch is now sorted by length and <code class="docutils literal notranslate"><span class="pre">pack_padded_sequence()</span></code> can be called in the forward method of a model.</p>
+<p>Note the batch is now sorted by length and <code class="docutils literal notranslate"><span class="pre">pack_padded_sequence()</span></code> can be called in the forward method of a model.</p>
 </section>
 <section id="packed-sequence">
 <h3><code class="docutils literal notranslate"><span class="pre">packed_sequence()</span></code><a class="headerlink" href="#packed-sequence" title="Permalink to this headline"></a></h3>
-<p>The <a class="reference internal" href="../api/collate.html#torchtime.collate.packed_sequence" title="torchtime.collate.packed_sequence"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">packed_sequence()</span></code></span></a> function returns <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> as PackedSequence objects within batches.</p>
+<p>Alternatively, the <a class="reference internal" href="../api/collate.html#torchtime.collate.packed_sequence" title="torchtime.collate.packed_sequence"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">packed_sequence()</span></code></span></a> function returns <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> as PackedSequence objects within batches.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
 <span class="kn">from</span> <span class="nn">torchtime.collate</span> <span class="kn">import</span> <span class="n">packed_sequence</span>

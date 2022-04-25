@@ -2,6 +2,7 @@
 
 The following data sets are available:
 
+* [PhysioNet2012](torchtime.data.PhysioNet2012)
 * [PhysioNet2019](torchtime.data.PhysioNet2019)
 * [UEA](torchtime.data.UEA)
 

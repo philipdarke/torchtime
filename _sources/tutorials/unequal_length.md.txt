@@ -1,6 +1,10 @@
-# Time series of unequal lengths
+# Time series of unequal length
 
-The `length` of each trajectory is provided as a tensor of shape (*n*). Some data sets, for example [CharacterTrajectories](http://timeseriesclassification.com/description.php?Dataset=CharacterTrajectories), feature sequences of unequal length:
+*This tutorial covers the `torchtime.data.UEA` class for data sets held in the UEA/UCR classification repository [[link]](https://www.timeseriesclassification.com/) however the examples also apply to other data sets with sequences of unequal length.*
+
+## Data structure
+
+The `length` of each sequence is provided as a tensor of shape (*n*). Some data sets, for example [CharacterTrajectories](http://timeseriesclassification.com/description.php?Dataset=CharacterTrajectories), feature sequences of unequal length.
 
 ```python
 from torch.utils.data import DataLoader
@@ -16,7 +20,7 @@ dataloader = DataLoader(char_traj, batch_size=32)
 next(iter(dataloader))["length"]
 ```
 
-Output:
+The length of each sequence in the batch is:
 
 ```python
 tensor([150, 136, 124, 108,  61, 157, 113, 133,  74, 121, 129, 138, 102, 130,
@@ -24,7 +28,7 @@ tensor([150, 136, 124, 108,  61, 157, 113, 133,  74, 121, 129, 138, 102, 130,
         106, 118, 138,  74])
 ```
 
-Trajectories are padded with `NaNs` to the length of the longest trajectory if the data set is of irregular length:
+Sequences are padded with `NaNs` to the length of the longest sequence if the data set is of irregular length. For example, the first sequence in CharacterTrajectories:
 
 ```python
 from torch.utils.data import DataLoader
@@ -79,6 +83,8 @@ Custom collate functions should be passed to the `collate_fn` argument of a [Dat
 
 ### `sort_by_length()`
 
+`sort_by_length()` sorts batches by length. For example:
+
 ```python
 from torch.utils.data import DataLoader
 from torchtime.data import UEA
@@ -104,11 +110,11 @@ tensor([157, 151, 151, 150, 138, 138, 136, 135, 133, 130, 129, 129, 127, 126,
          83,  74,  74,  61])
 ```
 
-Each batch is now sorted by length and ``pack_padded_sequence()`` can be called in the forward method of a model.
+Note the batch is now sorted by length and ``pack_padded_sequence()`` can be called in the forward method of a model.
 
 ### `packed_sequence()`
 
-The [`packed_sequence()`](torchtime.collate.packed_sequence) function returns `X` and `y` as PackedSequence objects within batches.
+Alternatively, the [`packed_sequence()`](torchtime.collate.packed_sequence) function returns `X` and `y` as PackedSequence objects within batches.
 
 ```
 from torch.utils.data import DataLoader
