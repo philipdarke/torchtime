@@ -161,12 +161,11 @@ class _TimeSeriesDataset(Dataset):
         """
         self.val_prop = val_prop
         self.missing = missing
-        self.categorical = [idx + time for idx in categorical]
+        self.categorical = categorical
         self.time = time
         self.mask = mask
         self.downscale = downscale
         self.seed = seed
-        self.n_channels = 0
         self.test_prop = 0
 
         # Constants
@@ -177,7 +176,7 @@ class _TimeSeriesDataset(Dataset):
             "forward": self._forward_imputation,
         }
 
-        # Validate impute argument
+        # Validate imputation arguments
         impute_options = self.IMPUTE_FUNCTIONS.keys()
         impute_error = "argument 'impute' must be a string in {} or a function".format(
             impute_options
@@ -189,6 +188,15 @@ class _TimeSeriesDataset(Dataset):
             imputer = impute
         else:
             raise Exception(impute_error)
+        if impute == "none" and (self.categorical != [] or override != {}):
+            print_message(
+                "No missing data imputation therefore any 'categorical' or 'override' arguments have been ignored",  # noqa: E501
+                type="error",
+            )
+            self.categorical = []
+            override = {}
+        assert type(categorical) is list, "argument 'categorical' must be a list"
+        assert type(override) is dict, "argument 'override' must be a dictionary"
 
         # Data splits
         assert (
@@ -228,9 +236,9 @@ class _TimeSeriesDataset(Dataset):
             self._simulate_missing(X_all)
 
         # 3. Add time stamp/mask/time delta channels
-        if time:
+        if self.time:
             X_all = torch.cat([self._time_stamp(X_all), X_all], dim=2)
-        if mask:
+        if self.mask:
             X_all = torch.cat([X_all, self._missing_mask(X_all)], dim=2)
         if delta:
             X_all = torch.cat([X_all, self._time_delta(X_all)], dim=2)
@@ -255,14 +263,31 @@ class _TimeSeriesDataset(Dataset):
         )
 
         # 5. Impute missing data (no missing values in time, mask and delta channels)
-        fill = torch.nanmean(torch.flatten(self.X_train, end_dim=1), 0)
-        train_modes = [
-            nan_mode(self.X_train[:, :, channel]) for channel in self.categorical
-        ]
-        for i, idx in enumerate(self.categorical):
-            fill[idx] = train_modes[i]  # fill with mode if categorical variable
-        for x, y in override.items():
-            fill[x + self.time] = y  # override fill values
+        fill = torch.nanmean(torch.flatten(self.X_train, end_dim=1), dim=0)
+        n_data_channels = int((len(fill) - self.time) / (1 + self.mask + delta) - 1)
+        # Impute using mode if categorical variable
+        if self.categorical != []:
+            self.categorical = [idx + time for idx in categorical]
+            assert (
+                max(categorical) <= n_data_channels
+            ), "indices in 'categorical' should be between 0 and {}".format(
+                n_data_channels
+            )
+            train_modes = [
+                nan_mode(self.X_train[:, :, channel]) for channel in self.categorical
+            ]
+            for i, idx in enumerate(self.categorical):
+                fill[idx] = train_modes[i]
+        # Override mean/mode if required
+        if override != {}:
+            for x, y in override.items():
+                assert (
+                    x <= n_data_channels
+                ), "indices in 'override' should be between 0 and {}".format(
+                    n_data_channels
+                )
+                fill[x + self.time] = y
+        # Impute data
         self.X_train, self.y_train = imputer(self.X_train, self.y_train, fill)
         self.X_val, self.y_val = imputer(self.X_val, self.y_val, fill)
         if self.test_prop > EPS:
