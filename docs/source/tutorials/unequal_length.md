@@ -2,9 +2,9 @@
 
 *This tutorial covers the `torchtime.data.UEA` class for data sets held in the UEA/UCR classification repository [[link]](https://www.timeseriesclassification.com/) however the examples also apply to other data sets with sequences of unequal length.*
 
-## Data structure
+## How unequal time series are handled
 
-The `length` of each sequence is provided as a tensor of shape (*n*). Some data sets, for example [CharacterTrajectories](http://timeseriesclassification.com/description.php?Dataset=CharacterTrajectories), feature sequences of unequal length.
+The length of each sequence is provided as a tensor of shape (*n*) in the attribute `length`. Some data sets, for example [CharacterTrajectories](http://timeseriesclassification.com/description.php?Dataset=CharacterTrajectories), feature sequences of unequal length:
 
 ```python
 from torch.utils.data import DataLoader
@@ -28,7 +28,7 @@ tensor([150, 136, 124, 108,  61, 157, 113, 133,  74, 121, 129, 138, 102, 130,
         106, 118, 138,  74])
 ```
 
-Sequences are padded with `NaNs` to the length of the longest sequence if the data set is of irregular length. For example, the first sequence in CharacterTrajectories:
+Sequences are padded with `NaNs` to the length of the longest sequence in order to form a tensor. For example, the first sequence in CharacterTrajectories:
 
 ```python
 from torch.utils.data import DataLoader
@@ -67,8 +67,8 @@ Note the time series has been padded with `NaNs` from *t* = 150.
 
 ## PackedSequence objects
 
-Data sets of variable length can be efficiently represented in PyTorch using a [`PackedSequence`](https://pytorch.org/docs/stable/generated/torch.nn.utils.rnn.PackedSequence.html) object. These are formed using
-[`pack_padded_sequence()`](https://pytorch.org/docs/stable/generated/torch.nn.utils.rnn.pack_padded_sequence.html#torch.nn.utils.rnn.pack_padded_sequence) which by default expects the input batch to be sorted in descending length. Two collate functions are provided to support the use of `PackedSequence` objects in models:
+Data sets of variable length can be efficiently represented in PyTorch using a [`PackedSequence`](https://pytorch.org/docs/stable/generated/torch.nn.utils.rnn.PackedSequence.html) object. These are formed using 
+[`torch.nn.utils.rnn.pack_padded_sequence()`](https://pytorch.org/docs/stable/generated/torch.nn.utils.rnn.pack_padded_sequence.html#torch.nn.utils.rnn.pack_padded_sequence) which by default expects the input batch to be sorted in descending length. Two collate functions are provided in `torchtime` to support the use of `PackedSequence` objects in models:
 
 * [`sort_by_length()`](torchtime.collate.sort_by_length) sorts each batch by descending length.
 
@@ -110,7 +110,7 @@ tensor([157, 151, 151, 150, 138, 138, 136, 135, 133, 130, 129, 129, 127, 126,
          83,  74,  74,  61])
 ```
 
-Note the batch is now sorted by length and ``pack_padded_sequence()`` can be called in the forward method of a model.
+Note the batch is now sorted by length and ``torch.nn.utils.rnn.pack_padded_sequence()`` can be called in the forward method of a model.
 
 ### `packed_sequence()`
 

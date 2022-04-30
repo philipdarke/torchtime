@@ -54,6 +54,7 @@ class TestTensorTimeSeriesDataset:
         assert dataset.length_val.shape == torch.Size([370])
 
     def test_imputation_validation_1(self):
+        """Test validation of ``categorical`` argument."""
         X = torch.tensor(
             [
                 [
@@ -122,6 +123,7 @@ class TestTensorTimeSeriesDataset:
             )
 
     def test_imputation_validation_2(self):
+        """Test validation of ``override`` argument."""
         X = torch.tensor(
             [
                 [

@@ -8,7 +8,7 @@ Most UEA/UCR data sets are regularly sampled and fully observed. However we ofte
 
 ```{eval-rst}
 .. note::
-   Data are dropped at random. The ``missing`` argument is the probability that data are missing. Results can be reproduced using the ``seed`` argument.
+   Data points are dropped independently at random. The ``missing`` argument represents the probability that a data point is missing. Results can be reproduced using the ``seed`` argument.
 ```
 
 ### Regularly sampled data with missing time points
@@ -23,7 +23,7 @@ char_traj = UEA(
     dataset="CharacterTrajectories",
     split="train",
     train_prop=0.7,
-    missing=0.5,  # 50% missing
+    missing=0.5,  # 50% proportion missing assumption
     seed=123,
 )
 dataloader = DataLoader(char_traj, batch_size=32)
@@ -57,7 +57,7 @@ char_traj = UEA(
     dataset="CharacterTrajectories",
     split="train",
     train_prop=0.7,
-    missing=[0.8, 0.2, 0.5],  # 80/20/50% missing respectively
+    missing=[0.8, 0.2, 0.5],  # 80/20/50% proportion missing assumption for each channel
     seed=123,
 )
 dataloader = DataLoader(char_traj, batch_size=32)
@@ -83,7 +83,7 @@ Note that each time point has a varying number of observations.
 
 ## Missing data masks
 
-In some applications, the presence (or absence) of data can itself be informative. For example, a doctor may be more likely to order a particular diagnostic test if they believe the patient has a medical condition. Missing data/observational masks can be used to inform models of missing data. These are appended by setting `mask` to `True`.
+In some applications, the absence/presence of data can itself be informative. For example, a doctor may be more likely to order a particular diagnostic test if they believe the patient has a medical condition. Missing data/observational masks can be used to inform models of missing data. These are appended by setting the `mask` argument to `True`.
 
 ```python
 from torch.utils.data import DataLoader
@@ -194,13 +194,18 @@ tensor([[    nan,  0.1978,  0.3263,  0.0000,  1.0000,  1.0000,  0.0000,  0.0000,
 
 Note the initial time channel is not returned but the missing data and time delta channels are appended to the data.
 
+```{eval-rst}
+.. note::
+   The channel order is always *time stamp* (if specified), *time series*, *missing data mask* (if specified) and *time delta* (if specified). The time stamp is one channel, and the time series, missing data mask and time delta each have the same number of channels as the time series.
+```
+
 ## Imputing missing data
 
 Missing data can be imputed using the `impute` argument. `torchtime` currently supports mean and forward imputation as well as custom imputation functions.
 
 ```{eval-rst}
-.. note::
-   Imputation has no impact on the missing data mask or time delta channels!
+.. warning::
+   By design, imputation has no impact on the missing data mask or time delta channels!
 ```
 
 ### Mean imputation
@@ -280,15 +285,29 @@ tensor([[ 0.0000,  0.1163,  0.1978,  0.3263],
    ``torchtime.impute`` includes imputation functions for tensors with missing data. See the `API <../api/impute.html>`_ for more information.
 ```
 
+### Handling categorical variables
+
+The mean and forward imputation options above assume all variables are continuous. To impute missing values for a categorical variable using the channel mode (rather than the channel mean), pass the channel indices for each categorical channel in a list to the `categorical` argument.
+
+For additional flexibility, the calculated channel mean/mode can be overridden using the `override` argument. This accepts a dictionary as in the example below and can be used to impute missing data with a fixed value.
+
+For example, assuming mean imputation is used for a data set with 10 channels where the 2nd and 8th are categorical:
+
+1. The `categorical` argument should be `[1, 7]` as channels are indexed from zero.
+
+2. To replace missing values in the 5th channel with a value of 100 rather than the channel mean, pass the dictionary `{4: 100}` to the `override` argument.
+
+For a real-world example see the [implementation](https://philipdarke.com/torchtime/_modules/torchtime/data.html#PhysioNet2012) of the PhysioNet2012 data set, where channel 20 (MechVent) is categorical (i.e. yes or no) with an overridden mode of zero.
+
 ### Custom imputation functions
 
-Alternatively a custom imputation function can be passed to ``impute``. This must accept ``X`` and ``y`` tensors with the raw time series and labels respectively and return both tensors post imputation.
+Alternatively a custom imputation function can be passed to `impute`. This must accept `X` (raw time series), `y` (labels) and `fill` (training data means/modes for each channel after overriding values as above) tensors and return `X` and `y` tensors post imputation.
 
 ```python
 from torch.utils.data import DataLoader
 from torchtime.data import UEA
 
-def zero_imputation(X, y):
+def zero_imputation(X, y, fill):
     """Set missing values to 0."""
     return X.nan_to_num(0), y.nan_to_num(0)
 

@@ -14,6 +14,7 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx_autodoc_typehints",
     "sphinx.ext.viewcode",
+    "sphinx.ext.doctest",
 ]
 exclude_patterns = ["_build"]
 

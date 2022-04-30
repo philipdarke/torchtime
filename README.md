@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/github/license/philipdarke/torchtime.svg)](https://github.com/philipdarke/torchtime/blob/main/LICENSE)
 [![DOI](https://zenodo.org/badge/475093888.svg)](https://zenodo.org/badge/latestdoi/475093888)
 
-Ready-to-go PyTorch data sets for supervised time series prediction problems. `torchtime` currently supports:
+Benchmark PyTorch data sets for supervised time series classification and prediction problems. `torchtime` currently supports:
 
 * All data sets in the UEA/UCR classification repository [[link]](https://www.timeseriesclassification.com/)
 
@@ -60,11 +60,15 @@ next_batch["length"].shape  # torch.Size([32])
 
 * Missing data can be imputed by setting `impute` to *mean* (replace with training data channel means) or *forward* (replace with previous observation). Alternatively a custom imputation function can be used.
 
-* A time stamp, missing data mask and the time since previous observation can be appended with the boolean arguments ``time``, ``mask`` and ``delta`` respectively.
+* A time stamp (added by default), missing data mask and the time since previous observation can be appended with the boolean arguments ``time``, ``mask`` and ``delta`` respectively.
 
 * For reproducibility, an optional random `seed` can be specified.
 
-Most UEA/UCR data sets are regularly sampled and fully observed. Missing data can be simulated using the `missing` argument to drop data at random from UEA/UCR data sets. See the [tutorials](https://philipdarke.com/torchtime/tutorials/) and [API](https://philipdarke.com/torchtime/api/) for more information.
+Missing data can be simulated using the `missing` argument to drop data at random from UEA/UCR data sets. See the [tutorials](https://philipdarke.com/torchtime/tutorials/) and [API](https://philipdarke.com/torchtime/api/) for more information.
+
+## Other resources
+
+If you're looking for the TensorFlow equivalent for PhysioNet data sets try [medical_ts_datasets](https://github.com/ExpectationMax/medical_ts_datasets).
 
 ## Acknowledgements
 

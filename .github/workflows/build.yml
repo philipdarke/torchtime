@@ -32,7 +32,7 @@ jobs:
         run: python3 -m poetry run pytest -v --cov=torchtime --cov-report=xml
       - name: Build documentation
         run: |
-          python3 -m poetry run make html --directory docs/
+          python3 -m poetry run make doctest html --directory docs/
           python3 -m poetry run genbadge coverage -v -i coverage.xml -o docs/_build/html/assets/coverage-badge.svg
       - name: Update GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
