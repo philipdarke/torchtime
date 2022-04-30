@@ -4,6 +4,7 @@ The following data sets are available:
 
 * [PhysioNet2012](torchtime.data.PhysioNet2012)
 * [PhysioNet2019](torchtime.data.PhysioNet2019)
+* [PhysioNet2019Binary](torchtime.data.PhysioNet2019Binary)
 * [UEA](torchtime.data.UEA)
 
 Alternatively, a data set can be created from `X`, `y` and `length` tensors using the [TensorTimeSeriesDataset](torchtime.data.TensorTimeSeriesDataset) class.

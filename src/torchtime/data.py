@@ -309,18 +309,21 @@ class _TimeSeriesDataset(Dataset):
             self.y = self.y_val
             self.length = self.length_val
 
-    def _no_imputation(self, X, y, _):
+    @staticmethod
+    def _no_imputation(X, y, _):
         """No imputation."""
         return X, y
 
-    def _mean_imputation(self, X, y, fill):
+    @staticmethod
+    def _mean_imputation(X, y, fill):
         """Mean imputation. Replace missing values in ``X`` from ``fill``. Replace
         missing values in ``y`` with zeros."""
         X_imputed = replace_missing(X, fill=fill)
         y_imputed = replace_missing(y, fill=torch.zeros(y.size(-1)))
         return X_imputed, y_imputed
 
-    def _forward_imputation(self, X, y, fill):
+    @staticmethod
+    def _forward_imputation(X, y, fill):
         """Forward imputation. Replace missing values with previous observation. Replace
         any initial missing values in ``X`` from ``fill``. Assume no missing initial
         values in ``y`` but there may be trailing missing values due to padding."""
@@ -382,7 +385,8 @@ class _TimeSeriesDataset(Dataset):
                     idx = sample_indices(length, rate, generator)
                     Xi[idx, channel] = float("nan")
 
-    def _time_stamp(self, X):
+    @staticmethod
+    def _time_stamp(X):
         """Calculate time stamp."""
         time_stamp = torch.arange(X.size(1)).unsqueeze(0)
         time_stamp = time_stamp.tile((X.size(0), 1)).unsqueeze(2)
@@ -776,8 +780,7 @@ class PhysioNet2012(_TimeSeriesDataset):
             Note that PhysioNet trajectories are of unequal length and are therefore
             padded with ``NaNs`` to the length of the longest trajectory in the data.
         y (Tensor): In-hospital survival (the ``In-hospital_death`` variable) for each
-            participant. *y* = 1 indicates an in-hospital death. A tensor of shape
-            (*n*, 1).
+            patient. *y* = 1 indicates an in-hospital death. A tensor of shape (*n*, 1).
         length (Tensor): Length of each trajectory prior to padding. A tensor of shape
             (*n*).
 
@@ -806,7 +809,7 @@ class PhysioNet2012(_TimeSeriesDataset):
         seed: int = None,
     ) -> None:
         print_message(
-            "PhysioNet 2012: https://physionet.org/files/challenge-2012/1.0.0/",
+            "PhysioNet2012(): https://physionet.org/files/challenge-2012/1.0.0/",
             type="info",
         )
         self.DATASETS = {
@@ -906,7 +909,8 @@ class PhysioNet2012(_TimeSeriesDataset):
         length = torch.tensor(length)
         return X, y, length
 
-    def _get_lengths(self, data_directories, data_files):
+    @staticmethod
+    def _get_lengths(data_directories, data_files):
         """Get length of each time series."""
         lengths = []
         for i, files in enumerate(data_files):
@@ -921,7 +925,8 @@ class PhysioNet2012(_TimeSeriesDataset):
                     lengths.append(len(lengths_j))
         return lengths
 
-    def _process_files(self, directory, files, max_length, channels):
+    @staticmethod
+    def _process_files(directory, files, max_length, channels):
         """Process .txt files."""
         X = np.full((len(files), max_length, len(channels)), float("nan"))
         template_dataframe = pd.DataFrame(columns=channels)
@@ -941,7 +946,8 @@ class PhysioNet2012(_TimeSeriesDataset):
                 # TODO: only include time 0 if a weight is provided
         return torch.tensor(X)
 
-    def _get_labels(self, outcome_files, data_files):
+    @staticmethod
+    def _get_labels(outcome_files, data_files):
         """Process outcome files."""
         y = []
         for i, file_i in enumerate(outcome_files):
@@ -1054,7 +1060,7 @@ class PhysioNet2019(_TimeSeriesDataset):
         seed: int = None,
     ) -> None:
         print_message(
-            "PhysioNet 2019: https://physionet.org/files/challenge-2019/1.0.0/",
+            "PhysioNet2019(): https://physionet.org/files/challenge-2019/1.0.0/",
             type="info",
         )
         self.DATASETS = {
@@ -1077,7 +1083,6 @@ class PhysioNet2019(_TimeSeriesDataset):
 
     def _get_data(self):
         """Download data and form X, y, length tensors."""
-        all_data = [None for _ in self.DATASETS]
         # Download and extract data
         physionet_download(self.DATASETS, self.PATH)
         # Prepare data
@@ -1085,19 +1090,22 @@ class PhysioNet2019(_TimeSeriesDataset):
         data_directories = [self.PATH / dataset for dataset in self.DATASETS]
         data_files = get_file_list(data_directories, self.downscale, self.seed)
         length, channels = self._get_lengths_channels(data_directories, data_files)
+        all_X = [None for _ in self.DATASETS]
+        all_y = [None for _ in self.DATASETS]
         for i, files in enumerate(data_files):
-            all_data[i] = self._process_files(
-                data_directories[i], data_files[i], max(length), channels
+            all_X[i], all_y[i] = self._process_files(
+                data_directories[i], files, max(length), channels
             )
         # Form tensors
-        X = torch.cat(all_data)
+        X = torch.cat(all_X)
+        y = torch.cat(all_y)
         length = torch.tensor(length)
-        y = X[:, :, -1].unsqueeze(2)
-        X = X[:, :, :-1]
         return X, y, length
 
-    def _get_lengths_channels(self, data_directories, data_files):
-        """Get length of each time series and number of channels."""
+    @staticmethod
+    def _get_lengths_channels(data_directories, data_files, max_time=None):
+        """Get length of each time series and number of channels. Time series can be
+        truncated at a specific hour with the ``max_time`` argument."""
         lengths = []  # sequence lengths
         channels = []  # number of channels
         for i, files in enumerate(data_files):
@@ -1105,26 +1113,208 @@ class PhysioNet2019(_TimeSeriesDataset):
                 with open(data_directories[i] / file_j) as file:
                     reader = csv.reader(file, delimiter="|")
                     lengths_j = []
-                    for k, row in enumerate(reader):
-                        if k == 0:
-                            channels.append(len(row))
-                        else:
-                            lengths_j.append(1)
+                    for k, Xijk in enumerate(reader):
+                        channels.append(len(Xijk))
+                        if k > 0:  # ignore header
+                            if max_time:
+                                if int(Xijk[39]) <= max_time:
+                                    lengths_j.append(1)
+                            else:
+                                lengths_j.append(1)
                     lengths.append(sum(lengths_j))
         channels = list(set(channels))
         assert len(channels) == 1, "corrupt file, delete data and re-run"
         return lengths, channels[0]
 
-    def _process_files(self, directory, files, max_length, channels):
+    @staticmethod
+    def _process_files(directory, files, max_length, channels):
         """Process .psv files."""
-        X = np.full((len(files), max_length, channels), float("nan"))
+        X = np.full((len(files), max_length, channels - 1), float("nan"))
+        y = np.full((len(files), max_length, 1), float("nan"))
         for i, file_i in enumerate(files):
             with open(directory / file_i) as file:
                 reader = csv.reader(file, delimiter="|")
                 for j, Xij in enumerate(reader):
                     if j > 0:  # ignore header
-                        X[i, j - 1] = Xij
-        return torch.tensor(X)
+                        X[i, j - 1] = Xij[:-1]
+                        y[i, j - 1, 0] = Xij[-1]
+        return torch.tensor(X), torch.tensor(y)
+
+
+class PhysioNet2019Binary(_TimeSeriesDataset):
+    """**Returns simplified binary prediction version of the PhysioNet Challenge 2019
+    data as a PyTorch Dataset.**
+
+    In contrast with the full challenge, the first 72 hours of data are used to predict
+    whether a patient develops sepsis at any point during the period of hospitalisation
+    as in `Kidger et al (2020) <https://arxiv.org/abs/2005.08926>`_.
+
+    See the PhysioNet `website <https://physionet.org/content/challenge-2019/1.0.0/>`_
+    for a description of the data set.
+
+    The proportion of data in the training, validation and (optional) test data sets are
+    specified by the ``train_prop`` and ``val_prop`` arguments. For a
+    training/validation split specify ``train_prop`` only. For a
+    training/validation/test split specify both ``train_prop`` and ``val_prop``. For
+    example ``train_prop=0.8`` generates a 80/20% train/validation split, but
+    ``train_prop=0.8``, ``val_prop=0.1`` generates a 80/10/10% train/validation/test
+    split. Splits are formed using stratified sampling.
+
+    The ``split`` argument determines which data set is returned.
+
+    Missing data are imputed using the ``impute`` argument. *mean* imputation replaces
+    missing values with the training data channel mean. *forward* imputation replaces
+    missing values with the previous observation. Alternatively a custom imputation
+    function can be passed to ``impute``. This must accept ``X`` (raw time series),
+    ``y`` (labels) and ``fill`` (channel means/modes) tensors and return ``X`` and ``y``
+    tensors post imputation.
+
+    The ``time``, ``mask`` and ``delta`` arguments append additional channels. By
+    default, a time stamp is added as the first channel. ``mask`` adds a missing data
+    mask and ``delta`` adds the time since the previous observation for each channel.
+    Time deltas are calculated as in `Che et al (2018)
+    <https://doi.org/10.1038/s41598-018-24271-9>`_.
+
+    Processed data are cached in the ``./.torchtime/physionet2019`` directory by
+    default. The location can be changed with the ``path`` argument, for example to
+    share a single cache location across projects.
+
+    .. note::
+        When passed to a PyTorch DataLoader, batches are a named dictionary with ``X``,
+        ``y`` and ``length`` data.
+
+    Args:
+        split: The data split to return, either *train*, *val* (validation) or *test*.
+        train_prop: Proportion of data in the training set.
+        val_prop: Proportion of data in the validation set (optional, see above).
+        impute: Method used to impute missing data, either *none*, *mean*, *forward* or
+            a custom imputer function (default "none").
+        time: Append time stamp in the first channel (default True).
+        mask: Append missing data mask channels (default False).
+        delta: Append time delta channels (default False).
+        downscale: The proportion of data to return. Use to reduce the size of the data
+            set when testing a model (default 1).
+        path: Location of the ``.torchtime`` cache directory (default ".").
+        seed: Random seed for reproducibility (optional).
+
+    Attributes:
+        X (Tensor): A tensor of default shape (*n*, *s*, *c* + 1) where *n* = number of
+            trajectories, *s* = (maximum) trajectory length and *c* = number of channels
+            in the PhysioNet data (*including* the ``ICULOS`` time stamp). The channels
+            are ordered as set out on the PhysioNet `website
+            <https://physionet.org/content/challenge-2019/1.0.0/>`_. By default, a
+            time stamp is appended as the first channel. If ``time`` is False, the
+            time stamp is omitted and the tensor has shape (*n*, *s*, *c*).
+
+            A missing data mask and/or time delta channels can be appended with the
+            ``mask`` and ``delta`` arguments. These each have the same number of
+            channels as the Physionet data. For example, if ``time``, ``mask`` and
+            ``delta`` are all True, ``X`` has shape (*n*, *s*, 3 * *c* + 1 = 121) and
+            the channels are in the order: time stamp, time series, missing data mask,
+            time deltas.
+
+            Note that PhysioNet trajectories are of unequal length and are therefore
+            padded with ``NaNs`` to the length of the longest trajectory in the data.
+        y (Tensor): Whether patient is diagnosed with sepsis at any time during
+            hospitalisation. A tensor of shape (*n*, 1).
+        length (Tensor): Length of each trajectory prior to padding. A tensor of shape
+            (*n*).
+
+    .. note::
+        ``X``, ``y`` and ``length`` are available for the training, validation and test
+        splits by appending ``_train``, ``_val`` and ``_test`` respectively. For
+        example, ``y_val`` returns the labels for the validation data set. These
+        attributes are available regardless of the ``split`` argument.
+
+    Returns:
+        torch.utils.data.Dataset: A PyTorch Dataset object which can be passed to a
+        DataLoader.
+    """
+
+    def __init__(
+        self,
+        split: str,
+        train_prop: float,
+        val_prop: float = None,
+        impute: Union[str, Callable[[Tensor], Tensor]] = "none",
+        time: bool = True,
+        mask: bool = False,
+        delta: bool = False,
+        downscale: float = 1.0,
+        path: str = ".",
+        seed: int = None,
+    ) -> None:
+        print_message(
+            "PhysioNet2019Binary(): https://physionet.org/files/challenge-2019/1.0.0/",
+            type="info",
+        )
+        self.DATASETS = {
+            "training": "https://archive.physionet.org/users/shared/challenge-2019/training_setA.zip",  # noqa: E501
+            "training_setB": "https://archive.physionet.org/users/shared/challenge-2019/training_setB.zip",  # noqa: E501
+        }
+        self.path = path
+        self.max_time = 72  # hours
+        super(PhysioNet2019Binary, self).__init__(
+            dataset="physionet2019binary",
+            split=split,
+            train_prop=train_prop,
+            val_prop=val_prop,
+            impute=impute,
+            time=time,
+            mask=mask,
+            delta=delta,
+            downscale=downscale,
+            path=path,
+            seed=seed,
+        )
+
+    def _get_data(self):
+        """Download data and form X, y, length tensors."""
+        # Download and extract data in "physionet2019" directory to avoid duplication
+        self.PATH = pathlib.Path() / self.path / ".torchtime" / "physionet2019"
+        physionet_download(self.DATASETS, self.PATH)
+        # Prepare data
+        print_message("Processing data...")
+        data_directories = [self.PATH / dataset for dataset in self.DATASETS]
+        data_files = get_file_list(data_directories, self.downscale, self.seed)
+        length, channels = PhysioNet2019._get_lengths_channels(
+            data_directories, data_files, max_time=self.max_time
+        )
+
+        print([i for i, x in enumerate(length) if x == 0])
+
+        all_X = [None for _ in self.DATASETS]
+        all_y = [None for _ in self.DATASETS]
+        for i, files in enumerate(data_files):
+            all_X[i], all_y[i] = self._process_files(
+                data_directories[i], files, max(length), channels
+            )
+        # Form tensors
+        X = torch.cat(all_X)
+        y = torch.cat(all_y)
+        length = torch.tensor(length)
+        # Drop patients with zero length sequences
+        patient_index = torch.arange(X.size(0)).masked_select(length != 0).int()
+        X = X.index_select(index=patient_index, dim=0)
+        y = y.index_select(index=patient_index, dim=0)
+        length = length.index_select(index=patient_index, dim=0)
+        # Save cached files to "physionet2019binary" directory
+        self.PATH = pathlib.Path() / self.path / ".torchtime" / "physionet2019binary"
+        return X, y, length
+
+    def _process_files(self, directory, files, max_length, channels):
+        """Process .psv files."""
+        X = np.full((len(files), max_length, channels - 1), float("nan"))
+        y = np.full((len(files), 1), 0.0)
+        for i, file_i in enumerate(files):
+            with open(directory / file_i) as file:
+                reader = csv.reader(file, delimiter="|")
+                for j, Xij in enumerate(reader):
+                    if j > 0:  # ignore header
+                        if int(Xij[39]) <= self.max_time:
+                            X[i, j - 1] = Xij[:-1]
+                        y[i, 0] = max(y[i, 0], int(Xij[-1]))  # sepsis at any point
+        return torch.tensor(X), torch.tensor(y)
 
 
 class UEA(_TimeSeriesDataset):
@@ -1256,9 +1446,9 @@ class UEA(_TimeSeriesDataset):
         seed: int = None,
     ) -> None:
         print_message(
-            "UEA/UCR "
+            "UEA(dataset="
             + dataset
-            + ": https://www.timeseriesclassification.com/description.php?Dataset="
+            + "): https://www.timeseriesclassification.com/description.php?Dataset="
             + dataset,
             type="info",
         )
