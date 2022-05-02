@@ -454,13 +454,13 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([200, 182, 4])
+        assert dataset.X_train.shape == torch.Size([200, 164, 4])
         assert dataset.y_train.shape == torch.Size([200, 20])
         assert dataset.length_train.shape == torch.Size([200])
-        assert dataset.X_val.shape == torch.Size([57, 182, 4])
+        assert dataset.X_val.shape == torch.Size([57, 164, 4])
         assert dataset.y_val.shape == torch.Size([57, 20])
         assert dataset.length_val.shape == torch.Size([57])
-        assert dataset.X_test.shape == torch.Size([28, 182, 4])
+        assert dataset.X_test.shape == torch.Size([28, 164, 4])
         assert dataset.y_test.shape == torch.Size([28, 20])
         assert dataset.length_test.shape == torch.Size([28])
 

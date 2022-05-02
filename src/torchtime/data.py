@@ -359,11 +359,6 @@ class _TimeSeriesDataset(Dataset):
         create a data set class."""
         raise NotImplementedError
 
-    def _downscale(self, X, y, length, proportion):
-        """Reduce size of data set."""
-        idx = sample_indices(X.size(0), proportion, seed=self.seed)
-        return X[idx], y[idx], length[idx]
-
     def _simulate_missing(self, X):
         """Simulate missing data by modifying X in place."""
         length = X.size(1)
@@ -1472,10 +1467,14 @@ class UEA(_TimeSeriesDataset):
         )
 
     def _get_data(self):
-        """Download data and form X, y, length tensors."""
+        """Download data and form ``X``, ``y`` and ``length`` tensors."""
         X_raw, y_raw = load_UCR_UEA_dataset(self.dataset)
-        # Length of each trajectory
         print_message("Processing data...")
+        if self.downscale < (1.0 - EPS):
+            idx = sample_indices(len(X_raw), self.downscale, seed=self.seed)
+            X_raw = X_raw.iloc[idx]
+            y_raw = y_raw[idx]
+        # Length of each trajectory
         channel_lengths = X_raw.apply(lambda Xi: Xi.apply(len), axis=1)
         length = torch.tensor(channel_lengths.apply(max, axis=1).values)
         self.max_length = length.max()
@@ -1489,8 +1488,6 @@ class UEA(_TimeSeriesDataset):
         if all(y != 0):
             y -= 1
         y = F.one_hot(y)
-        if self.downscale < (1.0 - EPS):
-            X, y, length = self._downscale(X, y, length, self.downscale)
         return X, y, length
 
     def _pad(self, Xi):
