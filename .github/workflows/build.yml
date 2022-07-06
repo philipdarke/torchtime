@@ -32,7 +32,8 @@ jobs:
         run: |
           python3 -m poetry run make doctest html --directory docs/
           python3 -m poetry run genbadge coverage -v -i coverage.xml -o docs/_build/html/assets/coverage-badge.svg
-      - uses: actions/upload-artifact@master
+      - name: Upload code coverage
+        uses: actions/upload-artifact@master
         with:
           name: coverage
           path: coverage.xml
@@ -56,7 +57,7 @@ jobs:
       - name: Install package and dependencies
         run: python3 -m poetry install
       - name: Get code coverage
-      - uses: actions/download-artifact@master
+        uses: actions/download-artifact@master
         with:
           name: coverage
       - name: Build documentation
