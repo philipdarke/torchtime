@@ -3,15 +3,18 @@ import re
 import pytest
 import torch
 
+from torchtime.constants import OBJ_EXT
 from torchtime.data import PhysioNet2012
+from torchtime.utils import _get_SHA256
 
-DOWNSCALE = 0.01
 SEED = 456789
 RTOL = 1e-4
 ATOL = 1e-4
 
 
 class TestPhysioNet2012:
+    """Test PhysioNet2012 class."""
+
     def test_invalid_split_arg(self):
         """Catch invalid split argument."""
         with pytest.raises(
@@ -21,7 +24,6 @@ class TestPhysioNet2012:
             PhysioNet2012(
                 split="xyz",
                 train_prop=0.8,
-                downscale=DOWNSCALE,
                 seed=SEED,
             )
 
@@ -34,7 +36,6 @@ class TestPhysioNet2012:
             PhysioNet2012(
                 split="train",
                 train_prop=-0.5,
-                downscale=DOWNSCALE,
                 seed=SEED,
             )
 
@@ -47,36 +48,56 @@ class TestPhysioNet2012:
             PhysioNet2012(
                 split="train",
                 train_prop=1,
-                downscale=DOWNSCALE,
                 seed=SEED,
             )
+        new_prop = 0.5
         with pytest.raises(
             AssertionError,
-            match=re.escape("argument 'val_prop' must be in range (0, 1-train_prop)"),
+            match=re.escape(
+                "argument 'val_prop' must be in range (0, {})".format(1 - new_prop)
+            ),
         ):
             PhysioNet2012(
                 split="test",
-                train_prop=0.5,
-                val_prop=0.5,
-                downscale=DOWNSCALE,
+                train_prop=new_prop,
+                val_prop=new_prop,
                 seed=SEED,
             )
+
+    def test_load_data(self):
+        """Validate data set."""
+        PhysioNet2012(
+            split="train",
+            train_prop=0.7,
+            seed=SEED,
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2012/X" + OBJ_EXT)
+            == "5c43fe40228ec6bd0122661e9ac48ad7cbdaf0778970cf9f81a5c3ac5ff67ab5"
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2012/y" + OBJ_EXT)
+            == "5b9bf1f58ff02e04397f68ae776fc519e20cae6e66a632b01fa309693c3de3e9"
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2012/length" + OBJ_EXT)
+            == "d4dbf3d19e9f03618f3113c57c5950031c22bad75c80744438e3121b1cff2204"
+        )
 
     def test_train_val(self):
         """Test training/validation split sizes."""
         dataset = PhysioNet2012(
             split="train",
             train_prop=0.7,
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([84, 153, 43])
-        assert dataset.y_train.shape == torch.Size([84, 1])
-        assert dataset.length_train.shape == torch.Size([84])
-        assert dataset.X_val.shape == torch.Size([36, 153, 43])
-        assert dataset.y_val.shape == torch.Size([36, 1])
-        assert dataset.length_val.shape == torch.Size([36])
+        assert dataset.X_train.shape == torch.Size([8400, 215, 43])
+        assert dataset.y_train.shape == torch.Size([8400, 1])
+        assert dataset.length_train.shape == torch.Size([8400])
+        assert dataset.X_val.shape == torch.Size([3600, 215, 43])
+        assert dataset.y_val.shape == torch.Size([3600, 1])
+        assert dataset.length_val.shape == torch.Size([3600])
         # Ensure no test data is returned
         with pytest.raises(
             AttributeError,
@@ -100,19 +121,18 @@ class TestPhysioNet2012:
             split="train",
             train_prop=0.7,
             val_prop=0.2,
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([84, 153, 43])
-        assert dataset.y_train.shape == torch.Size([84, 1])
-        assert dataset.length_train.shape == torch.Size([84])
-        assert dataset.X_val.shape == torch.Size([24, 153, 43])
-        assert dataset.y_val.shape == torch.Size([24, 1])
-        assert dataset.length_val.shape == torch.Size([24])
-        assert dataset.X_test.shape == torch.Size([12, 153, 43])
-        assert dataset.y_test.shape == torch.Size([12, 1])
-        assert dataset.length_test.shape == torch.Size([12])
+        assert dataset.X_train.shape == torch.Size([8400, 215, 43])
+        assert dataset.y_train.shape == torch.Size([8400, 1])
+        assert dataset.length_train.shape == torch.Size([8400])
+        assert dataset.X_val.shape == torch.Size([2400, 215, 43])
+        assert dataset.y_val.shape == torch.Size([2400, 1])
+        assert dataset.length_val.shape == torch.Size([2400])
+        assert dataset.X_test.shape == torch.Size([1200, 215, 43])
+        assert dataset.y_test.shape == torch.Size([1200, 1])
+        assert dataset.length_test.shape == torch.Size([1200])
 
     def test_train_split(self):
         """Test training split is returned."""
@@ -120,7 +140,6 @@ class TestPhysioNet2012:
             split="train",
             train_prop=0.7,
             val_prop=0.2,
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         # Check correct split is returned
@@ -134,7 +153,6 @@ class TestPhysioNet2012:
             split="val",
             train_prop=0.7,
             val_prop=0.2,
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         # Check correct split is returned
@@ -148,7 +166,6 @@ class TestPhysioNet2012:
             split="test",
             train_prop=0.7,
             val_prop=0.2,
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         # Check correct split is returned
@@ -163,7 +180,6 @@ class TestPhysioNet2012:
             train_prop=0.7,
             val_prop=0.2,
             time=False,
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         for i, Xi in enumerate(dataset.X_train.unbind()):
@@ -184,27 +200,25 @@ class TestPhysioNet2012:
         with pytest.raises(
             AssertionError,
             match=re.escape(
-                "argument 'impute' must be a string in dict_keys(['none', 'mean', 'forward']) or a function"  # noqa: E501
+                "argument 'impute' must be a string in ['none', 'mean', 'forward'] or a function"  # noqa: E501
             ),
         ):
             PhysioNet2012(
                 split="train",
                 train_prop=0.7,
                 impute="blah",
-                downscale=DOWNSCALE,
                 seed=SEED,
             )
         with pytest.raises(
             Exception,
             match=re.escape(
-                "argument 'impute' must be a string in dict_keys(['none', 'mean', 'forward']) or a function"  # noqa: E501
+                "argument 'impute' must be a string in ['none', 'mean', 'forward'] or a function"  # noqa: E501
             ),
         ):
             PhysioNet2012(
                 split="train",
                 train_prop=0.7,
                 impute=3,
-                downscale=DOWNSCALE,
                 seed=SEED,
             )
 
@@ -215,13 +229,12 @@ class TestPhysioNet2012:
             train_prop=0.7,
             val_prop=0.2,
             impute="none",
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         # Check number of NaNs
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 479274
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 133933
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 68629
+        assert torch.sum(torch.isnan(dataset.X_train)).item() == 69319622
+        assert torch.sum(torch.isnan(dataset.X_val)).item() == 19808408
+        assert torch.sum(torch.isnan(dataset.X_test)).item() == 9910198
 
     def test_mean_impute(self):
         """Test mean imputation."""
@@ -230,7 +243,6 @@ class TestPhysioNet2012:
             train_prop=0.7,
             val_prop=0.2,
             impute="mean",
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         # Check no NaNs post imputation
@@ -248,7 +260,6 @@ class TestPhysioNet2012:
             train_prop=0.7,
             val_prop=0.2,
             impute="forward",
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         # Check no NaNs post imputation
@@ -259,25 +270,41 @@ class TestPhysioNet2012:
         assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
-    def test_custom_impute(self):
+    def test_custom_imputation_1(self):
         """Test custom imputation function."""
 
-        def custom_imputer(X, y, fill):
-            """Does not impute data i.e. same as impute='none'"""
+        def impute_with_zero(X, y, fill, select):
+            return X.nan_to_num(0), y.nan_to_num(0)
+
+        dataset = PhysioNet2012(
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            impute=impute_with_zero,
+            seed=SEED,
+        )
+        # Check number of NaNs
+        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
+
+    def test_custom_imputation_2(self):
+        """Test custom imputation function."""
+
+        def no_imputation(X, y, fill, select):
             return X, y
 
         dataset = PhysioNet2012(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
-            impute=custom_imputer,
-            downscale=DOWNSCALE,
+            impute=no_imputation,
             seed=SEED,
         )
         # Check number of NaNs
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 479274
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 133933
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 68629
+        assert torch.sum(torch.isnan(dataset.X_train)).item() == 69319622
+        assert torch.sum(torch.isnan(dataset.X_val)).item() == 19808408
+        assert torch.sum(torch.isnan(dataset.X_test)).item() == 9910198
 
     def test_time(self):
         """Test time argument."""
@@ -286,26 +313,25 @@ class TestPhysioNet2012:
             train_prop=0.7,
             val_prop=0.2,
             time=True,
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([84, 153, 43])
-        assert dataset.X_val.shape == torch.Size([24, 153, 43])
-        assert dataset.X_test.shape == torch.Size([12, 153, 43])
+        assert dataset.X_train.shape == torch.Size([8400, 215, 43])
+        assert dataset.X_val.shape == torch.Size([2400, 215, 43])
+        assert dataset.X_test.shape == torch.Size([1200, 215, 43])
         # Check time channel
-        for i in range(153):
+        for i in range(215):
             assert torch.equal(
                 dataset.X_train[:, i, 0],
-                torch.full([84], fill_value=i, dtype=torch.float),
+                torch.full([8400], fill_value=i, dtype=torch.float),
             )
             assert torch.equal(
                 dataset.X_val[:, i, 0],
-                torch.full([24], fill_value=i, dtype=torch.float),
+                torch.full([2400], fill_value=i, dtype=torch.float),
             )
             assert torch.equal(
                 dataset.X_test[:, i, 0],
-                torch.full([12], fill_value=i, dtype=torch.float),
+                torch.full([1200], fill_value=i, dtype=torch.float),
             )
 
     def test_no_time(self):
@@ -315,13 +341,12 @@ class TestPhysioNet2012:
             train_prop=0.7,
             val_prop=0.2,
             time=False,
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([84, 153, 42])
-        assert dataset.X_val.shape == torch.Size([24, 153, 42])
-        assert dataset.X_test.shape == torch.Size([12, 153, 42])
+        assert dataset.X_train.shape == torch.Size([8400, 215, 42])
+        assert dataset.X_val.shape == torch.Size([2400, 215, 42])
+        assert dataset.X_test.shape == torch.Size([1200, 215, 42])
 
     def test_mask(self):
         """Test mask argument."""
@@ -331,13 +356,12 @@ class TestPhysioNet2012:
             val_prop=0.2,
             time=False,
             mask=True,
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([84, 153, 84])
-        assert dataset.X_val.shape == torch.Size([24, 153, 84])
-        assert dataset.X_test.shape == torch.Size([12, 153, 84])
+        assert dataset.X_train.shape == torch.Size([8400, 215, 84])
+        assert dataset.X_val.shape == torch.Size([2400, 215, 84])
+        assert dataset.X_test.shape == torch.Size([1200, 215, 84])
 
     def test_delta(self):
         """Test time delta argument."""
@@ -347,22 +371,21 @@ class TestPhysioNet2012:
             val_prop=0.2,
             time=False,
             delta=True,
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([84, 153, 84])
-        assert dataset.X_val.shape == torch.Size([24, 153, 84])
-        assert dataset.X_test.shape == torch.Size([12, 153, 84])
+        assert dataset.X_train.shape == torch.Size([8400, 215, 84])
+        assert dataset.X_val.shape == torch.Size([2400, 215, 84])
+        assert dataset.X_test.shape == torch.Size([1200, 215, 84])
         # Check time delta channel
         assert torch.equal(
-            dataset.X_train[:, 0, 42], torch.zeros([84], dtype=torch.float)
+            dataset.X_train[:, 0, 42], torch.zeros([8400], dtype=torch.float)
         )
         assert torch.equal(
-            dataset.X_val[:, 0, 42], torch.zeros([24], dtype=torch.float)
+            dataset.X_val[:, 0, 42], torch.zeros([2400], dtype=torch.float)
         )
         assert torch.equal(
-            dataset.X_test[:, 0, 42], torch.zeros([12], dtype=torch.float)
+            dataset.X_test[:, 0, 42], torch.zeros([1200], dtype=torch.float)
         )
 
     def test_time_mask_delta(self):
@@ -373,57 +396,62 @@ class TestPhysioNet2012:
             val_prop=0.2,
             mask=True,
             delta=True,
-            downscale=DOWNSCALE,
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([84, 153, 127])
-        assert dataset.X_val.shape == torch.Size([24, 153, 127])
-        assert dataset.X_test.shape == torch.Size([12, 153, 127])
+        assert dataset.X_train.shape == torch.Size([8400, 215, 127])
+        assert dataset.X_val.shape == torch.Size([2400, 215, 127])
+        assert dataset.X_test.shape == torch.Size([1200, 215, 127])
         # Check time channel
-        for i in range(153):
+        for i in range(215):
             assert torch.equal(
                 dataset.X_train[:, i, 0],
-                torch.full([84], fill_value=i, dtype=torch.float),
+                torch.full([8400], fill_value=i, dtype=torch.float),
             )
             assert torch.equal(
                 dataset.X_val[:, i, 0],
-                torch.full([24], fill_value=i, dtype=torch.float),
+                torch.full([2400], fill_value=i, dtype=torch.float),
             )
             assert torch.equal(
                 dataset.X_test[:, i, 0],
-                torch.full([12], fill_value=i, dtype=torch.float),
+                torch.full([1200], fill_value=i, dtype=torch.float),
             )
         # Check time delta channel
         assert torch.equal(
-            dataset.X_train[:, 0, 85], torch.zeros([84], dtype=torch.float)
+            dataset.X_train[:, 0, 85], torch.zeros([8400], dtype=torch.float)
         )
         assert torch.equal(
-            dataset.X_val[:, 0, 85], torch.zeros([24], dtype=torch.float)
+            dataset.X_val[:, 0, 85], torch.zeros([2400], dtype=torch.float)
         )
         assert torch.equal(
-            dataset.X_test[:, 0, 85], torch.zeros([12], dtype=torch.float)
+            dataset.X_test[:, 0, 85], torch.zeros([1200], dtype=torch.float)
         )
 
-    def test_downscale(self):
-        """Test downscale argument."""
+    def test_standarisation(self):
+        """Check training data is standardised."""
         dataset = PhysioNet2012(
             split="train",
             train_prop=0.7,
-            val_prop=0.2,
-            downscale=DOWNSCALE * 2,
+            time=False,
+            standardise=True,
             seed=SEED,
         )
-        # Check data set size
-        assert dataset.X_train.shape == torch.Size([168, 154, 43])
-        assert dataset.y_train.shape == torch.Size([168, 1])
-        assert dataset.length_train.shape == torch.Size([168])
-        assert dataset.X_val.shape == torch.Size([48, 154, 43])
-        assert dataset.y_val.shape == torch.Size([48, 1])
-        assert dataset.length_val.shape == torch.Size([48])
-        assert dataset.X_test.shape == torch.Size([24, 154, 43])
-        assert dataset.y_test.shape == torch.Size([24, 1])
-        assert dataset.length_test.shape == torch.Size([24])
+        for c, Xc in enumerate(dataset.X_train.unbind(dim=-1)):
+            print(Xc)
+            assert torch.allclose(
+                torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
+            )
+            assert torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            ) or torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([0.0]),  # if all values are the same
+                rtol=RTOL,
+                atol=ATOL,
+            )
 
     def test_reproducibility_1(self):
         """Test seed argument."""
@@ -431,18 +459,17 @@ class TestPhysioNet2012:
             split="train",
             train_prop=0.7,
             val_prop=0.2,
-            downscale=DOWNSCALE,
             seed=SEED,
         )
-        # Check first value in 2nd channel
+        # Check first value in 39th channel
         assert torch.allclose(
-            dataset.X_train[0, 65, 2], torch.tensor(2.7), rtol=RTOL, atol=ATOL
+            dataset.X_train[0, 0, 39], torch.tensor(80.0), rtol=RTOL, atol=ATOL
         )
         assert torch.allclose(
-            dataset.X_val[0, 6, 2], torch.tensor(2.4), rtol=RTOL, atol=ATOL
+            dataset.X_val[0, 0, 39], torch.tensor(63.0), rtol=RTOL, atol=ATOL
         )
         assert torch.allclose(
-            dataset.X_test[0, 2, 2], torch.tensor(4.0), rtol=RTOL, atol=ATOL
+            dataset.X_test[0, 0, 39], torch.tensor(61.0), rtol=RTOL, atol=ATOL
         )
 
     def test_reproducibility_2(self):
@@ -451,16 +478,15 @@ class TestPhysioNet2012:
             split="train",
             train_prop=0.7,
             val_prop=0.2,
-            downscale=DOWNSCALE,
             seed=999999,
         )
-        # Check first value in 7th channel
+        # Check first value in 39th channel
         assert torch.allclose(
-            dataset.X_train[0, 27, 7], torch.tensor(8.0), rtol=RTOL, atol=ATOL
+            dataset.X_train[0, 0, 39], torch.tensor(49.0), rtol=RTOL, atol=ATOL
         )
         assert torch.allclose(
-            dataset.X_val[0, 63, 7], torch.tensor(22.0), rtol=RTOL, atol=ATOL
+            dataset.X_val[0, 0, 39], torch.tensor(64.0), rtol=RTOL, atol=ATOL
         )
         assert torch.allclose(
-            dataset.X_test[0, 5, 7], torch.tensor(9.0), rtol=RTOL, atol=ATOL
+            dataset.X_test[0, 0, 39], torch.tensor(47.0), rtol=RTOL, atol=ATOL
         )

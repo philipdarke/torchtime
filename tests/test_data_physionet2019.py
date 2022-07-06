@@ -3,22 +3,25 @@ import re
 import pytest
 import torch
 
-from torchtime.data import UEA
+from torchtime.constants import OBJ_EXT
+from torchtime.data import PhysioNet2019
+from torchtime.utils import _get_SHA256
 
 SEED = 456789
 RTOL = 1e-4
 ATOL = 1e-4
 
 
-class TestUEACharacterTrajectories:
+class TestPhysioNet2019:
+    """Test PhysioNet2019 class."""
+
     def test_invalid_split_arg(self):
         """Catch invalid split argument."""
         with pytest.raises(
             AssertionError,
             match=re.escape("argument 'split' must be one of ['train', 'val']"),
         ):
-            UEA(
-                dataset="CharacterTrajectories",
+            PhysioNet2019(
                 split="xyz",
                 train_prop=0.8,
                 seed=SEED,
@@ -30,8 +33,7 @@ class TestUEACharacterTrajectories:
             AssertionError,
             match=re.escape("argument 'train_prop' must be in range (0, 1)"),
         ):
-            UEA(
-                dataset="CharacterTrajectories",
+            PhysioNet2019(
                 split="train",
                 train_prop=-0.5,
                 seed=SEED,
@@ -43,78 +45,98 @@ class TestUEACharacterTrajectories:
             AssertionError,
             match=re.escape("argument 'train_prop' must be in range (0, 1)"),
         ):
-            UEA(
-                dataset="CharacterTrajectories",
+            PhysioNet2019(
                 split="train",
                 train_prop=1,
                 seed=SEED,
             )
+        new_prop = 0.5
         with pytest.raises(
             AssertionError,
-            match=re.escape("argument 'val_prop' must be in range (0, 1-train_prop)"),
+            match=re.escape(
+                "argument 'val_prop' must be in range (0, {})".format(1 - new_prop)
+            ),
         ):
-            UEA(
-                dataset="CharacterTrajectories",
+            PhysioNet2019(
                 split="test",
-                train_prop=0.5,
-                val_prop=0.5,
+                train_prop=new_prop,
+                val_prop=new_prop,
                 seed=SEED,
             )
 
+    def test_load_data(self):
+        """Validate data set."""
+        PhysioNet2019(
+            split="train",
+            train_prop=0.7,
+            seed=SEED,
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2019/X" + OBJ_EXT)
+            == "ea94129dd03e594da80efae132b674b284499c613174d0314e13e8aaac179ba7"
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2019/y" + OBJ_EXT)
+            == "5f3cf8f30e4bebf166c5a4f9d4c2030dfb82d57729e6b4e67409047150345c0e"
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2019/length" + OBJ_EXT)
+            == "209672aa41dc2f092a63e49accc4203598b2d4deb9b28b910cbbb4082518c618"
+        )
+
     def test_train_val(self):
         """Test training/validation split sizes."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2001, 182, 4])
-        assert dataset.y_train.shape == torch.Size([2001, 20])
-        assert dataset.length_train.shape == torch.Size([2001])
-        assert dataset.X_val.shape == torch.Size([857, 182, 4])
-        assert dataset.y_val.shape == torch.Size([857, 20])
-        assert dataset.length_val.shape == torch.Size([857])
+        assert dataset.X_train.shape == torch.Size([28236, 336, 41])
+        assert dataset.y_train.shape == torch.Size([28236, 336, 1])
+        assert dataset.length_train.shape == torch.Size([28236])
+        assert dataset.X_val.shape == torch.Size([12100, 336, 41])
+        assert dataset.y_val.shape == torch.Size([12100, 336, 1])
+        assert dataset.length_val.shape == torch.Size([12100])
         # Ensure no test data is returned
         with pytest.raises(
-            AttributeError, match=re.escape("'UEA' object has no attribute 'X_test'")
+            AttributeError,
+            match=re.escape("'PhysioNet2019' object has no attribute 'X_test'"),
         ):
             dataset.X_test
         with pytest.raises(
-            AttributeError, match=re.escape("'UEA' object has no attribute 'y_test'")
+            AttributeError,
+            match=re.escape("'PhysioNet2019' object has no attribute 'y_test'"),
         ):
             dataset.y_test
         with pytest.raises(
             AttributeError,
-            match=re.escape("'UEA' object has no attribute 'length_test'"),
+            match=re.escape("'PhysioNet2019' object has no attribute 'length_test'"),
         ):
             dataset.length_test
 
     def test_train_val_test(self):
         """Test training/validation/test split sizes."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2002, 182, 4])
-        assert dataset.y_train.shape == torch.Size([2002, 20])
-        assert dataset.length_train.shape == torch.Size([2002])
-        assert dataset.X_val.shape == torch.Size([571, 182, 4])
-        assert dataset.y_val.shape == torch.Size([571, 20])
-        assert dataset.length_val.shape == torch.Size([571])
-        assert dataset.X_test.shape == torch.Size([285, 182, 4])
-        assert dataset.y_test.shape == torch.Size([285, 20])
-        assert dataset.length_test.shape == torch.Size([285])
+        assert dataset.X_train.shape == torch.Size([28236, 336, 41])
+        assert dataset.y_train.shape == torch.Size([28236, 336, 1])
+        assert dataset.length_train.shape == torch.Size([28236])
+        assert dataset.X_val.shape == torch.Size([8067, 336, 41])
+        assert dataset.y_val.shape == torch.Size([8067, 336, 1])
+        assert dataset.length_val.shape == torch.Size([8067])
+        assert dataset.X_test.shape == torch.Size([4033, 336, 41])
+        assert dataset.y_test.shape == torch.Size([4033, 336, 1])
+        assert dataset.length_test.shape == torch.Size([4033])
 
     def test_train_split(self):
         """Test training split is returned."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -127,8 +149,7 @@ class TestUEACharacterTrajectories:
 
     def test_val_split(self):
         """Test validation split is returned."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="val",
             train_prop=0.7,
             val_prop=0.2,
@@ -141,8 +162,7 @@ class TestUEACharacterTrajectories:
 
     def test_test_split(self):
         """Test test split is returned."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="test",
             train_prop=0.7,
             val_prop=0.2,
@@ -155,9 +175,8 @@ class TestUEACharacterTrajectories:
 
     def test_length(self):
         """Test length attribute."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
-            split="train",
+        dataset = PhysioNet2019(
+            split="test",
             train_prop=0.7,
             val_prop=0.2,
             time=False,
@@ -176,85 +195,56 @@ class TestUEACharacterTrajectories:
             assert not torch.all(torch.isnan(Xi[length_i - 1]))
             assert torch.all(torch.isnan(Xi[length_i:]))
 
-    def test_missing(self):
-        """Test missing data simulation."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
-            split="train",
-            train_prop=0.7,
-            val_prop=0.2,
-            missing=0.5,
-            seed=SEED,
-        )
-        # Check number of NaNs
-        assert (
-            torch.sum(torch.isnan(dataset.X_train)).item() == 732969
-        )  # expect around 3 * (239873 * 0.5 + 2002 * 182 - 239873) = 733,283
-        assert (
-            torch.sum(torch.isnan(dataset.X_val)).item() == 208686
-        )  # expect around 3 * (68797 * 0.5 + 571 * 182 - 68797) = 208,571
-        assert (
-            torch.sum(torch.isnan(dataset.X_test)).item() == 103872
-        )  # expect around 3 * (34269 * 0.5 + 285 * 182 - 34269) = 104,207
-
     def test_invalid_impute(self):
         """Catch invalid impute arguments."""
         with pytest.raises(
             AssertionError,
             match=re.escape(
-                "argument 'impute' must be a string in dict_keys(['none', 'mean', 'forward']) or a function"  # noqa: E501
+                "argument 'impute' must be a string in ['none', 'mean', 'forward'] or a function"  # noqa: E501
             ),
         ):
-            UEA(
-                dataset="CharacterTrajectories",
+            PhysioNet2019(
                 split="train",
                 train_prop=0.7,
-                missing=0.5,
                 impute="blah",
                 seed=SEED,
             )
         with pytest.raises(
             Exception,
             match=re.escape(
-                "argument 'impute' must be a string in dict_keys(['none', 'mean', 'forward']) or a function"  # noqa: E501
+                "argument 'impute' must be a string in ['none', 'mean', 'forward'] or a function"  # noqa: E501
             ),
         ):
-            UEA(
-                dataset="CharacterTrajectories",
+            PhysioNet2019(
                 split="train",
                 train_prop=0.7,
-                missing=0.5,
                 impute=3,
                 seed=SEED,
             )
 
     def test_no_impute(self):
         """Test no imputation."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
-            missing=0.5,
             impute="none",
             seed=SEED,
         )
         # Check number of NaNs
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 732969
-        assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 208686
-        assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 103872
-        assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_train)).item() == 366491058
+        assert torch.sum(torch.isnan(dataset.y_train)).item() == 8401181
+        assert torch.sum(torch.isnan(dataset.X_val)).item() == 104715681
+        assert torch.sum(torch.isnan(dataset.y_val)).item() == 2399984
+        assert torch.sum(torch.isnan(dataset.X_test)).item() == 52332856
+        assert torch.sum(torch.isnan(dataset.y_test)).item() == 1199521
 
     def test_mean_impute(self):
         """Test mean imputation."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
-            missing=0.5,
             impute="mean",
             seed=SEED,
         )
@@ -268,12 +258,10 @@ class TestUEACharacterTrajectories:
 
     def test_forward_impute(self):
         """Test forward imputation."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
-            missing=0.5,
             impute="forward",
             seed=SEED,
         )
@@ -285,34 +273,52 @@ class TestUEACharacterTrajectories:
         assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
-    def test_custom_impute(self):
+    def test_custom_imputation_1(self):
         """Test custom imputation function."""
 
-        def custom_imputer(X, y, fill):
-            """Does not impute data i.e. same as impute='none'"""
-            return X, y
+        def impute_with_zero(X, y, fill, select):
+            return X.nan_to_num(0), y.nan_to_num(0)
 
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
-            missing=0.5,
-            impute=custom_imputer,
+            impute=impute_with_zero,
             seed=SEED,
         )
         # Check number of NaNs
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 732969
+        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
         assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 208686
+        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
         assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 103872
+        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
+
+    def test_custom_imputation_2(self):
+        """Test custom imputation function."""
+
+        def no_imputation(X, y, fill, select):
+            """Does not impute data i.e. same as impute='none'"""
+            return X, y
+
+        dataset = PhysioNet2019(
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            impute=no_imputation,
+            seed=SEED,
+        )
+        # Check number of NaNs
+        assert torch.sum(torch.isnan(dataset.X_train)).item() == 366491058
+        assert torch.sum(torch.isnan(dataset.y_train)).item() == 8401181
+        assert torch.sum(torch.isnan(dataset.X_val)).item() == 104715681
+        assert torch.sum(torch.isnan(dataset.y_val)).item() == 2399984
+        assert torch.sum(torch.isnan(dataset.X_test)).item() == 52332856
+        assert torch.sum(torch.isnan(dataset.y_test)).item() == 1199521
 
     def test_time(self):
         """Test time argument."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -320,28 +326,27 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2002, 182, 4])
-        assert dataset.X_val.shape == torch.Size([571, 182, 4])
-        assert dataset.X_test.shape == torch.Size([285, 182, 4])
+        assert dataset.X_train.shape == torch.Size([28236, 336, 41])
+        assert dataset.X_val.shape == torch.Size([8067, 336, 41])
+        assert dataset.X_test.shape == torch.Size([4033, 336, 41])
         # Check time channel
         for i in range(182):
             assert torch.equal(
                 dataset.X_train[:, i, 0],
-                torch.full([2002], fill_value=i, dtype=torch.float),
+                torch.full([28236], fill_value=i, dtype=torch.float),
             )
             assert torch.equal(
                 dataset.X_val[:, i, 0],
-                torch.full([571], fill_value=i, dtype=torch.float),
+                torch.full([8067], fill_value=i, dtype=torch.float),
             )
             assert torch.equal(
                 dataset.X_test[:, i, 0],
-                torch.full([285], fill_value=i, dtype=torch.float),
+                torch.full([4033], fill_value=i, dtype=torch.float),
             )
 
     def test_no_time(self):
         """Test time argument."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -349,14 +354,13 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2002, 182, 3])
-        assert dataset.X_val.shape == torch.Size([571, 182, 3])
-        assert dataset.X_test.shape == torch.Size([285, 182, 3])
+        assert dataset.X_train.shape == torch.Size([28236, 336, 40])
+        assert dataset.X_val.shape == torch.Size([8067, 336, 40])
+        assert dataset.X_test.shape == torch.Size([4033, 336, 40])
 
     def test_mask(self):
         """Test mask argument."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -365,18 +369,13 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2002, 182, 6])
-        assert dataset.X_val.shape == torch.Size([571, 182, 6])
-        assert dataset.X_test.shape == torch.Size([285, 182, 6])
-        # Check mask channel
-        assert torch.sum(dataset.X_train[:, :, 3]) == torch.sum(dataset.length_train)
-        assert torch.sum(dataset.X_val[:, :, 3]) == torch.sum(dataset.length_val)
-        assert torch.sum(dataset.X_test[:, :, 3]) == torch.sum(dataset.length_test)
+        assert dataset.X_train.shape == torch.Size([28236, 336, 80])
+        assert dataset.X_val.shape == torch.Size([8067, 336, 80])
+        assert dataset.X_test.shape == torch.Size([4033, 336, 80])
 
     def test_delta(self):
         """Test time delta argument."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -385,24 +384,23 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2002, 182, 6])
-        assert dataset.X_val.shape == torch.Size([571, 182, 6])
-        assert dataset.X_test.shape == torch.Size([285, 182, 6])
+        assert dataset.X_train.shape == torch.Size([28236, 336, 80])
+        assert dataset.X_val.shape == torch.Size([8067, 336, 80])
+        assert dataset.X_test.shape == torch.Size([4033, 336, 80])
         # Check time delta channel
         assert torch.equal(
-            dataset.X_train[:, 0, 3], torch.zeros([2002], dtype=torch.float)
+            dataset.X_train[:, 0, 40], torch.zeros([28236], dtype=torch.float)
         )
         assert torch.equal(
-            dataset.X_val[:, 0, 3], torch.zeros([571], dtype=torch.float)
+            dataset.X_val[:, 0, 40], torch.zeros([8067], dtype=torch.float)
         )
         assert torch.equal(
-            dataset.X_test[:, 0, 3], torch.zeros([285], dtype=torch.float)
+            dataset.X_test[:, 0, 40], torch.zeros([4033], dtype=torch.float)
         )
 
     def test_time_mask_delta(self):
         """Test combination of time/mask/delta arguments."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -411,95 +409,88 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2002, 182, 10])
-        assert dataset.X_val.shape == torch.Size([571, 182, 10])
-        assert dataset.X_test.shape == torch.Size([285, 182, 10])
+        assert dataset.X_train.shape == torch.Size([28236, 336, 121])
+        assert dataset.X_val.shape == torch.Size([8067, 336, 121])
+        assert dataset.X_test.shape == torch.Size([4033, 336, 121])
         # Check time channel
         for i in range(182):
             assert torch.equal(
                 dataset.X_train[:, i, 0],
-                torch.full([2002], fill_value=i, dtype=torch.float),
+                torch.full([28236], fill_value=i, dtype=torch.float),
             )
             assert torch.equal(
                 dataset.X_val[:, i, 0],
-                torch.full([571], fill_value=i, dtype=torch.float),
+                torch.full([8067], fill_value=i, dtype=torch.float),
             )
             assert torch.equal(
                 dataset.X_test[:, i, 0],
-                torch.full([285], fill_value=i, dtype=torch.float),
+                torch.full([4033], fill_value=i, dtype=torch.float),
             )
-        # Check mask channel
-        assert torch.sum(dataset.X_train[:, :, 4]) == torch.sum(dataset.length_train)
-        assert torch.sum(dataset.X_val[:, :, 4]) == torch.sum(dataset.length_val)
-        assert torch.sum(dataset.X_test[:, :, 4]) == torch.sum(dataset.length_test)
         # Check time delta channel
         assert torch.equal(
-            dataset.X_train[:, 0, 7], torch.zeros([2002], dtype=torch.float)
+            dataset.X_train[:, 0, 81], torch.zeros([28236], dtype=torch.float)
         )
         assert torch.equal(
-            dataset.X_val[:, 0, 7], torch.zeros([571], dtype=torch.float)
+            dataset.X_val[:, 0, 81], torch.zeros([8067], dtype=torch.float)
         )
         assert torch.equal(
-            dataset.X_test[:, 0, 7], torch.zeros([285], dtype=torch.float)
+            dataset.X_test[:, 0, 81], torch.zeros([4033], dtype=torch.float)
         )
 
-    def test_downscale(self):
-        """Test downscale argument."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+    def test_standarisation(self):
+        """Check training data is standardised."""
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
-            val_prop=0.2,
-            downscale=0.1,
+            time=False,
+            standardise=True,
             seed=SEED,
         )
-        # Check data set size
-        assert dataset.X_train.shape == torch.Size([200, 164, 4])
-        assert dataset.y_train.shape == torch.Size([200, 20])
-        assert dataset.length_train.shape == torch.Size([200])
-        assert dataset.X_val.shape == torch.Size([57, 164, 4])
-        assert dataset.y_val.shape == torch.Size([57, 20])
-        assert dataset.length_val.shape == torch.Size([57])
-        assert dataset.X_test.shape == torch.Size([28, 164, 4])
-        assert dataset.y_test.shape == torch.Size([28, 20])
-        assert dataset.length_test.shape == torch.Size([28])
+        for c, Xc in enumerate(dataset.X_train.unbind(dim=-1)):
+            assert torch.allclose(
+                torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
+            )
+            assert torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            )
 
     def test_reproducibility_1(self):
         """Test seed argument."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
             seed=SEED,
         )
-        # Check first value in each data set
+        # Check first value in 39th channel
         assert torch.allclose(
-            dataset.X_train[0, 0, 1], torch.tensor(-0.1869), rtol=RTOL, atol=ATOL
+            dataset.X_train[0, 0, 39], torch.tensor(-1.53), rtol=RTOL, atol=ATOL
         )
         assert torch.allclose(
-            dataset.X_val[0, 0, 1], torch.tensor(0.0418), rtol=RTOL, atol=ATOL
+            dataset.X_val[0, 0, 39], torch.tensor(-0.02), rtol=RTOL, atol=ATOL
         )
         assert torch.allclose(
-            dataset.X_test[0, 0, 1], torch.tensor(0.0940), rtol=RTOL, atol=ATOL
+            dataset.X_test[0, 0, 39], torch.tensor(-6.73), rtol=RTOL, atol=ATOL
         )
 
     def test_reproducibility_2(self):
         """Test seed argument."""
-        dataset = UEA(
-            dataset="CharacterTrajectories",
+        dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
             val_prop=0.2,
             seed=999999,
         )
-        # Check first value in each data set
+        # Check first value in 39th channel
         assert torch.allclose(
-            dataset.X_train[0, 0, 1], torch.tensor(0.0391), rtol=RTOL, atol=ATOL
+            dataset.X_train[0, 0, 39], torch.tensor(-13.01), rtol=RTOL, atol=ATOL
         )
         assert torch.allclose(
-            dataset.X_val[0, 0, 1], torch.tensor(0.0), rtol=RTOL, atol=ATOL
+            dataset.X_val[0, 0, 39], torch.tensor(-109.75), rtol=RTOL, atol=ATOL
         )
         assert torch.allclose(
-            dataset.X_test[0, 0, 1], torch.tensor(-0.0767), rtol=RTOL, atol=ATOL
+            dataset.X_test[0, 0, 39], torch.tensor(-131.18), rtol=RTOL, atol=ATOL
         )

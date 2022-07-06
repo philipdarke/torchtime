@@ -3,14 +3,19 @@ import re
 import pytest
 import torch
 
+from torchtime.constants import OBJ_EXT
 from torchtime.data import UEA
+from torchtime.utils import _get_SHA256
 
+DATASET = "ArrowHead"
 SEED = 456789
 RTOL = 1e-4
 ATOL = 1e-4
 
 
 class TestUEAArrowHead:
+    """Test UEA class with ArrowHead data set."""
+
     def test_invalid_split_arg(self):
         """Catch invalid split argument."""
         with pytest.raises(
@@ -18,7 +23,7 @@ class TestUEAArrowHead:
             match=re.escape("argument 'split' must be one of ['train', 'val']"),
         ):
             UEA(
-                dataset="ArrowHead",
+                dataset=DATASET,
                 split="xyz",
                 train_prop=0.8,
                 seed=SEED,
@@ -31,7 +36,7 @@ class TestUEAArrowHead:
             match=re.escape("argument 'train_prop' must be in range (0, 1)"),
         ):
             UEA(
-                dataset="ArrowHead",
+                dataset=DATASET,
                 split="train",
                 train_prop=-0.5,
                 seed=SEED,
@@ -44,27 +49,51 @@ class TestUEAArrowHead:
             match=re.escape("argument 'train_prop' must be in range (0, 1)"),
         ):
             UEA(
-                dataset="ArrowHead",
+                dataset=DATASET,
                 split="train",
                 train_prop=1,
                 seed=SEED,
             )
+        new_prop = 0.5
         with pytest.raises(
             AssertionError,
-            match=re.escape("argument 'val_prop' must be in range (0, 1-train_prop)"),
+            match=re.escape(
+                "argument 'val_prop' must be in range (0, {})".format(1 - new_prop)
+            ),
         ):
             UEA(
-                dataset="ArrowHead",
+                dataset=DATASET,
                 split="test",
-                train_prop=0.5,
-                val_prop=0.5,
+                train_prop=new_prop,
+                val_prop=new_prop,
                 seed=SEED,
             )
+
+    def test_load_data(self):
+        """Validate data set."""
+        UEA(
+            dataset=DATASET,
+            split="train",
+            train_prop=0.7,
+            seed=SEED,
+        )
+        assert (
+            _get_SHA256(".torchtime/uea_" + DATASET + "/X" + OBJ_EXT)
+            == "9530efe27c6450c5da88a44c72ecd584b80c82599d62a3a02e0e09f572eb3a38"
+        )
+        assert (
+            _get_SHA256(".torchtime/uea_" + DATASET + "/y" + OBJ_EXT)
+            == "7f08d6239b17cad032fdc9a2d1f607b500825167a9884e2ad84f423a7513a30c"
+        )
+        assert (
+            _get_SHA256(".torchtime/uea_" + DATASET + "/length" + OBJ_EXT)
+            == "7348daeb7eb5239a1e400df18c574daabb03764e6c0422590c2ed44b014f9160"
+        )
 
     def test_train_val(self):
         """Test training/validation split sizes."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             seed=SEED,
@@ -94,7 +123,7 @@ class TestUEAArrowHead:
     def test_train_val_test(self):
         """Test training/validation/test split sizes."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -114,7 +143,7 @@ class TestUEAArrowHead:
     def test_train_split(self):
         """Test training split is returned."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -128,7 +157,7 @@ class TestUEAArrowHead:
     def test_val_split(self):
         """Test validation split is returned."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="val",
             train_prop=0.7,
             val_prop=0.2,
@@ -142,7 +171,7 @@ class TestUEAArrowHead:
     def test_test_split(self):
         """Test test split is returned."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="test",
             train_prop=0.7,
             val_prop=0.2,
@@ -156,7 +185,7 @@ class TestUEAArrowHead:
     def test_length(self):
         """Test length attribute."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -173,7 +202,7 @@ class TestUEAArrowHead:
     def test_missing(self):
         """Test missing data simulation."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -196,11 +225,11 @@ class TestUEAArrowHead:
         with pytest.raises(
             AssertionError,
             match=re.escape(
-                "argument 'impute' must be a string in dict_keys(['none', 'mean', 'forward']) or a function"  # noqa: E501
+                "argument 'impute' must be a string in ['none', 'mean', 'forward'] or a function"  # noqa: E501
             ),
         ):
             UEA(
-                dataset="ArrowHead",
+                dataset=DATASET,
                 split="train",
                 train_prop=0.7,
                 missing=0.5,
@@ -210,11 +239,11 @@ class TestUEAArrowHead:
         with pytest.raises(
             Exception,
             match=re.escape(
-                "argument 'impute' must be a string in dict_keys(['none', 'mean', 'forward']) or a function"  # noqa: E501
+                "argument 'impute' must be a string in ['none', 'mean', 'forward'] or a function"  # noqa: E501
             ),
         ):
             UEA(
-                dataset="ArrowHead",
+                dataset=DATASET,
                 split="train",
                 train_prop=0.7,
                 missing=0.5,
@@ -225,7 +254,7 @@ class TestUEAArrowHead:
     def test_no_impute(self):
         """Test no imputation."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -244,7 +273,7 @@ class TestUEAArrowHead:
     def test_mean_impute(self):
         """Test mean imputation."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -263,7 +292,7 @@ class TestUEAArrowHead:
     def test_forward_impute(self):
         """Test forward imputation."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -279,20 +308,42 @@ class TestUEAArrowHead:
         assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
-    def test_custom_impute(self):
+    def test_custom_imputation_1(self):
         """Test custom imputation function."""
 
-        def custom_imputer(X, y, fill):
-            """Does not impute data i.e. same as impute='none'"""
-            return X, y
+        def impute_with_zero(X, y, fill, select):
+            return X.nan_to_num(0), y.nan_to_num(0)
 
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
             missing=0.5,
-            impute=custom_imputer,
+            impute=impute_with_zero,
+            seed=SEED,
+        )
+        # Check number of NaNs
+        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
+
+    def test_custom_imputation_2(self):
+        """Test custom imputation function."""
+
+        def no_imputation(X, y, fill, select):
+            return X, y
+
+        dataset = UEA(
+            dataset=DATASET,
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            missing=0.5,
+            impute=no_imputation,
             seed=SEED,
         )
         # Check number of NaNs
@@ -306,7 +357,7 @@ class TestUEAArrowHead:
     def test_time(self):
         """Test time argument."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -335,7 +386,7 @@ class TestUEAArrowHead:
     def test_no_time(self):
         """Test time argument."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -350,7 +401,7 @@ class TestUEAArrowHead:
     def test_mask(self):
         """Test mask argument."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -370,7 +421,7 @@ class TestUEAArrowHead:
     def test_delta(self):
         """Test time delta argument."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -407,7 +458,7 @@ class TestUEAArrowHead:
     def test_time_mask_delta(self):
         """Test combination of time/mask/delta arguments."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -459,31 +510,31 @@ class TestUEAArrowHead:
                 torch.full([21], fill_value=1, dtype=torch.float),
             )
 
-    def test_downscale(self):
-        """Test downscale argument."""
+    def test_standarisation(self):
+        """Check training data is standardised."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
-            val_prop=0.2,
-            downscale=0.1,
+            time=False,
+            standardise=True,
             seed=SEED,
         )
-        # Check data set size
-        assert dataset.X_train.shape == torch.Size([15, 251, 2])
-        assert dataset.y_train.shape == torch.Size([15, 3])
-        assert dataset.length_train.shape == torch.Size([15])
-        assert dataset.X_val.shape == torch.Size([4, 251, 2])
-        assert dataset.y_val.shape == torch.Size([4, 3])
-        assert dataset.length_val.shape == torch.Size([4])
-        assert dataset.X_test.shape == torch.Size([2, 251, 2])
-        assert dataset.y_test.shape == torch.Size([2, 3])
-        assert dataset.length_test.shape == torch.Size([2])
+        for c, Xc in enumerate(dataset.X_train.unbind(dim=-1)):
+            assert torch.allclose(
+                torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
+            )
+            assert torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            )
 
     def test_reproducibility_1(self):
         """Test seed argument."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
@@ -503,7 +554,7 @@ class TestUEAArrowHead:
     def test_reproducibility_2(self):
         """Test seed argument."""
         dataset = UEA(
-            dataset="ArrowHead",
+            dataset=DATASET,
             split="train",
             train_prop=0.7,
             val_prop=0.2,
