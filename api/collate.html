@@ -7,6 +7,7 @@
   <title>Custom collate functions &mdash; torchtime</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -16,6 +17,8 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -30,7 +33,7 @@
             <a href="../index.html" class="icon icon-home"> torchtime
           </a>
               <div class="version">
-                0.3.0
+                0.4.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -75,72 +78,25 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="custom-collate-functions">
+  <span class="target" id="module-torchtime.collate"></span><section id="custom-collate-functions">
 <h1>Custom collate functions<a class="headerlink" href="#custom-collate-functions" title="Permalink to this headline"></a></h1>
-<p>Custom collate functions should be passed to the <code class="docutils literal notranslate"><span class="pre">collate_fn</span></code> argument of a <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">DataLoader</a>.</p>
-<p>Data sets of variable length can be efficiently represented in PyTorch using a <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.utils.rnn.PackedSequence.html"><code class="docutils literal notranslate"><span class="pre">PackedSequence</span></code></a> object. These are formed using
-<a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.utils.rnn.pack_padded_sequence.html#torch.nn.utils.rnn.pack_padded_sequence"><code class="docutils literal notranslate"><span class="pre">pack_padded_sequence()</span></code></a> which by default expects the input batch to be sorted in descending length. Two collate functions are provided to support the use of <code class="docutils literal notranslate"><span class="pre">PackedSequence</span></code> objects in models:</p>
+<p>Custom collate functions should be passed to the <code class="docutils literal notranslate"><span class="pre">collate_fn</span></code> argument of a
+<a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">DataLoader</a>:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#torchtime.collate.sort_by_length" title="torchtime.collate.sort_by_length"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">sort_by_length()</span></code></span></a> sorts each batch by descending length.</p></li>
-<li><p><a class="reference internal" href="#torchtime.collate.packed_sequence" title="torchtime.collate.packed_sequence"><span class="xref myst py py-func"><code class="docutils literal notranslate"><span class="pre">packed_sequence()</span></code></span></a> returns <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> as a <code class="docutils literal notranslate"><span class="pre">PackedSequence</span></code> object.</p></li>
+<li><p><a class="reference external" href="torchtime.collate.sort_by_length">sort_by_length()</a> sorts each batch by descending
+length</p></li>
+<li><p><a class="reference external" href="torchtime.collate.packed_sequence">packed_sequence()</a> returns <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> as a
+<code class="docutils literal notranslate"><span class="pre">PackedSequence</span></code> object</p></li>
 </ul>
-<span class="target" id="module-torchtime.collate"></span><dl class="py function">
-<dt class="sig sig-object py" id="torchtime.collate.packed_sequence">
-<span class="sig-prename descclassname"><span class="pre">torchtime.collate.</span></span><span class="sig-name descname"><span class="pre">packed_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchtime/collate.html#packed_sequence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.collate.packed_sequence" title="Permalink to this definition"></a></dt>
-<dd><p><strong>Collates a batch and returns data as PackedSequence objects.</strong></p>
-<p>Pass to the <code class="docutils literal notranslate"><span class="pre">collate_fn</span></code> argument when creating a PyTorch DataLoader. Batches are
-a named dictionary with <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> data. <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> are
-PackedSequence objects.</p>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
-<span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
-<span class="kn">from</span> <span class="nn">torchtime.collate</span> <span class="kn">import</span> <span class="n">packed_sequence</span>
-
-<span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
-    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
-    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
-    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
-    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
-    <span class="n">char_traj</span><span class="p">,</span>
-    <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
-    <span class="n">collate_fn</span><span class="o">=</span><span class="n">packed_sequence</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;X&quot;</span><span class="p">]</span>
-
-<span class="n">PackedSequence</span><span class="p">(</span>
-    <span class="n">data</span><span class="o">=</span><span class="n">tensor</span><span class="p">([[</span> <span class="mf">0.0000e+00</span><span class="p">,</span>  <span class="mf">2.2753e-01</span><span class="p">,</span>  <span class="mf">6.0560e-03</span><span class="p">,</span>  <span class="mf">2.0894e-02</span><span class="p">],</span>
-                 <span class="p">[</span> <span class="mf">0.0000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.6401e-02</span><span class="p">,</span>  <span class="mf">1.1512e-01</span><span class="p">,</span>  <span class="mf">7.3964e-01</span><span class="p">],</span>
-                 <span class="p">[</span> <span class="mf">0.0000e+00</span><span class="p">,</span>  <span class="mf">5.6454e-01</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.0000e-05</span><span class="p">,</span>  <span class="mf">2.9244e-01</span><span class="p">],</span>
-                 <span class="o">...</span><span class="p">,</span>
-                 <span class="p">[</span> <span class="mf">1.5400e+02</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.6396e-01</span><span class="p">,</span>  <span class="mf">1.9185e-01</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.4082e+00</span><span class="p">],</span>
-                 <span class="p">[</span> <span class="mf">1.5500e+02</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.2807e-01</span><span class="p">,</span>  <span class="mf">1.6577e-01</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.2167e+00</span><span class="p">],</span>
-                 <span class="p">[</span> <span class="mf">1.5600e+02</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.7705e-01</span><span class="p">,</span>  <span class="mf">1.2868e-01</span><span class="p">,</span> <span class="o">-</span><span class="mf">9.4452e-01</span><span class="p">]]),</span>
-    <span class="n">batch_sizes</span><span class="o">=</span><span class="n">tensor</span><span class="p">([</span><span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span>
-                        <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span>
-                        <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span>
-                        <span class="o">...</span><span class="p">,</span>
-                        <span class="mi">18</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>  <span class="mi">9</span><span class="p">,</span>  <span class="mi">9</span><span class="p">,</span>
-                         <span class="mi">8</span><span class="p">,</span>  <span class="mi">8</span><span class="p">,</span>  <span class="mi">7</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>
-                         <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">]),</span>
-    <span class="n">sorted_indices</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">unsorted_indices</span><span class="o">=</span><span class="kc">None</span>
-<span class="p">)</span>
-</pre></div>
-</div>
-</dd></dl>
-
 <dl class="py function">
 <dt class="sig sig-object py" id="torchtime.collate.sort_by_length">
 <span class="sig-prename descclassname"><span class="pre">torchtime.collate.</span></span><span class="sig-name descname"><span class="pre">sort_by_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchtime/collate.html#sort_by_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.collate.sort_by_length" title="Permalink to this definition"></a></dt>
-<dd><p><strong>Collates a batch and sorts by decending length.</strong></p>
+<dd><p><strong>Collates a batch and sorts by descending length.</strong></p>
 <p>Pass to the <code class="docutils literal notranslate"><span class="pre">collate_fn</span></code> argument when creating a PyTorch DataLoader. Batches are
-a named dictionary with <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> data. The batch is sorted by
-length and <code class="docutils literal notranslate"><span class="pre">pack_padded_sequence()</span></code> can be called in the forward method of the
-model.</p>
-<p>Example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+a named dictionary with <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> data that is sorted by
+length. <code class="docutils literal notranslate"><span class="pre">pack_padded_sequence()</span></code> can therefore be called in the forward method of
+the model. For example:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
 <span class="kn">from</span> <span class="nn">torchtime.collate</span> <span class="kn">import</span> <span class="n">sort_by_length</span>
 
@@ -155,13 +111,82 @@ model.</p>
     <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
     <span class="n">collate_fn</span><span class="o">=</span><span class="n">sort_by_length</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span>
-
-<span class="n">tensor</span><span class="p">([</span><span class="mi">157</span><span class="p">,</span> <span class="mi">151</span><span class="p">,</span> <span class="mi">151</span><span class="p">,</span> <span class="mi">150</span><span class="p">,</span> <span class="mi">138</span><span class="p">,</span> <span class="mi">138</span><span class="p">,</span> <span class="mi">136</span><span class="p">,</span> <span class="mi">135</span><span class="p">,</span> <span class="mi">133</span><span class="p">,</span> <span class="mi">130</span><span class="p">,</span> <span class="mi">129</span><span class="p">,</span> <span class="mi">129</span><span class="p">,</span> <span class="mi">127</span><span class="p">,</span> <span class="mi">126</span><span class="p">,</span>
-        <span class="mi">124</span><span class="p">,</span> <span class="mi">124</span><span class="p">,</span> <span class="mi">121</span><span class="p">,</span> <span class="mi">121</span><span class="p">,</span> <span class="mi">118</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">117</span><span class="p">,</span> <span class="mi">113</span><span class="p">,</span> <span class="mi">108</span><span class="p">,</span> <span class="mi">106</span><span class="p">,</span> <span class="mi">105</span><span class="p">,</span> <span class="mi">102</span><span class="p">,</span>  <span class="mi">98</span><span class="p">,</span>
-         <span class="mi">83</span><span class="p">,</span>  <span class="mi">74</span><span class="p">,</span>  <span class="mi">74</span><span class="p">,</span>  <span class="mi">61</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;length&quot;</span><span class="p">])</span>
 </pre></div>
 </div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>...
+tensor([157, 151, 151, 150, 138, 138, 136, 135, 133, 130, 129, 129, 127, 126,
+        124, 124, 121, 121, 118, 117, 117, 117, 113, 108, 106, 105, 102,  98,
+         83,  74,  74,  61])
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batch_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]) – Batch from a <code class="docutils literal notranslate"><span class="pre">torchtime.data</span></code> class.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Updated batch.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="torchtime.collate.packed_sequence">
+<span class="sig-prename descclassname"><span class="pre">torchtime.collate.</span></span><span class="sig-name descname"><span class="pre">packed_sequence</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch_data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchtime/collate.html#packed_sequence"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.collate.packed_sequence" title="Permalink to this definition"></a></dt>
+<dd><p><strong>Collates a batch and returns data as PackedSequence objects.</strong></p>
+<p>Pass to the <code class="docutils literal notranslate"><span class="pre">collate_fn</span></code> argument when creating a PyTorch DataLoader. Batches are
+a named dictionary with <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> data where <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> are
+PackedSequence objects. For example:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
+<span class="kn">from</span> <span class="nn">torchtime.collate</span> <span class="kn">import</span> <span class="n">packed_sequence</span>
+
+<span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span>
+    <span class="n">char_traj</span><span class="p">,</span>
+    <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span>
+    <span class="n">collate_fn</span><span class="o">=</span><span class="n">packed_sequence</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))[</span><span class="s2">&quot;X&quot;</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>...
+PackedSequence(data=tensor([[ 0.0000e+00,  2.2753e-01,  6.0560e-03,  2.0894e-02],
+        [ 0.0000e+00, -3.6401e-02,  1.1512e-01,  7.3964e-01],
+        [ 0.0000e+00,  5.6454e-01, -1.0000e-05,  2.9244e-01],
+        ...,
+        [ 1.5400e+02, -2.6396e-01,  1.9185e-01, -1.4082e+00],
+        [ 1.5500e+02, -2.2807e-01,  1.6577e-01, -1.2167e+00],
+        [ 1.5600e+02, -1.7705e-01,  1.2868e-01, -9.4452e-01]]), batch_sizes=tensor([32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+        32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+        32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32,
+        32, 32, 32, 32, 32, 32, 32, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31,
+        31, 31, 29, 29, 29, 29, 29, 29, 29, 29, 29, 28, 28, 28, 28, 28, 28, 28,
+        28, 28, 28, 28, 28, 28, 28, 28, 27, 27, 27, 27, 26, 26, 26, 25, 24, 24,
+        23, 23, 23, 23, 23, 22, 22, 22, 22, 19, 18, 18, 18, 16, 16, 16, 14, 14,
+        13, 12, 12, 10,  9,  9,  9,  8,  8,  7,  6,  6,  4,  4,  4,  4,  4,  4,
+         4,  4,  4,  4,  4,  4,  3,  1,  1,  1,  1,  1,  1]), sorted_indices=None, unsorted_indices=None)
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>batch_data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]) – Batch from a <code class="docutils literal notranslate"><span class="pre">torchtime.data</span></code> class.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">PackedSequence</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Updated batch.</p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

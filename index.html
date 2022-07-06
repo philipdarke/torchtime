@@ -4,9 +4,10 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Time series data sets for PyTorch &mdash; torchtime</title>
+  <title>Benchmark time series data sets for PyTorch &mdash; torchtime</title>
       <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
@@ -16,6 +17,8 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/clipboard.min.js"></script>
+        <script src="_static/copybutton.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -30,7 +33,7 @@
             <a href="#" class="icon icon-home"> torchtime
           </a>
               <div class="version">
-                0.3.0
+                0.4.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -59,7 +62,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li>Time series data sets for PyTorch</li>
+      <li>Benchmark time series data sets for PyTorch</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/philipdarke/torchtime/blob/main/docs/source/index.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -69,29 +72,59 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="time-series-data-sets-for-pytorch">
-<h1>Time series data sets for PyTorch<a class="headerlink" href="#time-series-data-sets-for-pytorch" title="Permalink to this headline"></a></h1>
+  <section id="benchmark-time-series-data-sets-for-pytorch">
+<h1>Benchmark time series data sets for PyTorch<a class="headerlink" href="#benchmark-time-series-data-sets-for-pytorch" title="Permalink to this headline"></a></h1>
 <p><a class="reference external" href="https://pypi.org/project/torchtime"><img alt="PyPi" src="https://img.shields.io/pypi/v/torchtime" /></a>
 <a class="reference external" href="https://github.com/philipdarke/torchtime/actions/workflows/build.yml"><img alt="Build status" src="https://img.shields.io/github/workflow/status/philipdarke/torchtime/build.svg" /></a>
 <img alt="Coverage" src="https://philipdarke.com/torchtime/assets/coverage-badge.svg?dummy=8484744" />
 <a class="reference external" href="https://github.com/philipdarke/torchtime/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/philipdarke/torchtime.svg" /></a>
 <a class="reference external" href="https://zenodo.org/badge/latestdoi/475093888"><img alt="DOI" src="https://zenodo.org/badge/475093888.svg" /></a></p>
-<p>Ready-to-go PyTorch data sets for supervised time series prediction problems. <code class="docutils literal notranslate"><span class="pre">torchtime</span></code> currently supports:</p>
+<p>PyTorch data sets for supervised time series classification and prediction problems, including:</p>
 <ul class="simple">
-<li><p>All data sets in the UEA/UCR classification repository <a class="reference external" href="https://www.timeseriesclassification.com/">[link]</a></p></li>
-<li><p>PhysioNet Challenge 2012 (in-hospital mortality) <a class="reference external" href="https://physionet.org/content/challenge-2012/1.0.0/">[link]</a></p></li>
-<li><p>PhysioNet Challenge 2019 (sepsis prediction) <a class="reference external" href="https://physionet.org/content/challenge-2019/1.0.0/">[link]</a></p></li>
+<li><p>All UEA/UCR classification repository data sets</p></li>
+<li><p>PhysioNet Challenge 2012 (in-hospital mortality)</p></li>
+<li><p>PhysioNet Challenge 2019 (sepsis prediction)</p></li>
+<li><p>A binary prediction variant of the 2019 PhysioNet Challenge</p></li>
 </ul>
+<section id="why-use-torchtime">
+<h2>Why use <code class="docutils literal notranslate"><span class="pre">torchtime</span></code>?<a class="headerlink" href="#why-use-torchtime" title="Permalink to this headline"></a></h2>
+<ol class="arabic simple">
+<li><p>Saves time. You don’t have to write your own PyTorch data classes.</p></li>
+<li><p>Better research. Use common, reproducible implementations of data sets for a level playing field when evaluating models.</p></li>
+</ol>
+</section>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ pip install torchtime
 </pre></div>
 </div>
 </section>
-<section id="example-usage">
-<h2>Example usage<a class="headerlink" href="#example-usage" title="Permalink to this headline"></a></h2>
-<p><code class="docutils literal notranslate"><span class="pre">torchtime.data</span></code> contains a class for each data set above. Each class has a consistent API.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">torchtime.data.UEA</span></code> class returns the UEA/UCR data set specified by the <code class="docutils literal notranslate"><span class="pre">dataset</span></code> argument (see list of data sets <a class="reference external" href="https://www.timeseriesclassification.com/dataset.php">here</a>). For example, to load training data for the <a class="reference external" href="https://www.timeseriesclassification.com/description.php?Dataset=ArrowHead">ArrowHead</a> data set with a 70/30% training/validation split and create a <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">DataLoader</a>:</p>
+<section id="getting-started">
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h2>
+<p>Data classes have a common API. The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines whether training (”<em>train</em>”), validation (”<em>val</em>”) or test (”<em>test</em>”) data are returned. The size of the splits are controlled with the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and (optional) <code class="docutils literal notranslate"><span class="pre">val_prop</span></code> arguments.</p>
+<section id="physionet-data-sets">
+<h3>PhysioNet data sets<a class="headerlink" href="#physionet-data-sets" title="Permalink to this headline"></a></h3>
+<p>Three <a class="reference external" href="https://physionet.org/">PhysioNet</a> data sets are currently supported:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://philipdarke.com/torchtime/api/data.html#torchtime.data.PhysioNet2012"><code class="docutils literal notranslate"><span class="pre">torchtime.data.PhysioNet2012</span></code></a> returns the 2012 challenge (in-hospital mortality) <a class="reference external" href="https://physionet.org/content/challenge-2012/1.0.0/">[link]</a>.</p></li>
+<li><p><a class="reference external" href="https://philipdarke.com/torchtime/api/data.html#torchtime.data.PhysioNet2019"><code class="docutils literal notranslate"><span class="pre">torchtime.data.PhysioNet2019</span></code></a> returns the 2019 challenge (sepsis prediction) <a class="reference external" href="https://physionet.org/content/challenge-2019/1.0.0/">[link]</a>.</p></li>
+<li><p><a class="reference external" href="https://philipdarke.com/torchtime/api/data.html#torchtime.data.PhysioNet2019Binary"><code class="docutils literal notranslate"><span class="pre">torchtime.data.PhysioNet2019Binary</span></code></a> returns a binary prediction variant of the 2019 challenge.</p></li>
+</ul>
+<p>For example, to load training data for the 2012 challenge with a 70/30% training/validation split and create a <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">DataLoader</a> for model training:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">PhysioNet2012</span>
+
+<span class="n">physionet2012</span> <span class="o">=</span> <span class="n">PhysioNet2012</span><span class="p">(</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">physionet2012</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="uea-ucr-repository-data-sets">
+<h3>UEA/UCR repository data sets<a class="headerlink" href="#uea-ucr-repository-data-sets" title="Permalink to this headline"></a></h3>
+<p>The <a class="reference external" href="https://philipdarke.com/torchtime/api/data.html#torchtime.data.UEA"><code class="docutils literal notranslate"><span class="pre">torchtime.data.UEA</span></code></a> class returns the <a class="reference external" href="https://www.timeseriesclassification.com/">UEA/UCR repository</a> data set specified by the <code class="docutils literal notranslate"><span class="pre">dataset</span></code> argument, for example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
 
@@ -103,27 +136,40 @@
 <span class="n">dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">arrowhead</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Batches are dictionaries of tensors <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code>.</p>
-<p><code class="docutils literal notranslate"><span class="pre">X</span></code> are the time series data. The package follows the <em>batch first</em> convention therefore <code class="docutils literal notranslate"><span class="pre">X</span></code> has shape (<em>n</em>, <em>s</em>, <em>c</em>) where <em>n</em> is batch size, <em>s</em> is (maximum) trajectory length and <em>c</em> is the number of channels. By default, a time stamp is appended to the time series data as the first channel.</p>
-<p><code class="docutils literal notranslate"><span class="pre">y</span></code> are one-hot encoded labels of shape (<em>n</em>, <em>l</em>) where <em>l</em> is the number of classes and <code class="docutils literal notranslate"><span class="pre">length</span></code> are the length of each trajectory (before padding if sequences are of irregular length) i.e. a tensor of shape (<em>n</em>).</p>
-<p>ArrowHead is a univariate time series therefore <code class="docutils literal notranslate"><span class="pre">X</span></code> has two channels, the time stamp followed by the time series (<em>c</em> = 2). Each series has 251 observations (<em>s</em> = 251) and there are three classes (<em>l</em> = 3).</p>
+</section>
+<section id="using-the-dataloader">
+<h3>Using the DataLoader<a class="headerlink" href="#using-the-dataloader" title="Permalink to this headline"></a></h3>
+<p>Batches are dictionaries of tensors <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">X</span></code> are the time series data. The package follows the <em>batch first</em> convention therefore <code class="docutils literal notranslate"><span class="pre">X</span></code> has shape (<em>n</em>, <em>s</em>, <em>c</em>) where <em>n</em> is batch size, <em>s</em> is (longest) trajectory length and <em>c</em> is the number of channels. By default, the first channel is a time stamp.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code> are one-hot encoded labels of shape (<em>n</em>, <em>l</em>) where <em>l</em> is the number of classes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">length</span></code> are the length of each trajectory (before padding if sequences are of irregular length) i.e. a tensor of shape (<em>n</em>).</p></li>
+</ul>
+<p>For example, ArrowHead is a univariate time series therefore <code class="docutils literal notranslate"><span class="pre">X</span></code> has two channels, the time stamp followed by the time series (<em>c</em> = 2). Each series has 251 observations (<em>s</em> = 251) and there are three classes (<em>l</em> = 3). For a batch size of 32:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">next_batch</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">dataloader</span><span class="p">))</span>
-
 <span class="n">next_batch</span><span class="p">[</span><span class="s2">&quot;X&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>       <span class="c1"># torch.Size([32, 251, 2])</span>
 <span class="n">next_batch</span><span class="p">[</span><span class="s2">&quot;y&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>       <span class="c1"># torch.Size([32, 3])</span>
 <span class="n">next_batch</span><span class="p">[</span><span class="s2">&quot;length&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># torch.Size([32])</span>
 </pre></div>
 </div>
+<p>See <a class="reference external" href="https://philipdarke.com/torchtime/tutorials/getting_started.html#using-dataloaders">Using DataLoaders</a> for more information.</p>
 </section>
-<section id="additional-options">
-<h2>Additional options<a class="headerlink" href="#additional-options" title="Permalink to this headline"></a></h2>
+</section>
+<section id="advanced-options">
+<h2>Advanced options<a class="headerlink" href="#advanced-options" title="Permalink to this headline"></a></h2>
 <ul class="simple">
-<li><p>The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines whether training, validation or test data are returned. The size of the splits are controlled with the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code> arguments.</p></li>
-<li><p>Missing data can be imputed by setting <code class="docutils literal notranslate"><span class="pre">impute</span></code> to <em>mean</em> (replace with training data channel means) or <em>forward</em> (replace with previous observation). Alternatively a custom imputation function can be used.</p></li>
-<li><p>A time stamp, missing data mask and the time since previous observation can be appended with the boolean arguments <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> respectively.</p></li>
+<li><p>Missing data can be imputed by setting <code class="docutils literal notranslate"><span class="pre">impute</span></code> to <em>mean</em> (replace with training data channel means) or <em>forward</em> (replace with previous observation). Alternatively a custom imputation function can be passed to the <code class="docutils literal notranslate"><span class="pre">impute</span></code> argument.</p></li>
+<li><p>A time stamp (added by default), missing data mask and the time since previous observation can be appended with the boolean arguments <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> respectively.</p></li>
+<li><p>Time series data are standardised using the <code class="docutils literal notranslate"><span class="pre">standardise</span></code> boolean argument.</p></li>
+<li><p>The location of cached data can be changed with the <code class="docutils literal notranslate"><span class="pre">path</span></code> argument, for example to share a single cache location across projects.</p></li>
 <li><p>For reproducibility, an optional random <code class="docutils literal notranslate"><span class="pre">seed</span></code> can be specified.</p></li>
+<li><p>Missing data can be simulated using the <code class="docutils literal notranslate"><span class="pre">missing</span></code> argument to drop data at random from UEA/UCR data sets.</p></li>
 </ul>
-<p>Most UEA/UCR data sets are regularly sampled and fully observed. Missing data can be simulated using the <code class="docutils literal notranslate"><span class="pre">missing</span></code> argument to drop data at random from UEA/UCR data sets. See the <a class="reference external" href="https://philipdarke.com/torchtime/tutorials/">tutorials</a> and <a class="reference external" href="https://philipdarke.com/torchtime/api/">API</a> for more information.</p>
+<p>See the <a class="reference external" href="https://philipdarke.com/torchtime/tutorials/">tutorials</a> and <a class="reference external" href="https://philipdarke.com/torchtime/api/">API</a> for more information.</p>
+</section>
+<section id="other-resources">
+<h2>Other resources<a class="headerlink" href="#other-resources" title="Permalink to this headline"></a></h2>
+<p>If you’re looking for the TensorFlow equivalent for PhysioNet data sets try <a class="reference external" href="https://github.com/ExpectationMax/medical_ts_datasets">medical_ts_datasets</a>.</p>
 </section>
 <section id="acknowledgements">
 <h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline"></a></h2>

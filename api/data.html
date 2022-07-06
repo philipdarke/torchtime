@@ -7,6 +7,7 @@
   <title>Time series data sets &mdash; torchtime</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -16,6 +17,8 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,7 +34,7 @@
             <a href="../index.html" class="icon icon-home"> torchtime
           </a>
               <div class="version">
-                0.3.0
+                0.4.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -76,47 +79,33 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="time-series-data-sets">
+  <span class="target" id="module-torchtime.data"></span><section id="time-series-data-sets">
 <h1>Time series data sets<a class="headerlink" href="#time-series-data-sets" title="Permalink to this headline"></a></h1>
-<p>The following data sets are available:</p>
 <ul class="simple">
-<li><p><a class="reference internal" href="#torchtime.data.PhysioNet2012" title="torchtime.data.PhysioNet2012"><span class="xref myst py py-class">PhysioNet2012</span></a></p></li>
-<li><p><a class="reference internal" href="#torchtime.data.PhysioNet2019" title="torchtime.data.PhysioNet2019"><span class="xref myst py py-class">PhysioNet2019</span></a></p></li>
-<li><p><a class="reference internal" href="#torchtime.data.UEA" title="torchtime.data.UEA"><span class="xref myst py py-class">UEA</span></a></p></li>
+<li><p><a class="reference external" href="#torchtime.data.PhysioNet2012">PhysioNet2012</a></p></li>
+<li><p><a class="reference external" href="#torchtime.data.PhysioNet2019">PhysioNet2019</a></p></li>
+<li><p><a class="reference external" href="#torchtime.data.PhysioNet2019Binary">PhysioNet2019Binary</a></p></li>
+<li><p><a class="reference external" href="#torchtime.data.UEA">UEA</a></p></li>
 </ul>
-<p>Alternatively, a data set can be created from <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> tensors using the <a class="reference internal" href="#torchtime.data.TensorTimeSeriesDataset" title="torchtime.data.TensorTimeSeriesDataset"><span class="xref myst py py-class">TensorTimeSeriesDataset</span></a> class.</p>
-<span class="target" id="module-torchtime.data"></span><dl class="py class">
+<dl class="py class">
 <dt class="sig sig-object py" id="torchtime.data.PhysioNet2012">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchtime.data.</span></span><span class="sig-name descname"><span class="pre">PhysioNet2012</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_prop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_prop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchtime/data.html#PhysioNet2012"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.data.PhysioNet2012" title="Permalink to this definition"></a></dt>
-<dd><p><strong>Returns the PhysioNet Challenge 2012 data as a PyTorch Dataset.</strong></p>
-<p>See the PhysioNet <a class="reference external" href="https://physionet.org/content/challenge-2012/1.0.0/">website</a>
-for a description of the data set.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchtime.data.</span></span><span class="sig-name descname"><span class="pre">PhysioNet2012</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_prop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_prop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchtime/data.html#PhysioNet2012"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.data.PhysioNet2012" title="Permalink to this definition"></a></dt>
+<dd><p><strong>Returns the PhysioNet Challenge 2012 data as a PyTorch Dataset.</strong> See the
+PhysioNet <a class="reference external" href="https://physionet.org/content/challenge-2012/1.0.0/">website</a> for a
+description of the data set.</p>
 <p>The proportion of data in the training, validation and (optional) test data sets are
 specified by the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code> arguments. For a
 training/validation split specify <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> only. For a
-training/validation/test split specify both <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code>. For
-example <code class="docutils literal notranslate"><span class="pre">train_prop=0.8</span></code> generates a 80/20% train/validation split, but
+training/validation/test split specify both <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code>.</p>
+<p>For example <code class="docutils literal notranslate"><span class="pre">train_prop=0.8</span></code> generates a 80/20% train/validation split, but
 <code class="docutils literal notranslate"><span class="pre">train_prop=0.8</span></code>, <code class="docutils literal notranslate"><span class="pre">val_prop=0.1</span></code> generates a 80/10/10% train/validation/test
 split. Splits are formed using stratified sampling.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines which data set is returned.</p>
-<p>Missing data are imputed using the <code class="docutils literal notranslate"><span class="pre">impute</span></code> argument. <em>mean</em> imputation replaces
-missing values with the training data channel mean. <em>forward</em> imputation replaces
-missing values with the previous observation. Alternatively a custom imputation
-function can be passed to <code class="docutils literal notranslate"><span class="pre">impute</span></code>. This must accept <code class="docutils literal notranslate"><span class="pre">X</span></code> (raw time series),
-<code class="docutils literal notranslate"><span class="pre">y</span></code> (labels) and <code class="docutils literal notranslate"><span class="pre">fill</span></code> (channel means/modes) tensors and return <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>
-tensors post imputation.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> arguments append additional channels. By
-default, a time stamp is added as the first channel. <code class="docutils literal notranslate"><span class="pre">mask</span></code> adds a missing data
-mask and <code class="docutils literal notranslate"><span class="pre">delta</span></code> adds the time since the previous observation for each channel.
-Time deltas are calculated as in <a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">Che et al (2018)</a>.</p>
-<p>Processed data are cached in the <code class="docutils literal notranslate"><span class="pre">./.torchtime/physionet2012</span></code> directory by
-default. The location can be changed with the <code class="docutils literal notranslate"><span class="pre">path</span></code> argument, for example to
-share a single cache location across projects.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
 <p>When passed to a PyTorch DataLoader, batches are a named dictionary with <code class="docutils literal notranslate"><span class="pre">X</span></code>,
-<code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> data.</p>
-</div>
+<code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> data. The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines whether training,
+validation or test data are returned.</p>
+<p>Missing data can imputed using the <code class="docutils literal notranslate"><span class="pre">impute</span></code> argument. See the <a class="reference external" href="https://philipdarke.com/torchtime/tutorials/missing_data.html">missing data
+tutorial</a> for more
+information.</p>
 <p>Data channels are in the following order:</p>
 <dl class="field-list simple">
 <dt class="field-odd">0. Mins</dt>
@@ -266,12 +255,14 @@ the channel mode is assumed to be zero.</p>
 <li><p><strong>train_prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the training set.</p></li>
 <li><p><strong>val_prop</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Proportion of data in the validation set (optional, see above).</p></li>
 <li><p><strong>impute</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Method used to impute missing data, either <em>none</em>, <em>mean</em>, <em>forward</em> or
-a custom imputer function (default “none”).</p></li>
+a custom imputation function (default “none”).</p></li>
 <li><p><strong>time</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append time stamp in the first channel (default True).</p></li>
-<li><p><strong>mask</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append missing data mask channels (default False).</p></li>
-<li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append time delta channels (default False).</p></li>
-<li><p><strong>downscale</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The proportion of data to return. Use to reduce the size of the data
-set when testing a model (default 1).</p></li>
+<li><p><strong>mask</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append missing data mask for each channel (default False).</p></li>
+<li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append time since previous observation for each channel calculated as in
+<a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">Che et al (2018)</a>. Default
+False.</p></li>
+<li><p><strong>standardise</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Standardise the time series (default False).</p></li>
+<li><p><strong>overwrite_cache</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Overwrite saved cache (default False).</p></li>
 <li><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Location of the <code class="docutils literal notranslate"><span class="pre">.torchtime</span></code> cache directory (default “.”).</p></li>
 <li><p><strong>seed</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Random seed for reproducibility (optional).</p></li>
 </ul>
@@ -281,7 +272,7 @@ set when testing a model (default 1).</p></li>
 <dt class="sig sig-object py" id="torchtime.data.PhysioNet2012.X">
 <span class="sig-name descname"><span class="pre">X</span></span><a class="headerlink" href="#torchtime.data.PhysioNet2012.X" title="Permalink to this definition"></a></dt>
 <dd><p>A tensor of default shape (<em>n</em>, <em>s</em>, <em>c</em> + 1) where <em>n</em> = number of
-trajectories, <em>s</em> = (maximum) trajectory length and <em>c</em> = number of channels
+trajectories, <em>s</em> = (longest) trajectory length and <em>c</em> = number of channels
 in the PhysioNet data (<em>including</em> the time since admission in minutes). See
 above for the order of the PhysioNet channels. By default, a time stamp is
 appended as the first channel. If <code class="docutils literal notranslate"><span class="pre">time</span></code> is False, the time stamp is
@@ -305,8 +296,7 @@ padded with <code class="docutils literal notranslate"><span class="pre">NaNs</s
 <dt class="sig sig-object py" id="torchtime.data.PhysioNet2012.y">
 <span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#torchtime.data.PhysioNet2012.y" title="Permalink to this definition"></a></dt>
 <dd><p>In-hospital survival (the <code class="docutils literal notranslate"><span class="pre">In-hospital_death</span></code> variable) for each
-participant. <em>y</em> = 1 indicates an in-hospital death. A tensor of shape
-(<em>n</em>, 1).</p>
+patient. <em>y</em> = 1 indicates an in-hospital death. A tensor of shape (<em>n</em>, 1).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>Tensor</p>
@@ -335,47 +325,30 @@ attributes are available regardless of the <code class="docutils literal notrans
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A PyTorch Dataset object which can be passed to a
-DataLoader.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>torch.utils.data.Dataset</p>
+<dd class="field-odd"><p>A PyTorch Dataset object which can be passed to a DataLoader.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="torchtime.data.PhysioNet2019">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchtime.data.</span></span><span class="sig-name descname"><span class="pre">PhysioNet2019</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_prop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_prop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchtime/data.html#PhysioNet2019"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.data.PhysioNet2019" title="Permalink to this definition"></a></dt>
-<dd><p><strong>Returns the PhysioNet Challenge 2019 data as a PyTorch Dataset.</strong></p>
-<p>See the PhysioNet <a class="reference external" href="https://physionet.org/content/challenge-2019/1.0.0/">website</a>
-for a description of the data set.</p>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchtime.data.</span></span><span class="sig-name descname"><span class="pre">PhysioNet2019</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_prop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_prop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchtime/data.html#PhysioNet2019"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.data.PhysioNet2019" title="Permalink to this definition"></a></dt>
+<dd><p><strong>Returns the PhysioNet Challenge 2019 data as a PyTorch Dataset.</strong> See the
+PhysioNet <a class="reference external" href="https://physionet.org/content/challenge-2019/1.0.0/">website</a> for a
+description of the data set.</p>
 <p>The proportion of data in the training, validation and (optional) test data sets are
 specified by the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code> arguments. For a
 training/validation split specify <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> only. For a
-training/validation/test split specify both <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code>. For
-example <code class="docutils literal notranslate"><span class="pre">train_prop=0.8</span></code> generates a 80/20% train/validation split, but
+training/validation/test split specify both <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code>.</p>
+<p>For example <code class="docutils literal notranslate"><span class="pre">train_prop=0.8</span></code> generates a 80/20% train/validation split, but
 <code class="docutils literal notranslate"><span class="pre">train_prop=0.8</span></code>, <code class="docutils literal notranslate"><span class="pre">val_prop=0.1</span></code> generates a 80/10/10% train/validation/test
 split. Splits are formed using stratified sampling.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines which data set is returned.</p>
-<p>Missing data are imputed using the <code class="docutils literal notranslate"><span class="pre">impute</span></code> argument. <em>mean</em> imputation replaces
-missing values with the training data channel mean. <em>forward</em> imputation replaces
-missing values with the previous observation. Alternatively a custom imputation
-function can be passed to <code class="docutils literal notranslate"><span class="pre">impute</span></code>. This must accept <code class="docutils literal notranslate"><span class="pre">X</span></code> (raw time series),
-<code class="docutils literal notranslate"><span class="pre">y</span></code> (labels) and <code class="docutils literal notranslate"><span class="pre">fill</span></code> (channel means/modes) tensors and return <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>
-tensors post imputation.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> arguments append additional channels. By
-default, a time stamp is added as the first channel. <code class="docutils literal notranslate"><span class="pre">mask</span></code> adds a missing data
-mask and <code class="docutils literal notranslate"><span class="pre">delta</span></code> adds the time since the previous observation for each channel.
-Time deltas are calculated as in <a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">Che et al (2018)</a>.</p>
-<p>Processed data are cached in the <code class="docutils literal notranslate"><span class="pre">./.torchtime/physionet2019</span></code> directory by
-default. The location can be changed with the <code class="docutils literal notranslate"><span class="pre">path</span></code> argument, for example to
-share a single cache location across projects.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
 <p>When passed to a PyTorch DataLoader, batches are a named dictionary with <code class="docutils literal notranslate"><span class="pre">X</span></code>,
-<code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> data.</p>
-</div>
+<code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> data. The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines whether training,
+validation or test data are returned.</p>
+<p>Missing data can imputed using the <code class="docutils literal notranslate"><span class="pre">impute</span></code> argument. See the <a class="reference external" href="https://philipdarke.com/torchtime/tutorials/missing_data.html">missing data
+tutorial</a> for more
+information.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -383,12 +356,15 @@ share a single cache location across projects.</p>
 <li><p><strong>train_prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the training set.</p></li>
 <li><p><strong>val_prop</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Proportion of data in the validation set (optional, see above).</p></li>
 <li><p><strong>impute</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Method used to impute missing data, either <em>none</em>, <em>mean</em>, <em>forward</em> or
-a custom imputer function (default “none”).</p></li>
+a custom imputation function (default “none”).</p></li>
 <li><p><strong>time</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append time stamp in the first channel (default True).</p></li>
-<li><p><strong>mask</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append missing data mask channels (default False).</p></li>
-<li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append time delta channels (default False).</p></li>
-<li><p><strong>downscale</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The proportion of data to return. Use to reduce the size of the data
-set when testing a model (default 1).</p></li>
+<li><p><strong>mask</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append missing data mask for each channel (default False).</p></li>
+<li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – <p>Append time since previous observation for each channel calculated as in
+<a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">Che et al (2018)</a>. Default
+False.</p>
+</p></li>
+<li><p><strong>standardise</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Standardise the time series (default False).</p></li>
+<li><p><strong>overwrite_cache</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Overwrite saved cache (default False).</p></li>
 <li><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Location of the <code class="docutils literal notranslate"><span class="pre">.torchtime</span></code> cache directory (default “.”).</p></li>
 <li><p><strong>seed</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Random seed for reproducibility (optional).</p></li>
 </ul>
@@ -398,7 +374,7 @@ set when testing a model (default 1).</p></li>
 <dt class="sig sig-object py" id="torchtime.data.PhysioNet2019.X">
 <span class="sig-name descname"><span class="pre">X</span></span><a class="headerlink" href="#torchtime.data.PhysioNet2019.X" title="Permalink to this definition"></a></dt>
 <dd><p>A tensor of default shape (<em>n</em>, <em>s</em>, <em>c</em> + 1) where <em>n</em> = number of
-trajectories, <em>s</em> = (maximum) trajectory length and <em>c</em> = number of channels
+trajectories, <em>s</em> = (longest) trajectory length and <em>c</em> = number of channels
 in the PhysioNet data (<em>including</em> the <code class="docutils literal notranslate"><span class="pre">ICULOS</span></code> time stamp). The channels
 are ordered as set out on the PhysioNet <a class="reference external" href="https://physionet.org/content/challenge-2019/1.0.0/">website</a>. By default, a
 time stamp is appended as the first channel. If <code class="docutils literal notranslate"><span class="pre">time</span></code> is False, the
@@ -453,101 +429,70 @@ attributes are available regardless of the <code class="docutils literal notrans
 <dd class="field-odd"><p>A PyTorch Dataset object which can be passed to a
 DataLoader.</p>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>torch.utils.data.Dataset</p>
-</dd>
 </dl>
 </dd></dl>
 
 <dl class="py class">
-<dt class="sig sig-object py" id="torchtime.data.TensorTimeSeriesDataset">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchtime.data.</span></span><span class="sig-name descname"><span class="pre">TensorTimeSeriesDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">X</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_prop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_prop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchtime/data.html#TensorTimeSeriesDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.data.TensorTimeSeriesDataset" title="Permalink to this definition"></a></dt>
-<dd><p><strong>Returns a PyTorch Dataset from input tensors.</strong></p>
-<p>Pass <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> tensors and a <code class="docutils literal notranslate"><span class="pre">dataset</span></code> name to create the data
-set.</p>
+<dt class="sig sig-object py" id="torchtime.data.PhysioNet2019Binary">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchtime.data.</span></span><span class="sig-name descname"><span class="pre">PhysioNet2019Binary</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_prop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_prop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchtime/data.html#PhysioNet2019Binary"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.data.PhysioNet2019Binary" title="Permalink to this definition"></a></dt>
+<dd><p><strong>Returns a binary prediction variant of the PhysioNet Challenge 2019 data as a
+PyTorch Dataset.</strong></p>
+<p>In contrast with the full challenge, the first 72 hours of data are used to predict
+whether a patient develops sepsis at any point during the period of hospitalisation
+as in <a class="reference external" href="https://arxiv.org/abs/2005.08926">Kidger et al (2020)</a>. See the PhysioNet
+<a class="reference external" href="https://physionet.org/content/challenge-2019/1.0.0/">website</a> for a description
+of the data set.</p>
 <p>The proportion of data in the training, validation and (optional) test data sets are
 specified by the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code> arguments. For a
 training/validation split specify <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> only. For a
-training/validation/test split specify both <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code>. For
-example <code class="docutils literal notranslate"><span class="pre">train_prop=0.8</span></code> generates a 80/20% train/validation split, but
+training/validation/test split specify both <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code>.</p>
+<p>For example <code class="docutils literal notranslate"><span class="pre">train_prop=0.8</span></code> generates a 80/20% train/validation split, but
 <code class="docutils literal notranslate"><span class="pre">train_prop=0.8</span></code>, <code class="docutils literal notranslate"><span class="pre">val_prop=0.1</span></code> generates a 80/10/10% train/validation/test
 split. Splits are formed using stratified sampling.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines which data set is returned.</p>
-<p>Missing data can be simulated using the <code class="docutils literal notranslate"><span class="pre">missing</span></code> argument. Data are dropped at
-random.</p>
-<p>Missing data are imputed using the <code class="docutils literal notranslate"><span class="pre">impute</span></code> argument. <em>mean</em> imputation replaces
-missing values with the training data channel mean. <em>forward</em> imputation replaces
-missing values with the previous observation. Alternatively a custom imputation
-function can be passed to <code class="docutils literal notranslate"><span class="pre">impute</span></code>. This must accept <code class="docutils literal notranslate"><span class="pre">X</span></code> (raw time series),
-<code class="docutils literal notranslate"><span class="pre">y</span></code> (labels) and <code class="docutils literal notranslate"><span class="pre">fill</span></code> (channel means/modes) tensors and return <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>
-tensors post imputation.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Mean and forward imputation are unsuitable for categorical variables. To impute
-missing values for a categorical variable with the channel mode (rather than
-the channel mean), pass the channel indices to the <code class="docutils literal notranslate"><span class="pre">categorical</span></code> argument.
-Note this is also required for forward imputation to appropriately impute any
-initial missing values.</p>
-<p>Alternatively, the calculated channel mean/mode can be overridden using the
-<code class="docutils literal notranslate"><span class="pre">override</span></code> argument. This can be used to impute missing data with a fixed
-value.</p>
-</div>
-<p>The <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> arguments append additional channels. By
-default, a time stamp is added as the first channel. <code class="docutils literal notranslate"><span class="pre">mask</span></code> adds a missing data
-mask and <code class="docutils literal notranslate"><span class="pre">delta</span></code> adds the time since the previous observation for each channel.
-Time deltas are calculated as in <a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">Che et al (2018)</a>.</p>
-<p>Data are cached in the <code class="docutils literal notranslate"><span class="pre">./.torchtime/[dataset</span> <span class="pre">name]</span></code> directory by default. The
-location can be changed with the <code class="docutils literal notranslate"><span class="pre">path</span></code> argument, for example to share a single
-cache location across projects.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
 <p>When passed to a PyTorch DataLoader, batches are a named dictionary with <code class="docutils literal notranslate"><span class="pre">X</span></code>,
-<code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> data.</p>
-</div>
+<code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> data. The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines whether training,
+validation or test data are returned.</p>
+<p>Missing data can imputed using the <code class="docutils literal notranslate"><span class="pre">impute</span></code> argument. See the <a class="reference external" href="https://philipdarke.com/torchtime/tutorials/missing_data.html">missing data
+tutorial</a> for more
+information.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of cache directory for data set.</p></li>
-<li><p><strong>X</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – Tensor with time series data of shape (<em>n</em>, <em>s</em>, <em>c</em>).</p></li>
-<li><p><strong>y</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – Tensor with label data of shape (<em>n</em>, <em>s</em>, <em>l</em>) or (<em>n</em>, <em>s</em>, <em>l</em>).</p></li>
-<li><p><strong>length</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – Tensor with time series lengths of shape (<em>n</em>).</p></li>
 <li><p><strong>split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The data split to return, either <em>train</em>, <em>val</em> (validation) or <em>test</em>.</p></li>
 <li><p><strong>train_prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the training set.</p></li>
 <li><p><strong>val_prop</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Proportion of data in the validation set (optional, see above).</p></li>
-<li><p><strong>missing</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – The proportion of data to drop at random. If <code class="docutils literal notranslate"><span class="pre">missing</span></code> is a single
-value, data are dropped from all channels. To drop data independently across
-each channel, pass a list of rates with the proportion missing for each
-channel (default 0 i.e. no missing data simulation).</p></li>
 <li><p><strong>impute</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Method used to impute missing data, either <em>none</em>, <em>mean</em>, <em>forward</em> or
-a custom imputer function (default “none”).</p></li>
-<li><p><strong>categorical</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – List with channel indices of categorical variables (default <code class="docutils literal notranslate"><span class="pre">[]</span></code>
-i.e. no categorical variables).</p></li>
-<li><p><strong>override</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Override the calculated channel mean/mode when imputing data.
-Dictionary with channel indices and values e.g. {1: 4.5, 3: 7.2} (default
-<code class="docutils literal notranslate"><span class="pre">{}</span></code> i.e. no overridden channel mean/modes).</p></li>
+a custom imputation function (default “none”).</p></li>
 <li><p><strong>time</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append time stamp in the first channel (default True).</p></li>
-<li><p><strong>mask</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append missing data mask channels (default False).</p></li>
-<li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append time delta channels (default False).</p></li>
-<li><p><strong>downscale</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The proportion of data to return. Use to reduce the size of the data
-set when testing a model (default 1).</p></li>
+<li><p><strong>mask</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append missing data mask for each channel (default False).</p></li>
+<li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – <p>Append time since previous observation for each channel calculated as in
+<a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">Che et al (2018)</a>. Default
+False.</p>
+</p></li>
+<li><p><strong>standardise</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Standardise the time series (default False).</p></li>
+<li><p><strong>overwrite_cache</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Overwrite saved cache (default False).</p></li>
 <li><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Location of the <code class="docutils literal notranslate"><span class="pre">.torchtime</span></code> cache directory (default “.”).</p></li>
 <li><p><strong>seed</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Random seed for reproducibility (optional).</p></li>
 </ul>
 </dd>
 </dl>
 <dl class="py attribute">
-<dt class="sig sig-object py" id="torchtime.data.TensorTimeSeriesDataset.X">
-<span class="sig-name descname"><span class="pre">X</span></span><a class="headerlink" href="#torchtime.data.TensorTimeSeriesDataset.X" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="torchtime.data.PhysioNet2019Binary.X">
+<span class="sig-name descname"><span class="pre">X</span></span><a class="headerlink" href="#torchtime.data.PhysioNet2019Binary.X" title="Permalink to this definition"></a></dt>
 <dd><p>A tensor of default shape (<em>n</em>, <em>s</em>, <em>c</em> + 1) where <em>n</em> = number of
-trajectories, <em>s</em> = trajectory length and <em>c</em> = number of channels. By
-default, a time stamp is appended as the first channel. If <code class="docutils literal notranslate"><span class="pre">time</span></code> is
-False, the time stamp is omitted and the tensor has shape (<em>n</em>, <em>s</em>, <em>c</em>).</p>
+trajectories, <em>s</em> = (longest) trajectory length and <em>c</em> = number of channels
+in the PhysioNet data (<em>including</em> the <code class="docutils literal notranslate"><span class="pre">ICULOS</span></code> time stamp). The channels
+are ordered as set out on the PhysioNet <a class="reference external" href="https://physionet.org/content/challenge-2019/1.0.0/">website</a>. By default, a
+time stamp is appended as the first channel. If <code class="docutils literal notranslate"><span class="pre">time</span></code> is False, the
+time stamp is omitted and the tensor has shape (<em>n</em>, <em>s</em>, <em>c</em>).</p>
 <p>A missing data mask and/or time delta channels can be appended with the
 <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> arguments. These each have the same number of
-channels as the data set. For example, if <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and
-<code class="docutils literal notranslate"><span class="pre">delta</span></code> are all True, <code class="docutils literal notranslate"><span class="pre">X</span></code> has shape (<em>n</em>, <em>s</em>, 3 * <em>c</em> + 1) and the
-channels are in the order: time stamp, time series, missing data mask, time
-deltas.</p>
+channels as the Physionet data. For example, if <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and
+<code class="docutils literal notranslate"><span class="pre">delta</span></code> are all True, <code class="docutils literal notranslate"><span class="pre">X</span></code> has shape (<em>n</em>, <em>s</em>, 3 * <em>c</em> + 1 = 121) and
+the channels are in the order: time stamp, time series, missing data mask,
+time deltas.</p>
+<p>Note that PhysioNet trajectories are of unequal length and are therefore
+padded with <code class="docutils literal notranslate"><span class="pre">NaNs</span></code> to the length of the longest trajectory in the data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>Tensor</p>
@@ -556,9 +501,10 @@ deltas.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="torchtime.data.TensorTimeSeriesDataset.y">
-<span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#torchtime.data.TensorTimeSeriesDataset.y" title="Permalink to this definition"></a></dt>
-<dd><p>Label data. Shape equal to input tensor <code class="docutils literal notranslate"><span class="pre">y</span></code>.</p>
+<dt class="sig sig-object py" id="torchtime.data.PhysioNet2019Binary.y">
+<span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#torchtime.data.PhysioNet2019Binary.y" title="Permalink to this definition"></a></dt>
+<dd><p>Whether patient is diagnosed with sepsis at any time during
+hospitalisation. A tensor of shape (<em>n</em>, 1).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type</dt>
 <dd class="field-odd"><p>Tensor</p>
@@ -567,8 +513,8 @@ deltas.</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="torchtime.data.TensorTimeSeriesDataset.length">
-<span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#torchtime.data.TensorTimeSeriesDataset.length" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="torchtime.data.PhysioNet2019Binary.length">
+<span class="sig-name descname"><span class="pre">length</span></span><a class="headerlink" href="#torchtime.data.PhysioNet2019Binary.length" title="Permalink to this definition"></a></dt>
 <dd><p>Length of each trajectory prior to padding. A tensor of shape
 (<em>n</em>).</p>
 <dl class="field-list simple">
@@ -587,85 +533,67 @@ attributes are available regardless of the <code class="docutils literal notrans
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A PyTorch Dataset object which can be passed to a
-DataLoader.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>torch.utils.data.Dataset</p>
+<dd class="field-odd"><p>A PyTorch Dataset object which can be passed to a DataLoader.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="torchtime.data.UEA">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchtime.data.</span></span><span class="sig-name descname"><span class="pre">UEA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_prop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_prop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">override</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">downscale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchtime/data.html#UEA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.data.UEA" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchtime.data.</span></span><span class="sig-name descname"><span class="pre">UEA</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_prop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_prop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">categorical</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel_means</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchtime/data.html#UEA"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.data.UEA" title="Permalink to this definition"></a></dt>
 <dd><p><strong>Returns a time series classification data set from the UEA/UCR
-repository as a PyTorch Dataset.</strong></p>
-<p>See the UEA/UCR repository <a class="reference external" href="https://www.timeseriesclassification.com/">website</a> for a list of data sets and
-their descriptions.</p>
+repository as a PyTorch Dataset.</strong> See the UEA/UCR repository <a class="reference external" href="https://www.timeseriesclassification.com/">website</a> for the data sets.</p>
 <p>The proportion of data in the training, validation and (optional) test data sets are
 specified by the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code> arguments. For a
 training/validation split specify <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> only. For a
-training/validation/test split specify both <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code>. For
-example <code class="docutils literal notranslate"><span class="pre">train_prop=0.8</span></code> generates a 80/20% train/validation split, but
+training/validation/test split specify both <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code>.</p>
+<p>For example <code class="docutils literal notranslate"><span class="pre">train_prop=0.8</span></code> generates a 80/20% train/validation split, but
 <code class="docutils literal notranslate"><span class="pre">train_prop=0.8</span></code>, <code class="docutils literal notranslate"><span class="pre">val_prop=0.1</span></code> generates a 80/10/10% train/validation/test
 split. Splits are formed using stratified sampling.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines which data set is returned.</p>
-<p>Missing data can be simulated using the <code class="docutils literal notranslate"><span class="pre">missing</span></code> argument. Data are dropped at
-random.</p>
-<p>Missing data are imputed using the <code class="docutils literal notranslate"><span class="pre">impute</span></code> argument. <em>mean</em> imputation replaces
-missing values with the training data channel mean. <em>forward</em> imputation replaces
-missing values with the previous observation. Alternatively a custom imputation
-function can be passed to <code class="docutils literal notranslate"><span class="pre">impute</span></code>. This must accept <code class="docutils literal notranslate"><span class="pre">X</span></code> (raw time series),
-<code class="docutils literal notranslate"><span class="pre">y</span></code> (labels) and <code class="docutils literal notranslate"><span class="pre">fill</span></code> (channel means/modes) tensors and return <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code>
-tensors post imputation.</p>
+<p>When passed to a PyTorch DataLoader, batches are a named dictionary with <code class="docutils literal notranslate"><span class="pre">X</span></code>,
+<code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> data. The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines whether training,
+validation or test data are returned.</p>
+<p>Missing data can be simulated by dropping data at random. Support is also provided
+to impute missing data. These options are controlled by the <code class="docutils literal notranslate"><span class="pre">missing</span></code> and
+<code class="docutils literal notranslate"><span class="pre">impute</span></code> arguments. See the <a class="reference external" href="https://philipdarke.com/torchtime/tutorials/missing_data.html">missing data tutorial</a> for more
+information.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Mean and forward imputation are unsuitable for categorical variables. To impute
-missing values for a categorical variable with the channel mode (rather than
-the channel mean), pass the channel indices to the <code class="docutils literal notranslate"><span class="pre">categorical</span></code> argument.
-Note this is also required for forward imputation to appropriately impute
-initial missing values.</p>
+<p>Mean imputation is unsuitable for categorical variables. To impute missing
+values for a categorical variable with the channel mode (rather than the channel
+mean), pass the channel indices to the <code class="docutils literal notranslate"><span class="pre">categorical</span></code> argument. Note this is
+also required for forward imputation to appropriately impute initial missing
+values.</p>
 <p>Alternatively, the calculated channel mean/mode can be overridden using the
-<code class="docutils literal notranslate"><span class="pre">override</span></code> argument. This can be used to impute missing data with a fixed
+<code class="docutils literal notranslate"><span class="pre">channel_means</span></code> argument. This can be used to impute missing data with a fixed
 value.</p>
-</div>
-<p>The <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> arguments append additional channels. By
-default, a time stamp is added as the first channel. <code class="docutils literal notranslate"><span class="pre">mask</span></code> adds a missing data
-mask and <code class="docutils literal notranslate"><span class="pre">delta</span></code> adds the time since the previous observation for each channel.
-Time deltas are calculated as in <a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">Che et al (2018)</a>.</p>
-<p>Data are downloaded using the <code class="docutils literal notranslate"><span class="pre">sktime</span></code> package and cached in the
-<code class="docutils literal notranslate"><span class="pre">./.torchtime/[dataset</span> <span class="pre">name]</span></code> directory by default. The location can be changed
-with the <code class="docutils literal notranslate"><span class="pre">path</span></code> argument, for example to share a single cache location across
-projects.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>When passed to a PyTorch DataLoader, batches are a named dictionary with <code class="docutils literal notranslate"><span class="pre">X</span></code>,
-<code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> data.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dataset</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The data set to return.</p></li>
+<li><p><strong>dataset</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The UEA/UCR data set from list <a class="reference external" href="https://timeseriesclassification.com/dataset.php">here</a>.</p></li>
 <li><p><strong>split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The data split to return, either <em>train</em>, <em>val</em> (validation) or <em>test</em>.</p></li>
 <li><p><strong>train_prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the training set.</p></li>
 <li><p><strong>val_prop</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Proportion of data in the validation set (optional, see above).</p></li>
 <li><p><strong>missing</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – The proportion of data to drop at random. If <code class="docutils literal notranslate"><span class="pre">missing</span></code> is a single
 value, data are dropped from all channels. To drop data independently across
-each channel, pass a list of rates with the proportion missing for each
-channel (default 0 i.e. no missing data simulation).</p></li>
+each channel, pass a list of the proportion missing for each channel e.g.
+<code class="docutils literal notranslate"><span class="pre">[0.5,</span> <span class="pre">0.2,</span> <span class="pre">0.8]</span></code>. Default 0 i.e. no missing data simulation.</p></li>
 <li><p><strong>impute</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Method used to impute missing data, either <em>none</em>, <em>mean</em>, <em>forward</em> or
-a custom imputer function (default “none”).</p></li>
-<li><p><strong>categorical</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – List with channel indices of categorical variables (default <code class="docutils literal notranslate"><span class="pre">[]</span></code>
-i.e. no categorical variables).</p></li>
-<li><p><strong>override</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Override the calculated channel mean/mode when imputing data.
-Dictionary with channel indices and values e.g. {1: 4.5, 3: 7.2} (default
-<code class="docutils literal notranslate"><span class="pre">{}</span></code> i.e. no overridden channel mean/modes).</p></li>
+a custom imputation function (default “none”). See warning above.</p></li>
+<li><p><strong>categorical</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – List with channel indices of categorical variables. Only required
+if imputing data. Default <code class="docutils literal notranslate"><span class="pre">[]</span></code> i.e. no categorical variables.</p></li>
+<li><p><strong>channel_means</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Override the calculated channel mean/mode when imputing data.
+Only used if imputing data. Dictionary with channel indices and values e.g.
+<code class="docutils literal notranslate"><span class="pre">{1:</span> <span class="pre">4.5,</span> <span class="pre">3:</span> <span class="pre">7.2}</span></code> (default <code class="docutils literal notranslate"><span class="pre">{}</span></code> i.e. no overridden channel mean/modes).</p></li>
 <li><p><strong>time</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append time stamp in the first channel (default True).</p></li>
-<li><p><strong>mask</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append missing data mask channels (default False).</p></li>
-<li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append time delta channels (default False).</p></li>
-<li><p><strong>downscale</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The proportion of data to return. Use to reduce the size of the data
-set when testing a model (default 1).</p></li>
+<li><p><strong>mask</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append missing data mask for each channel (default False).</p></li>
+<li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – <p>Append time since previous observation for each channel calculated as in
+<a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">Che et al (2018)</a>. Default
+False.</p>
+</p></li>
+<li><p><strong>standardise</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Standardise the time series (default False).</p></li>
+<li><p><strong>overwrite_cache</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Overwrite saved cache (default False).</p></li>
 <li><p><strong>path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Location of the <code class="docutils literal notranslate"><span class="pre">.torchtime</span></code> cache directory (default “.”).</p></li>
 <li><p><strong>seed</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – Random seed for reproducibility (optional).</p></li>
 </ul>
@@ -675,7 +603,7 @@ set when testing a model (default 1).</p></li>
 <dt class="sig sig-object py" id="torchtime.data.UEA.X">
 <span class="sig-name descname"><span class="pre">X</span></span><a class="headerlink" href="#torchtime.data.UEA.X" title="Permalink to this definition"></a></dt>
 <dd><p>A tensor of default shape (<em>n</em>, <em>s</em>, <em>c</em> + 1) where <em>n</em> = number of
-trajectories, <em>s</em> = (maximum) trajectory length and <em>c</em> = number of
+trajectories, <em>s</em> = (longest) trajectory length and <em>c</em> = number of
 channels. By default, a time stamp is appended as the first channel. If
 <code class="docutils literal notranslate"><span class="pre">time</span></code> is False, the time stamp is omitted and the tensor has shape
 (<em>n</em>, <em>s</em>, <em>c</em>).</p>
@@ -727,11 +655,7 @@ attributes are available regardless of the <code class="docutils literal notrans
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>A PyTorch Dataset object which can be passed to a
-DataLoader.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>torch.utils.data.Dataset</p>
+<dd class="field-odd"><p>A PyTorch Dataset object which can be passed to a DataLoader.</p>
 </dd>
 </dl>
 </dd></dl>

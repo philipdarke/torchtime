@@ -7,6 +7,7 @@
   <title>Getting started &mdash; torchtime</title>
       <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
@@ -16,6 +17,8 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -31,7 +34,7 @@
             <a href="../index.html" class="icon icon-home"> torchtime
           </a>
               <div class="version">
-                0.3.0
+                0.4.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -78,17 +81,19 @@
              
   <section id="getting-started">
 <h1>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h1>
-<p>This tutorial covers the <code class="docutils literal notranslate"><span class="pre">torchtime.data.UEA</span></code> class for data sets held in the UEA/UCR classification repository <a class="reference external" href="https://www.timeseriesclassification.com/">[link]</a>. A similar approach applies for other data sets, see the <a class="reference internal" href="../api/data.html"><span class="doc std std-doc">API</span></a> for further details.</p>
+<p><em>This tutorial covers the <code class="docutils literal notranslate"><span class="pre">torchtime.data.UEA</span></code> class. A similar approach applies for other data sets, see the <a class="reference internal" href="../api/data.html"><span class="doc std std-doc">API</span></a> for further details.</em></p>
 <p><code class="docutils literal notranslate"><span class="pre">torchtime.data.UEA</span></code> has the following arguments:</p>
 <ul class="simple">
 <li><p>The data set is specified using the <code class="docutils literal notranslate"><span class="pre">dataset</span></code> argument (see list <a class="reference external" href="https://www.timeseriesclassification.com/dataset.php">here</a>).</p></li>
-<li><p>The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines whether training, validation or test data are returned. The size of the splits are controlled with the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code> arguments. See <a class="reference internal" href="#data-splits"><span class="std std-ref">data splits</span></a> below.</p></li>
+<li><p>The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines whether training, validation or test data are returned. The size of the splits are controlled with the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code> arguments. See <a class="reference internal" href="#data-splits"><span class="std std-ref">below</span></a>.</p></li>
 <li><p>Missing data can be simulated by dropping data at random. Support is also provided to impute missing data. These options are controlled by the <code class="docutils literal notranslate"><span class="pre">missing</span></code> and <code class="docutils literal notranslate"><span class="pre">impute</span></code> arguments. See the <a class="reference internal" href="missing_data.html"><span class="doc std std-doc">missing data</span></a> tutorial for their usage.</p></li>
-<li><p>A time stamp, missing data mask and the time since previous observation can be appended to the time series data with the boolean arguments <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> respectively. See the <a class="reference internal" href="missing_data.html"><span class="doc std std-doc">missing data</span></a> tutorial for their usage.</p></li>
+<li><p>A time stamp (added by default), missing data mask and the time since previous observation can be appended with the boolean arguments <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> respectively. See the <a class="reference internal" href="missing_data.html"><span class="doc std std-doc">missing data</span></a> tutorial for their usage.</p></li>
+<li><p>Time series data are standardised using the <code class="docutils literal notranslate"><span class="pre">standardise</span></code> boolean argument (default <code class="docutils literal notranslate"><span class="pre">False</span></code>).</p></li>
+<li><p>The location of cached data can be changed with the <code class="docutils literal notranslate"><span class="pre">path</span></code> argument (default <code class="docutils literal notranslate"><span class="pre">./.torchtime/[dataset</span> <span class="pre">name]</span></code>), for example to share a single cache location across projects.</p></li>
 <li><p>For reproducibility, an optional random <code class="docutils literal notranslate"><span class="pre">seed</span></code> can be specified.</p></li>
 </ul>
-<p>For example, to load training data for the <a class="reference external" href="https://www.timeseriesclassification.com/description.php?Dataset=ArrowHead">ArrowHead</a> data set with a 70/30% training/validation split:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
+<p>For example, to load training data for the <a class="reference external" href="https://www.timeseriesclassification.com/description.php?Dataset=ArrowHead">ArrowHead</a> data set with a 70/30% training/validation split as a <code class="docutils literal notranslate"><span class="pre">torchtime</span></code> object named <code class="docutils literal notranslate"><span class="pre">arrowhead</span></code>:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
 
 <span class="n">arrowhead</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
     <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;ArrowHead&quot;</span><span class="p">,</span>
@@ -98,95 +103,125 @@
 <span class="p">)</span>
 </pre></div>
 </div>
-<p><code class="docutils literal notranslate"><span class="pre">torchtime</span></code> downloads the data set using the <a class="reference external" href="https://www.sktime.org"><code class="docutils literal notranslate"><span class="pre">sktime</span></code></a> package. Training and validation splits are inconsistent across UEA/UCR data sets therefore the package downloads all data and initialises training, validation and (optional) test data sets.</p>
-<section id="accessing-the-data">
-<h2>Accessing the data<a class="headerlink" href="#accessing-the-data" title="Permalink to this headline"></a></h2>
-<p>Data can be accessed with the <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> attributes. These return the data specified in the <code class="docutils literal notranslate"><span class="pre">split</span></code> argument i.e. the training data in the example above.</p>
+<p><code class="docutils literal notranslate"><span class="pre">torchtime</span></code> downloads the data set and extracts the time series using the <a class="reference external" href="https://www.sktime.org"><code class="docutils literal notranslate"><span class="pre">sktime</span></code></a> package. Training and validation splits are inconsistent across UEA/UCR data sets therefore the package downloads all data and returns the data splits specified by the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code> arguments.</p>
+<section id="working-with-torchtime-objects">
+<h2>Working with <code class="docutils literal notranslate"><span class="pre">torchtime</span></code> objects<a class="headerlink" href="#working-with-torchtime-objects" title="Permalink to this headline"></a></h2>
+<p>Data are accessed with the <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code> attributes. These return the data specified in the <code class="docutils literal notranslate"><span class="pre">split</span></code> argument i.e. the training data in the example above.</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">X</span></code> are the time series data. The package follows the <em>batch first</em> convention therefore <code class="docutils literal notranslate"><span class="pre">X</span></code> has shape (<em>n</em>, <em>s</em>, <em>c</em>) where <em>n</em> is batch size, <em>s</em> is (maximum) trajectory length and <em>c</em> is the number of channels. By default, a time stamp is appended to the time series data as the first channel.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code> are label data. For UEA/UCR data sets, labels are one-hot encoded tensors of shape (<em>n</em>, <em>l</em>) where <em>l</em> is the number of classes.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">length</span></code> are the length of each trajectory (before padding if series are of irregular length) i.e. a tensor of shape (<em>n</em>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">X</span></code> are the time series data. The package follows the <em>batch first</em> convention therefore <code class="docutils literal notranslate"><span class="pre">X</span></code> has shape (<em>n</em>, <em>s</em>, <em>c</em>) where <em>n</em> is batch size, <em>s</em> is (longest) trajectory length and <em>c</em> is the number of channels. By default, the first channel is a time stamp.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code> are one-hot encoded labels of shape (<em>n</em>, <em>l</em>) where <em>l</em> is the number of classes.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">length</span></code> are the length of each trajectory (before padding if sequences are of irregular length) i.e. a tensor of shape (<em>n</em>).</p></li>
 </ul>
-<p>Training, validation and test (if specified) data are also available by appending <code class="docutils literal notranslate"><span class="pre">_train</span></code>, <code class="docutils literal notranslate"><span class="pre">_val</span></code> and <code class="docutils literal notranslate"><span class="pre">_test</span></code> respectively.</p>
-<p>ArrowHead is a univariate time series therefore <code class="docutils literal notranslate"><span class="pre">X</span></code> has two channels, the time stamp followed by the time series (<em>c</em> = 2). Each series has 251 observations (<em>s</em> = 251) and there are three classes (<em>l</em> = 3).</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Training data (implicit)</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span>             <span class="c1"># torch.Size([148, 251, 2])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span>             <span class="c1"># torch.Size([148, 3])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">length</span><span class="o">.</span><span class="n">shape</span>        <span class="c1"># torch.Size([148])</span>
+<p>Training, validation and test (if specified) data are accessed by appending <code class="docutils literal notranslate"><span class="pre">_train</span></code>, <code class="docutils literal notranslate"><span class="pre">_val</span></code> and <code class="docutils literal notranslate"><span class="pre">_test</span></code> respectively.</p>
+<p>ArrowHead is a univariate time series therefore <code class="docutils literal notranslate"><span class="pre">X</span></code> has two channels, the time stamp followed by the time series (<em>c</em> = 2). Each series has 251 observations (<em>s</em> = 251) and there are three classes (<em>l</em> = 3). Therefore, for the example above:</p>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Training data (implicit)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([148, 251, 2])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([148, 3])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">length</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([148])</span>
 
-<span class="c1"># Training data (explicit)</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span>       <span class="c1"># torch.Size([148, 251, 2])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">y_train</span><span class="o">.</span><span class="n">shape</span>       <span class="c1"># torch.Size([148, 3])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">length_train</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># torch.Size([148])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Training data (explicit)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([148, 251, 2])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">y_train</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([148, 3])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">length_train</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([148])</span>
 
-<span class="c1"># Validation data</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">X_val</span><span class="o">.</span><span class="n">shape</span>         <span class="c1"># torch.Size([63, 251, 2])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">y_val</span><span class="o">.</span><span class="n">shape</span>         <span class="c1"># torch.Size([63, 3])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">length_val</span><span class="o">.</span><span class="n">shape</span>    <span class="c1"># torch.Size([63])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Validation data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">X_val</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([63, 251, 2])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">y_val</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([63, 3])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">length_val</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([63])</span>
+</pre></div>
+</div>
+</section>
+<section id="training-validation-and-test-splits">
+<span id="data-splits"></span><h2>Training, validation and test splits<a class="headerlink" href="#training-validation-and-test-splits" title="Permalink to this headline"></a></h2>
+<p>To create training and validation data sets, pass the proportion of data for training to the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> argument as in the example above.</p>
+<p>To create training, validation and test data sets, use both the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code> arguments. For example, for a 70/20/10% training/validation/test split:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">arrowhead</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;ArrowHead&quot;</span><span class="p">,</span>
+    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
+    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>  <span class="c1"># 70% training</span>
+    <span class="n">val_prop</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>    <span class="c1"># 20% validation</span>
+    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-pycon3 notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Training data (implicit)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([148, 251, 2])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([148, 3])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">length</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([148])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Training data (explicit)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([148, 251, 2])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">y_train</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([148, 3])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">length_train</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([148])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Validation data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">X_val</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([42, 251, 2])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">y_val</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([42, 3])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">length_val</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([42])</span>
+
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Test data</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">X_test</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([21, 251, 2])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">y_test</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([21, 3])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">arrowhead</span><span class="o">.</span><span class="n">length_test</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">torch.Size([21])</span>
 </pre></div>
 </div>
 </section>
 <section id="using-dataloaders">
 <h2>Using DataLoaders<a class="headerlink" href="#using-dataloaders" title="Permalink to this headline"></a></h2>
-<p>Data sets are passed to a PyTorch <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">DataLoader</a> for model training.</p>
-<p>Rather than calling <code class="docutils literal notranslate"><span class="pre">torchtime.data.UEA</span></code> two or three times to create training, validation and test sets, it is more efficient to create one instance of the data set and pass the validation and test data to <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.TensorDataset"><code class="docutils literal notranslate"><span class="pre">torch.utils.data.TensorDataset</span></code></a>. This avoids holding two/three complete copies of the data in memory.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">TensorDataset</span>
-<span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
+<p>Data sets are typically passed to a PyTorch <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader">DataLoader</a> for model training. Batches of <code class="docutils literal notranslate"><span class="pre">torchtime</span></code> data sets are dictionaries of tensors <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code>.</p>
+<p>Rather than calling <code class="docutils literal notranslate"><span class="pre">torchtime.data.UEA</span></code> two or three times to create training, validation and test sets, it is more efficient to create one instance of the data set and pass the validation and test data to <a class="reference external" href="https://pytorch.org/docs/stable/data.html#torch.utils.data.TensorDataset"><code class="docutils literal notranslate"><span class="pre">torch.utils.data.TensorDataset</span></code></a>. This avoids holding two/three complete copies of the data in memory. For example:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">TensorDataset</span>
 
 <span class="n">arrowhead</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
     <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;ArrowHead&quot;</span><span class="p">,</span>
     <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
-    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
+    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>  <span class="c1"># 70% training</span>
+    <span class="n">val_prop</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>    <span class="c1"># 20% validation</span>
     <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">arrowhead</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
 
+<span class="c1"># Validation data</span>
 <span class="n">val_data</span> <span class="o">=</span> <span class="n">TensorDataset</span><span class="p">(</span>
     <span class="n">arrowhead</span><span class="o">.</span><span class="n">X_val</span><span class="p">,</span>
     <span class="n">arrowhead</span><span class="o">.</span><span class="n">y_val</span><span class="p">,</span>
     <span class="n">arrowhead</span><span class="o">.</span><span class="n">length_val</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="n">val_dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">val_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>In the example above, <code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code> and <code class="docutils literal notranslate"><span class="pre">val_dataloader</span></code> are the iterable DataLoaders for the training and validation data respectively.</p>
-<p>DataLoader batches are dictionaries of tensors <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code>.</p>
-</section>
-<section id="data-splits">
-<span id="id1"></span><h2>Data splits<a class="headerlink" href="#data-splits" title="Permalink to this headline"></a></h2>
-<p>To create training and validation data sets, pass the proportion of data for the training data to the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> argument. See the 70/30% training/validation split in the example above.</p>
-<p>To create training, validation and test data sets, use both the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and <code class="docutils literal notranslate"><span class="pre">val_prop</span></code> arguments. For example, for a 70/20/10% training/validation/test split:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
 
-<span class="n">arrowhead</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
-    <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;ArrowHead&quot;</span><span class="p">,</span>
-    <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
-    <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
-    <span class="n">val_prop</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
-    <span class="n">seed</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="c1"># Training data (implicit)</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span>             <span class="c1"># torch.Size([148, 251, 2])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">y</span><span class="o">.</span><span class="n">shape</span>             <span class="c1"># torch.Size([148, 3])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">length</span><span class="o">.</span><span class="n">shape</span>        <span class="c1"># torch.Size([148])</span>
-
-<span class="c1"># Training data (explicit)</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span>       <span class="c1"># torch.Size([148, 251, 2])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">y_train</span><span class="o">.</span><span class="n">shape</span>       <span class="c1"># torch.Size([148, 3])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">length_train</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># torch.Size([148])</span>
-
-<span class="c1"># Validation data</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">X_val</span><span class="o">.</span><span class="n">shape</span>         <span class="c1"># torch.Size([42, 251, 2])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">y_val</span><span class="o">.</span><span class="n">shape</span>         <span class="c1"># torch.Size([42, 3])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">length_val</span><span class="o">.</span><span class="n">shape</span>    <span class="c1"># torch.Size([42])</span>
 
 <span class="c1"># Test data</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">X_test</span><span class="o">.</span><span class="n">shape</span>        <span class="c1"># torch.Size([21, 251, 2])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">y_test</span><span class="o">.</span><span class="n">shape</span>        <span class="c1"># torch.Size([21, 3])</span>
-<span class="n">arrowhead</span><span class="o">.</span><span class="n">length_test</span><span class="o">.</span><span class="n">shape</span>   <span class="c1"># torch.Size([21])</span>
+<span class="n">test_data</span> <span class="o">=</span> <span class="n">TensorDataset</span><span class="p">(</span>
+    <span class="n">arrowhead</span><span class="o">.</span><span class="n">X_test</span><span class="p">,</span>
+    <span class="n">arrowhead</span><span class="o">.</span><span class="n">y_test</span><span class="p">,</span>
+    <span class="n">arrowhead</span><span class="o">.</span><span class="n">length_test</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">test_dataloader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">test_data</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">32</span><span class="p">)</span>
 </pre></div>
 </div>
+<p><code class="docutils literal notranslate"><span class="pre">arrowhead</span></code> is a <code class="docutils literal notranslate"><span class="pre">torchtime</span></code> object containing the training and validation data. <code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code>, <code class="docutils literal notranslate"><span class="pre">val_dataloader</span></code> and <code class="docutils literal notranslate"><span class="pre">test_dataloader</span></code> are the iterable DataLoaders for the training, validation and test data respectively.</p>
+<p>Note that <code class="docutils literal notranslate"><span class="pre">train_dataloader</span></code> returns batches as a named dictionary as above, but <code class="docutils literal notranslate"><span class="pre">val_dataloader</span></code> and <code class="docutils literal notranslate"><span class="pre">test_dataloader</span></code> return a list.</p>
 </section>
 </section>
 

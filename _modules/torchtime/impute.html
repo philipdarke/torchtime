@@ -6,6 +6,7 @@
   <title>torchtime.impute &mdash; torchtime</title>
       <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
       <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
@@ -15,6 +16,8 @@
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
@@ -28,7 +31,7 @@
             <a href="../../index.html" class="icon icon-home"> torchtime
           </a>
               <div class="version">
-                0.3.0
+                0.4.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -68,95 +71,113 @@
            <div itemprop="articleBody">
              
   <h1>Source code for torchtime.impute</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">=======================</span>
+<span class="sd">Missing data imputation</span>
+<span class="sd">=======================</span>
+
+<span class="sd">The following functions are provided to impute missing time series data:</span>
+
+<span class="sd">* `Replace missing data with a fixed value &lt;#torchtime.impute.replace_missing&gt;`_</span>
+<span class="sd">* `Forward imputation &lt;#torchtime.impute.forward_impute&gt;`_</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">torch</span>
 <span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">Tensor</span>
 
 
-<div class="viewcode-block" id="replace_missing"><a class="viewcode-back" href="../../api/impute.html#torchtime.impute.replace_missing">[docs]</a><span class="k">def</span> <span class="nf">replace_missing</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">fill</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">select</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+<div class="viewcode-block" id="replace_missing"><a class="viewcode-back" href="../../api/impute.html#torchtime.impute.replace_missing">[docs]</a><span class="k">def</span> <span class="nf">replace_missing</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">fill</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">select</span><span class="p">:</span> <span class="n">Tensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;**Replace missing data with a fixed value by channel.**</span>
 
-<span class="sd">    Imputes missing data by replacing all ``NaNs`` with a value by channel. All channels</span>
-<span class="sd">    are imputed by default, however a subset can be imputed by passing a list of indices</span>
-<span class="sd">    to ``select``.</span>
+<span class="sd">    Imputes missing data by replacing all ``NaNs`` with a fixed value by channel. Fill</span>
+<span class="sd">    values are specified by the ``fill`` argument. All channels are imputed by default,</span>
+<span class="sd">    however a subset can be imputed by passing the indices to ``select``.</span>
 
-<span class="sd">    ``fill`` must be a tensor with the replacement value for, and in the same order as,</span>
-<span class="sd">    each channel that is imputed. If all columns are to be imputed, ``fill`` must be a</span>
-<span class="sd">    tensor of size (*c*) where *c* is the number of channels in the input. If ``select``</span>
-<span class="sd">    is used to impute a subset of channels, ``fill`` must be a tensor of size (*d*)</span>
-<span class="sd">    where *d* is the length of ``select``. A common choice of ``fill`` is the mean of</span>
-<span class="sd">    each channel in the training data.</span>
-
-<span class="sd">    Under this approach, no knowledge of the time series at times *t &gt; i* is required</span>
-<span class="sd">    when imputing values at time *i*. This is essential if you are developing a model</span>
-<span class="sd">    that will make online predictions.</span>
+<span class="sd">    A common choice of ``fill`` is the mean of each channel in the training data. Under</span>
+<span class="sd">    this approach, no knowledge of the time series at times *t &gt; i* is required when</span>
+<span class="sd">    imputing values at time *i*. This is essential if you are developing a model that</span>
+<span class="sd">    will make online predictions.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        input: The tensor to impute.</span>
-<span class="sd">        fill: Fill values for each channel, for example channel means.</span>
-<span class="sd">        select: Impute these channels (by default all channels are imputed).</span>
+<span class="sd">        input: The tensor to impute. The final dimension must hold channel data.</span>
+<span class="sd">        fill: Fill values for each channel in the same order as the data. ``fill`` must</span>
+<span class="sd">            be the same length as the number of channels to be imputed i.e. the number</span>
+<span class="sd">            of channels in the data or the length of ``select`` if shorter.</span>
+<span class="sd">        select: Indices for the channels to be imputed (by default all channels are</span>
+<span class="sd">            imputed).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Tensor: Tensor with imputed data.</span>
+<span class="sd">        Imputed time series.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">fill</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Tensor</span><span class="p">,</span> <span class="s2">&quot;argument &#39;fill&#39; must be a Tensor&quot;</span>
     <span class="k">if</span> <span class="n">select</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">fill</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="nb">input</span><span class="o">.</span><span class="n">size</span><span class="p">(</span>
             <span class="o">-</span><span class="mi">1</span>
-        <span class="p">),</span> <span class="s2">&quot;tensor &#39;fill&#39; must have same number of channels as input (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="p">),</span> <span class="s2">&quot;Tensor &#39;fill&#39; must have same number of channels as input (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="nb">input</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">select</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+        <span class="n">select</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">select</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">list</span> <span class="ow">and</span> <span class="n">fill</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">select</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Tensor</span> <span class="ow">and</span> <span class="n">fill</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
             <span class="n">select</span>
-        <span class="p">),</span> <span class="s2">&quot;&#39;select&#39; must be a list the same length as &#39;fill&#39; (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fill</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="p">),</span> <span class="s2">&quot;&#39;select&#39; must be a Tensor the same length as &#39;fill&#39; (</span><span class="si">{}</span><span class="s2">)&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">fill</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="c1"># Replace missing values by channel</span>
     <span class="n">output</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
+    <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">channel</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">unbind</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)):</span>
         <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">select</span><span class="p">:</span>
-            <span class="n">channel</span><span class="o">.</span><span class="n">nan_to_num_</span><span class="p">(</span><span class="n">fill</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">fill</span> <span class="o">=</span> <span class="n">fill</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">channel</span><span class="o">.</span><span class="n">nan_to_num_</span><span class="p">(</span><span class="n">fill</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+            <span class="n">j</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="k">return</span> <span class="n">output</span></div>
 
 
-<div class="viewcode-block" id="forward_impute"><a class="viewcode-back" href="../../api/impute.html#torchtime.impute.forward_impute">[docs]</a><span class="k">def</span> <span class="nf">forward_impute</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">fill</span><span class="p">:</span> <span class="n">Tensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;**Imputes missing data using (last observation carried) forward imputation.**</span>
+<div class="viewcode-block" id="forward_impute"><a class="viewcode-back" href="../../api/impute.html#torchtime.impute.forward_impute">[docs]</a><span class="k">def</span> <span class="nf">forward_impute</span><span class="p">(</span><span class="nb">input</span><span class="p">:</span> <span class="n">Tensor</span><span class="p">,</span> <span class="n">fill</span><span class="p">:</span> <span class="n">Tensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">select</span><span class="p">:</span> <span class="n">Tensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tensor</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;**Replace missing data with last observation carried forward.**</span>
 
-<span class="sd">    Missing data (``NaNs``) are replaced by the previous channel observation.</span>
+<span class="sd">    Missing data (``NaNs``) are replaced by the previous observation in the channel.</span>
 
 <span class="sd">    If the initial value(s) of a channel is ``NaN`` this is replaced with the respective</span>
-<span class="sd">    value in ``fill``. ``fill`` must be a tensor with the replacement value for, and in</span>
-<span class="sd">    the same order as, each channel. A common choice of ``fill`` is the mean of each</span>
-<span class="sd">    channel in the training data.  ``fill` is only required if an initial value is</span>
-<span class="sd">    ``NaN``.</span>
+<span class="sd">    value in ``fill`` (only required if an initial value is ``NaN``). All channels are</span>
+<span class="sd">    imputed by default, however a subset can be imputed by passing the indices to</span>
+<span class="sd">    ``select``.</span>
 
-<span class="sd">    Under this approach, no knowledge of the time series at times *t &gt; i* is required</span>
-<span class="sd">    when imputing values at time *i*. This is essential if you are developing a model</span>
-<span class="sd">    that will make online predictions.</span>
+<span class="sd">    A common choice of ``fill`` is the mean of each channel in the training data. Under</span>
+<span class="sd">    this approach, no knowledge of the time series at times *t &gt; i* is required when</span>
+<span class="sd">    imputing values at time *i*. This is essential if you are developing a model that</span>
+<span class="sd">    will make online predictions.</span>
 
 <span class="sd">    .. note::</span>
 <span class="sd">        Only ``input`` tensors with 3 or fewer dimensions are currently supported. The</span>
 <span class="sd">        final dimension must hold channel data.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        input: The tensor to impute.</span>
-<span class="sd">        fill: Fill values for initial NaNs in each channel, for example channel means.</span>
+<span class="sd">        input: The tensor to impute. The final dimension must hold channel data.</span>
+<span class="sd">        fill: Fill values for each channel in the same order as the data. ``fill`` must</span>
+<span class="sd">            be the same length as the number of channels to be imputed i.e. the number</span>
+<span class="sd">            of channels in the data or the length of ``select`` if shorter.</span>
+<span class="sd">        select: Indices for the channels to be imputed (by default all channels are</span>
+<span class="sd">            imputed).</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        Tensor: Tensor with imputed data.</span>
+<span class="sd">        Imputed time series.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">,</span> <span class="s2">&quot;tensor &#39;input&#39; must have 3 or fewer dimensions&quot;</span>
-    <span class="c1"># Last observation carried forward</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">size</span><span class="p">())</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">,</span> <span class="s2">&quot;Tensor &#39;input&#39; must have at least two dimensions&quot;</span>
+    <span class="k">if</span> <span class="n">select</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">select</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">input</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+    <span class="c1"># Last observation carried forward (all channels)</span>
     <span class="n">x</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (n, c, s)</span>
     <span class="n">x_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
     <span class="n">x_mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cummax</span><span class="p">(</span><span class="n">x_mask</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">x_mask</span><span class="p">)</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">output</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (n, s, c)</span>
+    <span class="n">x_imputed</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">x_mask</span><span class="p">)</span>
+    <span class="n">x_imputed</span> <span class="o">=</span> <span class="n">x_imputed</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># shape (n, s, c)</span>
+    <span class="c1"># Update selected channels with imputed data</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="nb">input</span><span class="o">.</span><span class="n">index_copy</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">select</span><span class="p">,</span> <span class="n">x_imputed</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">select</span><span class="p">])</span>
     <span class="c1"># Fill initial NaNs</span>
-    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">output</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">select</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">assert</span> <span class="n">fill</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;argument &#39;fill&#39; must be provided&quot;</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="n">replace_missing</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">fill</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">replace_missing</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">select</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">output</span></div>
 </pre></div>
 
