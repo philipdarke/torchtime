@@ -8,17 +8,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* PhysioNet2019Binary data set, a implified binary prediction variant of PhysioNet2019
+* `torchtime.data.PhysioNet2019Binary` data set, a binary prediction variant of the PhysioNet 2019 challenge
+* SHA256 checksums to verify integrity of cached data
+* `standardise` argument to standarise data
+* `overwrite_cache` argument to update a cached data set
+* Impute a subset of channels using forward imputation with `select` argument
+* Progress bars for PhysioNet data set processing
+* Additional argument validation
+* Additional unit tests
+* Code copy button in documentation
 
 ### Changed
 
+* Code refactor
+* Removed `torchtime.data.TensorTimeSeriesDataset` class
+* Removed `downscale` argument
+* `override` argument renamed `channel_means`
+* Download UEA/UCR data directly (not via `sktime`)
+* `overwrite_cache` argument to update cached data
+* Updated console messages
+* Rename cache directories
+* `test` directory renamed `tests`
+* Using MacOS runner for GitHub Actions
+* Updated tutorials with automated code testing
 * Updated documentation
 
 ## [0.3.0] - 2022-04-25
 
 ### Added
 
-* PhysioNet2012 data set
+* `torchtime.data.PhysioNet2012` data set
 * PhysioNet and UEA/UCR unit tests
 * Utility function module
 * Better console messages
@@ -30,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-* Replace PhysioNet2019 missing data indicator with `NaNs`
+* Replace PhysioNet 2019 missing data indicator with `NaN`
 * Code coverage badge
 
 ## [0.2.0] - 2022-04-08
