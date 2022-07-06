@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "torchtime"
-version = "0.4.1"
+version = "0.4.2"
 description = "Benchmark time series data sets for PyTorch"
 authors = ["Philip Darke <hello@philipdarke.com>"]
 license = "MIT"
