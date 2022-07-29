@@ -200,7 +200,7 @@ class TestPhysioNet2019:
         with pytest.raises(
             AssertionError,
             match=re.escape(
-                "argument 'impute' must be a string in ['none', 'mean', 'forward'] or a function"  # noqa: E501
+                "argument 'impute' must be a string in ['none', 'zero', 'mean', 'forward'] or a function"  # noqa: E501
             ),
         ):
             PhysioNet2019(
@@ -212,7 +212,7 @@ class TestPhysioNet2019:
         with pytest.raises(
             Exception,
             match=re.escape(
-                "argument 'impute' must be a string in ['none', 'mean', 'forward'] or a function"  # noqa: E501
+                "argument 'impute' must be a string in ['none', 'zero', 'mean', 'forward'] or a function"  # noqa: E501
             ),
         ):
             PhysioNet2019(
@@ -238,6 +238,23 @@ class TestPhysioNet2019:
         assert torch.sum(torch.isnan(dataset.y_val)).item() == 2399984
         assert torch.sum(torch.isnan(dataset.X_test)).item() == 52332856
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 1199521
+
+    def test_zero_impute(self):
+        """Test zero imputation."""
+        dataset = PhysioNet2019(
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            impute="zero",
+            seed=SEED,
+        )
+        # Check no NaNs post imputation
+        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
     def test_mean_impute(self):
         """Test mean imputation."""

@@ -93,8 +93,9 @@ class _TimeSeriesDataset(Dataset):
             value, data are dropped from all channels. To drop data independently across
             each channel, pass a list of the proportion missing for each channel e.g.
             ``[0.5, 0.2, 0.8]``. Default 0 i.e. no missing data simulation.
-        impute: Method used to impute missing data, either *none*, *mean*, *forward* or
-            a custom imputation function (default "none"). See warning above.
+        impute: Method used to impute missing data, either *none*, *zero*, *mean*,
+            *forward* or a custom imputation function (default "none"). See warning
+            above.
         categorical: List with channel indices of categorical variables. Only required
             if imputing data. Default ``[]`` i.e. no categorical variables.
         channel_means: Override the calculated channel mean/mode when imputing data.
@@ -179,6 +180,7 @@ class _TimeSeriesDataset(Dataset):
         # Constants
         self.IMPUTE_FUNCTIONS = {
             "none": self._no_imputation,
+            "zero": self._zero_imputation,
             "mean": self._mean_imputation,
             "forward": self._forward_imputation,
         }
@@ -390,6 +392,13 @@ class _TimeSeriesDataset(Dataset):
     def _no_imputation(X, y, fill, select):
         """No imputation."""
         return X, y
+
+    @staticmethod
+    def _zero_imputation(X, y, fill, select):
+        """Zero imputation. Replace missing values with zeros."""
+        X_imputed = replace_missing(X, fill=torch.zeros(select.size(-1)), select=select)
+        y_imputed = replace_missing(y, fill=torch.zeros(y.size(-1)))
+        return X_imputed, y_imputed
 
     @staticmethod
     def _mean_imputation(X, y, fill, select):
@@ -608,8 +617,8 @@ class PhysioNet2012(_TimeSeriesDataset):
         split: The data split to return, either *train*, *val* (validation) or *test*.
         train_prop: Proportion of data in the training set.
         val_prop: Proportion of data in the validation set (optional, see above).
-        impute: Method used to impute missing data, either *none*, *mean*, *forward* or
-            a custom imputation function (default "none").
+        impute: Method used to impute missing data, either *none*, *zero*, *mean*,
+            *forward* or a custom imputation function (default "none").
         time: Append time stamp in the first channel (default True).
         mask: Append missing data mask for each channel (default False).
         delta: Append time since previous observation for each channel calculated as in
@@ -797,8 +806,8 @@ class PhysioNet2019(_TimeSeriesDataset):
         split: The data split to return, either *train*, *val* (validation) or *test*.
         train_prop: Proportion of data in the training set.
         val_prop: Proportion of data in the validation set (optional, see above).
-        impute: Method used to impute missing data, either *none*, *mean*, *forward* or
-            a custom imputation function (default "none").
+        impute: Method used to impute missing data, either *none*, *zero*, *mean*,
+            *forward* or a custom imputation function (default "none").
         time: Append time stamp in the first channel (default True).
         mask: Append missing data mask for each channel (default False).
         delta: Append time since previous observation for each channel calculated as in
@@ -964,8 +973,8 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
         split: The data split to return, either *train*, *val* (validation) or *test*.
         train_prop: Proportion of data in the training set.
         val_prop: Proportion of data in the validation set (optional, see above).
-        impute: Method used to impute missing data, either *none*, *mean*, *forward* or
-            a custom imputation function (default "none").
+        impute: Method used to impute missing data, either *none*, *zero*, *mean*,
+            *forward* or a custom imputation function (default "none").
         time: Append time stamp in the first channel (default True).
         mask: Append missing data mask for each channel (default False).
         delta: Append time since previous observation for each channel calculated as in
@@ -1135,8 +1144,9 @@ class UEA(_TimeSeriesDataset):
             value, data are dropped from all channels. To drop data independently across
             each channel, pass a list of the proportion missing for each channel e.g.
             ``[0.5, 0.2, 0.8]``. Default 0 i.e. no missing data simulation.
-        impute: Method used to impute missing data, either *none*, *mean*, *forward* or
-            a custom imputation function (default "none"). See warning above.
+        impute: Method used to impute missing data, either *none*, *zero*, *mean*,
+            *forward* or a custom imputation function (default "none"). See warning
+            above.
         categorical: List with channel indices of categorical variables. Only required
             if imputing data. Default ``[]`` i.e. no categorical variables.
         channel_means: Override the calculated channel mean/mode when imputing data.

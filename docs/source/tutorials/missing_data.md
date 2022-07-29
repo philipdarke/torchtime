@@ -226,11 +226,48 @@ Note the initial time channel is not returned but the missing data and time delt
 
 ## Imputing missing data
 
-Missing data can be imputed using the `impute` argument. `torchtime` currently supports mean and forward imputation as well as custom imputation functions.
+Missing data can be imputed using the `impute` argument. `torchtime` currently supports ``zero'', mean and forward imputation as well as custom imputation functions.
 
 ```{eval-rst}
 .. warning::
    By design, imputation has no impact on the missing data mask or time delta channels!
+```
+
+### Zero imputation
+
+Missing values are set to zero:
+
+```{eval-rst}
+.. testcode::
+
+    char_traj = UEA(
+        dataset="CharacterTrajectories",
+        split="train",
+        train_prop=0.7,
+        missing=[0.8, 0.2, 0.5],
+        impute="zero",
+        seed=123,
+    )
+    dataloader = DataLoader(char_traj, batch_size=32)
+    print(next(iter(dataloader))["X"][0, 0:10])
+```
+
+Output:
+
+```{eval-rst}
+.. testoutput::
+
+    ...
+    tensor([[ 0.0000,  0.0000,  0.1978,  0.3263],
+            [ 1.0000,  0.0000,  0.2399,  0.0000],
+            [ 2.0000,  0.0000,  0.2511,  0.0000],
+            [ 3.0000,  0.0000,  0.0000,  0.4016],
+            [ 4.0000,  0.0000,  0.0000,  0.3410],
+            [ 5.0000,  0.0000,  0.0824,  0.2739],
+            [ 6.0000,  0.0000, -0.0302,  0.2281],
+            [ 7.0000,  0.0000, -0.1670,  0.2144],
+            [ 8.0000,  0.0000,  0.0000,  0.0000],
+            [ 9.0000, -1.3501, -0.4994,  0.2447]])
 ```
 
 ### Mean imputation
@@ -335,15 +372,15 @@ Alternatively a custom imputation function can be passed to `impute`. This must 
 ```{eval-rst}
 .. testcode::
 
-    def zero_imputation(X, y, fill, select):
-        return X.nan_to_num(0), y.nan_to_num(0)  # set missing values to zero
+    def five_imputation(X, y, fill, select):
+        return X.nan_to_num(5), y.nan_to_num(5)  # set missing values to five
 
     char_traj = UEA(
         dataset="CharacterTrajectories",
         split="train",
         train_prop=0.7,
         missing=[0.8, 0.2, 0.5],
-        impute=zero_imputation,
+        impute=five_imputation,
         seed=123,
     )
     dataloader = DataLoader(char_traj, batch_size=32)
@@ -356,14 +393,14 @@ Output:
 .. testoutput::
 
     ...
-    tensor([[ 0.0000,  0.0000,  0.1978,  0.3263],
-            [ 1.0000,  0.0000,  0.2399,  0.0000],
-            [ 2.0000,  0.0000,  0.2511,  0.0000],
-            [ 3.0000,  0.0000,  0.0000,  0.4016],
-            [ 4.0000,  0.0000,  0.0000,  0.3410],
-            [ 5.0000,  0.0000,  0.0824,  0.2739],
-            [ 6.0000,  0.0000, -0.0302,  0.2281],
-            [ 7.0000,  0.0000, -0.1670,  0.2144],
-            [ 8.0000,  0.0000,  0.0000,  0.0000],
+    tensor([[ 0.0000,  5.0000,  0.1978,  0.3263],
+            [ 1.0000,  5.0000,  0.2399,  5.0000],
+            [ 2.0000,  5.0000,  0.2511,  5.0000],
+            [ 3.0000,  5.0000,  5.0000,  0.4016],
+            [ 4.0000,  5.0000,  5.0000,  0.3410],
+            [ 5.0000,  5.0000,  0.0824,  0.2739],
+            [ 6.0000,  5.0000, -0.0302,  0.2281],
+            [ 7.0000,  5.0000, -0.1670,  0.2144],
+            [ 8.0000,  5.0000,  5.0000,  5.0000],
             [ 9.0000, -1.3501, -0.4994,  0.2447]])
 ```
