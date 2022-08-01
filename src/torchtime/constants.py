@@ -9,7 +9,7 @@ EPS: Final[float] = np.finfo(float).eps
 OBJ_EXT: Final[str] = ".pt"
 TQDM_FORMAT: Final[
     str
-] = "{desc}: {percentage:3.0f}% {bar}  {n_fmt}/{total_fmt} [{elapsed}<{remaining}]"
+] = "{percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]"
 
 # UEA/UCR
 UEA_DOWNLOAD_URL: Final[str] = "https://www.timeseriesclassification.com/Downloads/"

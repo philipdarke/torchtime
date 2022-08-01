@@ -10,8 +10,9 @@ from urllib.parse import urlparse
 import numpy as np
 import requests
 import torch
+from tqdm import tqdm
 
-from torchtime.constants import CHECKSUM_EXT, DATASET_OBJS, OBJ_EXT
+from torchtime.constants import CHECKSUM_EXT, DATASET_OBJS, OBJ_EXT, TQDM_FORMAT
 
 # Utilities ----------------------------------------------------------------------------
 
@@ -119,8 +120,21 @@ def _download_object(url, save_file):
     """Download a file to ``save_file``."""
     try:
         print("Downloading " + url + "...")
-        download = requests.get(url)
-        save_file.write(download.content)
+        download = requests.get(url, stream=True)
+        download_size = int(download.headers.get("content-length", 0))
+        with tqdm(
+            total=download_size,
+            unit="iB",
+            unit_scale=True,
+            unit_divisor=1024,
+            delay=1,
+            bar_format=TQDM_FORMAT,
+        ) as bar:
+            for chunk in download.iter_content(chunk_size=1024):
+                size = save_file.write(chunk)
+                save_file.flush()
+                bar.update(size)
+            download.close()
     except Exception:
         raise Exception(
             "could not download {}, check URL and internet access".format(url)
