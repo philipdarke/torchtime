@@ -34,7 +34,7 @@
             <a href="../index.html" class="icon icon-home"> torchtime
           </a>
               <div class="version">
-                0.4.2
+                0.5.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -233,9 +233,17 @@ data dictionary.</p>
 <dt class="field-odd">40. Height</dt>
 <dd class="field-odd"><p>Height (cm) at ICU admission</p>
 </dd>
-<dt class="field-even">41. ICUType</dt>
-<dd class="field-even"><p>Type of ICU unit (1: Coronary Care Unit,
-2: Cardiac Surgery Recovery Unit, 3: Medical ICU, or 4: Surgical ICU)</p>
+<dt class="field-even">41. ICUType1</dt>
+<dd class="field-even"><p>Type of ICU unit (1: Coronary Care Unit)</p>
+</dd>
+<dt class="field-odd">42. ICUType2</dt>
+<dd class="field-odd"><p>Type of ICU unit (2: Cardiac Surgery Recovery Unit)</p>
+</dd>
+<dt class="field-even">43. ICUType3</dt>
+<dd class="field-even"><p>Type of ICU unit (3: Medical ICU)</p>
+</dd>
+<dt class="field-odd">44. ICUType4</dt>
+<dd class="field-odd"><p>Type of ICU unit (4: Surgical ICU)</p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -247,6 +255,7 @@ the same method as a continuous variable.</p>
 assumed that value 1 indicates that mechanical ventilation has been used and
 <code class="docutils literal notranslate"><span class="pre">NaN</span></code> indicates either missing data or no mechanical ventilation. Accordingly,
 the channel mode is assumed to be zero.</p>
+<p>Variables 41-44 are the one-hot encoded value of ICUType.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -254,8 +263,8 @@ the channel mode is assumed to be zero.</p>
 <li><p><strong>split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The data split to return, either <em>train</em>, <em>val</em> (validation) or <em>test</em>.</p></li>
 <li><p><strong>train_prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the training set.</p></li>
 <li><p><strong>val_prop</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Proportion of data in the validation set (optional, see above).</p></li>
-<li><p><strong>impute</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Method used to impute missing data, either <em>none</em>, <em>mean</em>, <em>forward</em> or
-a custom imputation function (default “none”).</p></li>
+<li><p><strong>impute</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Method used to impute missing data, either <em>none</em>, <em>zero</em>, <em>mean</em>,
+<em>forward</em> or a custom imputation function (default “none”).</p></li>
 <li><p><strong>time</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append time stamp in the first channel (default True).</p></li>
 <li><p><strong>mask</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append missing data mask for each channel (default False).</p></li>
 <li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append time since previous observation for each channel calculated as in
@@ -355,8 +364,8 @@ information.</p>
 <li><p><strong>split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The data split to return, either <em>train</em>, <em>val</em> (validation) or <em>test</em>.</p></li>
 <li><p><strong>train_prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the training set.</p></li>
 <li><p><strong>val_prop</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Proportion of data in the validation set (optional, see above).</p></li>
-<li><p><strong>impute</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Method used to impute missing data, either <em>none</em>, <em>mean</em>, <em>forward</em> or
-a custom imputation function (default “none”).</p></li>
+<li><p><strong>impute</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Method used to impute missing data, either <em>none</em>, <em>zero</em>, <em>mean</em>,
+<em>forward</em> or a custom imputation function (default “none”).</p></li>
 <li><p><strong>time</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append time stamp in the first channel (default True).</p></li>
 <li><p><strong>mask</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append missing data mask for each channel (default False).</p></li>
 <li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – <p>Append time since previous observation for each channel calculated as in
@@ -461,8 +470,8 @@ information.</p>
 <li><p><strong>split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The data split to return, either <em>train</em>, <em>val</em> (validation) or <em>test</em>.</p></li>
 <li><p><strong>train_prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the training set.</p></li>
 <li><p><strong>val_prop</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Proportion of data in the validation set (optional, see above).</p></li>
-<li><p><strong>impute</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Method used to impute missing data, either <em>none</em>, <em>mean</em>, <em>forward</em> or
-a custom imputation function (default “none”).</p></li>
+<li><p><strong>impute</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Method used to impute missing data, either <em>none</em>, <em>zero</em>, <em>mean</em>,
+<em>forward</em> or a custom imputation function (default “none”).</p></li>
 <li><p><strong>time</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append time stamp in the first channel (default True).</p></li>
 <li><p><strong>mask</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – Append missing data mask for each channel (default False).</p></li>
 <li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – <p>Append time since previous observation for each channel calculated as in
@@ -579,8 +588,9 @@ value.</p>
 value, data are dropped from all channels. To drop data independently across
 each channel, pass a list of the proportion missing for each channel e.g.
 <code class="docutils literal notranslate"><span class="pre">[0.5,</span> <span class="pre">0.2,</span> <span class="pre">0.8]</span></code>. Default 0 i.e. no missing data simulation.</p></li>
-<li><p><strong>impute</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Method used to impute missing data, either <em>none</em>, <em>mean</em>, <em>forward</em> or
-a custom imputation function (default “none”). See warning above.</p></li>
+<li><p><strong>impute</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Union</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>, <code class="xref py py-data docutils literal notranslate"><span class="pre">Callable</span></code>[[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>], <code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]]) – Method used to impute missing data, either <em>none</em>, <em>zero</em>, <em>mean</em>,
+<em>forward</em> or a custom imputation function (default “none”). See warning
+above.</p></li>
 <li><p><strong>categorical</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>]) – List with channel indices of categorical variables. Only required
 if imputing data. Default <code class="docutils literal notranslate"><span class="pre">[]</span></code> i.e. no categorical variables.</p></li>
 <li><p><strong>channel_means</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dict</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Override the calculated channel mean/mode when imputing data.

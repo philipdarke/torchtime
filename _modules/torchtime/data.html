@@ -31,7 +31,7 @@
             <a href="../../index.html" class="icon icon-home"> torchtime
           </a>
               <div class="version">
-                0.4.2
+                0.5.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -166,8 +166,9 @@
 <span class="sd">            value, data are dropped from all channels. To drop data independently across</span>
 <span class="sd">            each channel, pass a list of the proportion missing for each channel e.g.</span>
 <span class="sd">            ``[0.5, 0.2, 0.8]``. Default 0 i.e. no missing data simulation.</span>
-<span class="sd">        impute: Method used to impute missing data, either *none*, *mean*, *forward* or</span>
-<span class="sd">            a custom imputation function (default &quot;none&quot;). See warning above.</span>
+<span class="sd">        impute: Method used to impute missing data, either *none*, *zero*, *mean*,</span>
+<span class="sd">            *forward* or a custom imputation function (default &quot;none&quot;). See warning</span>
+<span class="sd">            above.</span>
 <span class="sd">        categorical: List with channel indices of categorical variables. Only required</span>
 <span class="sd">            if imputing data. Default ``[]`` i.e. no categorical variables.</span>
 <span class="sd">        channel_means: Override the calculated channel mean/mode when imputing data.</span>
@@ -252,6 +253,7 @@
         <span class="c1"># Constants</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">IMPUTE_FUNCTIONS</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;none&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_no_imputation</span><span class="p">,</span>
+            <span class="s2">&quot;zero&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_zero_imputation</span><span class="p">,</span>
             <span class="s2">&quot;mean&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mean_imputation</span><span class="p">,</span>
             <span class="s2">&quot;forward&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_forward_imputation</span><span class="p">,</span>
         <span class="p">}</span>
@@ -465,6 +467,13 @@
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
 
     <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_zero_imputation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">select</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Zero imputation. Replace missing values with zeros.&quot;&quot;&quot;</span>
+        <span class="n">X_imputed</span> <span class="o">=</span> <span class="n">replace_missing</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">select</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span> <span class="n">select</span><span class="o">=</span><span class="n">select</span><span class="p">)</span>
+        <span class="n">y_imputed</span> <span class="o">=</span> <span class="n">replace_missing</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">X_imputed</span><span class="p">,</span> <span class="n">y_imputed</span>
+
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_mean_imputation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">select</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Mean imputation. Replace missing values in ``X`` from ``fill``. Replace</span>
 <span class="sd">        missing values in ``y`` with zeros.&quot;&quot;&quot;</span>
@@ -663,8 +672,10 @@
 <span class="sd">    :38. Age: Age (years) at ICU admission</span>
 <span class="sd">    :39. Gender: Gender (0: female, or 1: male)</span>
 <span class="sd">    :40. Height: Height (cm) at ICU admission</span>
-<span class="sd">    :41. ICUType: Type of ICU unit (1: Coronary Care Unit,</span>
-<span class="sd">        2: Cardiac Surgery Recovery Unit, 3: Medical ICU, or 4: Surgical ICU)</span>
+<span class="sd">    :41. ICUType1: Type of ICU unit (1: Coronary Care Unit)</span>
+<span class="sd">    :42. ICUType2: Type of ICU unit (2: Cardiac Surgery Recovery Unit)</span>
+<span class="sd">    :43. ICUType3: Type of ICU unit (3: Medical ICU)</span>
+<span class="sd">    :44. ICUType4: Type of ICU unit (4: Surgical ICU)</span>
 
 <span class="sd">    .. note::</span>
 <span class="sd">        Channels 38 to 41 do not vary with time.</span>
@@ -677,12 +688,14 @@
 <span class="sd">        ``NaN`` indicates either missing data or no mechanical ventilation. Accordingly,</span>
 <span class="sd">        the channel mode is assumed to be zero.</span>
 
+<span class="sd">        Variables 41-44 are the one-hot encoded value of ICUType.</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        split: The data split to return, either *train*, *val* (validation) or *test*.</span>
 <span class="sd">        train_prop: Proportion of data in the training set.</span>
 <span class="sd">        val_prop: Proportion of data in the validation set (optional, see above).</span>
-<span class="sd">        impute: Method used to impute missing data, either *none*, *mean*, *forward* or</span>
-<span class="sd">            a custom imputation function (default &quot;none&quot;).</span>
+<span class="sd">        impute: Method used to impute missing data, either *none*, *zero*, *mean*,</span>
+<span class="sd">            *forward* or a custom imputation function (default &quot;none&quot;).</span>
 <span class="sd">        time: Append time stamp in the first channel (default True).</span>
 <span class="sd">        mask: Append missing data mask for each channel (default False).</span>
 <span class="sd">        delta: Append time since previous observation for each channel calculated as in</span>
@@ -762,8 +775,13 @@
         <span class="n">outcome_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_path</span> <span class="o">/</span> <span class="s2">&quot;outcomes&quot;</span>
         <span class="n">all_X</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">PHYSIONET_2012_DATASETS</span><span class="p">]</span>
         <span class="c1"># Download and extract data</span>
-        <span class="n">_physionet_download</span><span class="p">(</span><span class="n">PHYSIONET_2012_DATASETS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_path</span><span class="p">)</span>
-        <span class="p">[</span><span class="n">_download_to_directory</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">outcome_path</span><span class="p">)</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">PHYSIONET_2012_OUTCOMES</span><span class="p">]</span>
+        <span class="n">_physionet_download</span><span class="p">(</span>
+            <span class="n">PHYSIONET_2012_DATASETS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overwrite_cache</span>
+        <span class="p">)</span>
+        <span class="p">[</span>
+            <span class="n">_download_to_directory</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">outcome_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overwrite_cache</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">PHYSIONET_2012_OUTCOMES</span>
+        <span class="p">]</span>
         <span class="c1"># Prepare time series data</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing data...&quot;</span><span class="p">)</span>
         <span class="n">data_directories</span> <span class="o">=</span> <span class="p">[</span>
@@ -823,7 +841,11 @@
                 <span class="n">Xi</span><span class="p">[</span><span class="s2">&quot;Age&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xi</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;Age&quot;</span><span class="p">]</span>
                 <span class="n">Xi</span><span class="p">[</span><span class="s2">&quot;Gender&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xi</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;Gender&quot;</span><span class="p">]</span>
                 <span class="n">Xi</span><span class="p">[</span><span class="s2">&quot;Height&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xi</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;Height&quot;</span><span class="p">]</span>
-                <span class="n">Xi</span><span class="p">[</span><span class="s2">&quot;ICUType&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Xi</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;ICUType&quot;</span><span class="p">]</span>
+                <span class="c1"># One-hot encode ICUType</span>
+                <span class="n">icu_classes</span> <span class="o">=</span> <span class="mi">4</span>
+                <span class="n">icu_onehot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="n">icu_classes</span><span class="p">)[</span><span class="nb">int</span><span class="p">(</span><span class="n">Xi</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="s2">&quot;00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;ICUType&quot;</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">icu_classes</span><span class="p">):</span>
+                    <span class="n">Xi</span><span class="p">[</span><span class="s2">&quot;ICUType&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">j</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="n">icu_onehot</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
                 <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="p">:</span> <span class="n">Xi</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">Xi</span><span class="p">[</span><span class="n">channels</span><span class="p">]</span>
                 <span class="c1"># TODO: only include time 0 if a weight is provided</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
@@ -870,8 +892,8 @@
 <span class="sd">        split: The data split to return, either *train*, *val* (validation) or *test*.</span>
 <span class="sd">        train_prop: Proportion of data in the training set.</span>
 <span class="sd">        val_prop: Proportion of data in the validation set (optional, see above).</span>
-<span class="sd">        impute: Method used to impute missing data, either *none*, *mean*, *forward* or</span>
-<span class="sd">            a custom imputation function (default &quot;none&quot;).</span>
+<span class="sd">        impute: Method used to impute missing data, either *none*, *zero*, *mean*,</span>
+<span class="sd">            *forward* or a custom imputation function (default &quot;none&quot;).</span>
 <span class="sd">        time: Append time stamp in the first channel (default True).</span>
 <span class="sd">        mask: Append missing data mask for each channel (default False).</span>
 <span class="sd">        delta: Append time since previous observation for each channel calculated as in</span>
@@ -947,7 +969,7 @@
     <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Download data and form ``X``, ``y``, ``length`` tensors.&quot;&quot;&quot;</span>
         <span class="c1"># Download and extract data</span>
-        <span class="n">_physionet_download</span><span class="p">(</span><span class="n">PHYSIONET_2019_DATASETS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">_physionet_download</span><span class="p">(</span><span class="n">PHYSIONET_2019_DATASETS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overwrite_cache</span><span class="p">)</span>
         <span class="c1"># Prepare data</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing data...&quot;</span><span class="p">)</span>
         <span class="n">data_directories</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">dataset</span> <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">PHYSIONET_2019_DATASETS</span><span class="p">]</span>
@@ -1037,8 +1059,8 @@
 <span class="sd">        split: The data split to return, either *train*, *val* (validation) or *test*.</span>
 <span class="sd">        train_prop: Proportion of data in the training set.</span>
 <span class="sd">        val_prop: Proportion of data in the validation set (optional, see above).</span>
-<span class="sd">        impute: Method used to impute missing data, either *none*, *mean*, *forward* or</span>
-<span class="sd">            a custom imputation function (default &quot;none&quot;).</span>
+<span class="sd">        impute: Method used to impute missing data, either *none*, *zero*, *mean*,</span>
+<span class="sd">            *forward* or a custom imputation function (default &quot;none&quot;).</span>
 <span class="sd">        time: Append time stamp in the first channel (default True).</span>
 <span class="sd">        mask: Append missing data mask for each channel (default False).</span>
 <span class="sd">        delta: Append time since previous observation for each channel calculated as in</span>
@@ -1118,7 +1140,7 @@
         <span class="sd">&quot;&quot;&quot;Download data and form ``X``, ``y``, ``length`` tensors.&quot;&quot;&quot;</span>
         <span class="c1"># Download and extract data in &quot;physionet2019&quot; directory to avoid duplication</span>
         <span class="n">cache_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_arg</span> <span class="o">/</span> <span class="s2">&quot;.torchtime&quot;</span> <span class="o">/</span> <span class="s2">&quot;physionet_2019&quot;</span>
-        <span class="n">_physionet_download</span><span class="p">(</span><span class="n">PHYSIONET_2019_DATASETS</span><span class="p">,</span> <span class="n">cache_path</span><span class="p">)</span>
+        <span class="n">_physionet_download</span><span class="p">(</span><span class="n">PHYSIONET_2019_DATASETS</span><span class="p">,</span> <span class="n">cache_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overwrite_cache</span><span class="p">)</span>
         <span class="c1"># Prepare data</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Processing data...&quot;</span><span class="p">)</span>
         <span class="n">data_directories</span> <span class="o">=</span> <span class="p">[</span><span class="n">cache_path</span> <span class="o">/</span> <span class="n">dataset</span> <span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="n">PHYSIONET_2019_DATASETS</span><span class="p">]</span>
@@ -1208,8 +1230,9 @@
 <span class="sd">            value, data are dropped from all channels. To drop data independently across</span>
 <span class="sd">            each channel, pass a list of the proportion missing for each channel e.g.</span>
 <span class="sd">            ``[0.5, 0.2, 0.8]``. Default 0 i.e. no missing data simulation.</span>
-<span class="sd">        impute: Method used to impute missing data, either *none*, *mean*, *forward* or</span>
-<span class="sd">            a custom imputation function (default &quot;none&quot;). See warning above.</span>
+<span class="sd">        impute: Method used to impute missing data, either *none*, *zero*, *mean*,</span>
+<span class="sd">            *forward* or a custom imputation function (default &quot;none&quot;). See warning</span>
+<span class="sd">            above.</span>
 <span class="sd">        categorical: List with channel indices of categorical variables. Only required</span>
 <span class="sd">            if imputing data. Default ``[]`` i.e. no categorical variables.</span>
 <span class="sd">        channel_means: Override the calculated channel mean/mode when imputing data.</span>
