@@ -4,7 +4,7 @@
 [![Build status](https://img.shields.io/github/workflow/status/philipdarke/torchtime/build.svg)](https://github.com/philipdarke/torchtime/actions/workflows/build.yml)
 ![Coverage](https://philipdarke.com/torchtime/assets/coverage-badge.svg?dummy=8484744)
 [![License](https://img.shields.io/github/license/philipdarke/torchtime.svg)](https://github.com/philipdarke/torchtime/blob/main/LICENSE)
-[![DOI](https://zenodo.org/badge/475093888.svg)](https://zenodo.org/badge/latestdoi/475093888)
+[![DOI](https://img.shields.io/badge/DOI-10.48550%2FarXiv.2207.12503-blue)](https://doi.org/10.48550/arXiv.2207.12503)
 
 PyTorch data sets for supervised time series classification and prediction problems, including:
 
@@ -104,6 +104,24 @@ If you're looking for the TensorFlow equivalent for PhysioNet data sets try [med
 `torchtime` uses some of the data processing ideas in Kidger et al, 2020 [[1]](https://arxiv.org/abs/2005.08926) and Che et al, 2018 [[2]](https://doi.org/10.1038/s41598-018-24271-9).
 
 This work is supported by the Engineering and Physical Sciences Research Council, Centre for Doctoral Training in Cloud Computing for Big Data, Newcastle University (grant number EP/L015358/1).
+
+## Citing `torchtime`
+
+If you use this software, please cite the [paper](https://doi.org/10.48550/arXiv.2207.12503):
+
+```
+@software{darke_torchtime_2022,
+    author = Darke, Philip and Missier, Paolo and Bacardit, Jaume,
+    title = "Benchmark time series data sets for {PyTorch} - the torchtime package",
+    month = July,
+    year = 2022,
+    publisher={arXiv},
+    doi = 10.48550/arXiv.2207.12503,
+    url = https://doi.org/10.48550/arXiv.2207.12503,
+}
+```
+
+DOIs are also available for each version of the package [here](https://doi.org/10.5281/zenodo.6402406).
 
 ## References
 
