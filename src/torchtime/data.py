@@ -599,8 +599,10 @@ class PhysioNet2012(_TimeSeriesDataset):
     :38. Age: Age (years) at ICU admission
     :39. Gender: Gender (0: female, or 1: male)
     :40. Height: Height (cm) at ICU admission
-    :41. ICUType: Type of ICU unit (1: Coronary Care Unit,
-        2: Cardiac Surgery Recovery Unit, 3: Medical ICU, or 4: Surgical ICU)
+    :41. ICUType1: Type of ICU unit (1: Coronary Care Unit)
+    :42. ICUType2: Type of ICU unit (2: Cardiac Surgery Recovery Unit)
+    :43. ICUType3: Type of ICU unit (3: Medical ICU)
+    :44. ICUType4: Type of ICU unit (4: Surgical ICU)
 
     .. note::
         Channels 38 to 41 do not vary with time.
@@ -612,6 +614,8 @@ class PhysioNet2012(_TimeSeriesDataset):
         assumed that value 1 indicates that mechanical ventilation has been used and
         ``NaN`` indicates either missing data or no mechanical ventilation. Accordingly,
         the channel mode is assumed to be zero.
+
+        Variables 41-44 are the one-hot encoded value of ICUType.
 
     Args:
         split: The data split to return, either *train*, *val* (validation) or *test*.
@@ -759,7 +763,11 @@ class PhysioNet2012(_TimeSeriesDataset):
                 Xi["Age"] = Xi.loc["00:00", "Age"]
                 Xi["Gender"] = Xi.loc["00:00", "Gender"]
                 Xi["Height"] = Xi.loc["00:00", "Height"]
-                Xi["ICUType"] = Xi.loc["00:00", "ICUType"]
+                # One-hot encode ICUType
+                icu_classes = 4
+                icu_onehot = np.eye(icu_classes)[int(Xi.loc["00:00", "ICUType"]) - 1]
+                for j in range(icu_classes):
+                    Xi["ICUType" + str(j + 1)] = icu_onehot[j]
                 X[i, : Xi.shape[0], :] = Xi[channels]
                 # TODO: only include time 0 if a weight is provided
         return torch.tensor(X)

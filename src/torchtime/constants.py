@@ -67,7 +67,10 @@ PHYSIONET_2012_VARS: Final[list] = [
     "Age",
     "Gender",
     "Height",
-    "ICUType",
+    "ICUType1",
+    "ICUType2",
+    "ICUType3",
+    "ICUType4",
 ]
 
 # PhysioNet 2019

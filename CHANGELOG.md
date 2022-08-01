@@ -10,19 +10,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * "zero" value imputation
 
-## [0.4.2] - 2022-07-06
+### Changed
+
+* One-hot encoded PhysioNet2012 `ICUType` channel
+* Updated pre-commits
 
 ### Fixed
 
-* Continuous deployment
+* `scikit-learn` dependancy
 
-## [0.4.1] - 2022-07-06
-
-### Changed
-
-* Continuous deployment
-
-## [0.4.0] - 2022-07-06
+## [0.4.2] - 2022-07-06
 
 ### Added
 
@@ -50,6 +47,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * Using MacOS runner for GitHub Actions
 * Updated tutorials with automated code testing
 * Updated documentation
+
+### Fixed
+
+* Continuous deployment
+
+## [0.4.1] - 2022-07-06
+
+Release pulled
+
+## [0.4.0] - 2022-07-06
+
+Release pulled
 
 ## [0.3.0] - 2022-04-25
 
@@ -116,10 +125,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 First release to PyPi
 
-[Unreleased]: https://github.com/philipdarke/torchtime/compare/v0.4.2.HEAD
-[0.4.2]: https://github.com/philipdarke/torchtime/compare/v0.4.1..v0.4.2
-[0.4.1]: https://github.com/philipdarke/torchtime/compare/v0.4.0..v0.4.1
-[0.4.0]: https://github.com/philipdarke/torchtime/compare/v0.3.0..v0.4.0
+[Unreleased]: https://github.com/philipdarke/torchtime/compare/v0.5.0.HEAD
+[0.5.0]: https://github.com/philipdarke/torchtime/compare/v0.4.2..v0.5.0
+[0.4.2]: https://github.com/philipdarke/torchtime/compare/v0.3.0..v0.4.2
 [0.3.0]: https://github.com/philipdarke/torchtime/compare/v0.2.0..v0.3.0
 [0.2.0]: https://github.com/philipdarke/torchtime/compare/v0.1.1..v0.2.0
 [0.1.1]: https://github.com/philipdarke/torchtime/compare/v0.1.0..v0.1.1
