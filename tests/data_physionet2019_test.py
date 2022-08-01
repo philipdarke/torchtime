@@ -333,6 +333,27 @@ class TestPhysioNet2019:
         assert torch.sum(torch.isnan(dataset.X_test)).item() == 52332856
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 1199521
 
+    def test_overwrite_data(self):
+        """Overwrite cache and validate data set."""
+        PhysioNet2019(
+            split="train",
+            train_prop=0.7,
+            seed=SEED,
+            overwrite_cache=True,
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2019/X" + OBJ_EXT)
+            == "ea94129dd03e594da80efae132b674b284499c613174d0314e13e8aaac179ba7"
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2019/y" + OBJ_EXT)
+            == "5f3cf8f30e4bebf166c5a4f9d4c2030dfb82d57729e6b4e67409047150345c0e"
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2019/length" + OBJ_EXT)
+            == "209672aa41dc2f092a63e49accc4203598b2d4deb9b28b910cbbb4082518c618"
+        )
+
     def test_time(self):
         """Test time argument."""
         dataset = PhysioNet2019(

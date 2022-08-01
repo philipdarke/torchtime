@@ -702,8 +702,13 @@ class PhysioNet2012(_TimeSeriesDataset):
         outcome_path = self.dataset_path / "outcomes"
         all_X = [None for _ in PHYSIONET_2012_DATASETS]
         # Download and extract data
-        _physionet_download(PHYSIONET_2012_DATASETS, self.dataset_path)
-        [_download_to_directory(url, outcome_path) for url in PHYSIONET_2012_OUTCOMES]
+        _physionet_download(
+            PHYSIONET_2012_DATASETS, self.dataset_path, self.overwrite_cache
+        )
+        [
+            _download_to_directory(url, outcome_path, self.overwrite_cache)
+            for url in PHYSIONET_2012_OUTCOMES
+        ]
         # Prepare time series data
         print("Processing data...")
         data_directories = [
@@ -891,7 +896,7 @@ class PhysioNet2019(_TimeSeriesDataset):
     def _get_data(self):
         """Download data and form ``X``, ``y``, ``length`` tensors."""
         # Download and extract data
-        _physionet_download(PHYSIONET_2019_DATASETS, self.path)
+        _physionet_download(PHYSIONET_2019_DATASETS, self.path, self.overwrite_cache)
         # Prepare data
         print("Processing data...")
         data_directories = [self.path / dataset for dataset in PHYSIONET_2019_DATASETS]
@@ -1062,7 +1067,7 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
         """Download data and form ``X``, ``y``, ``length`` tensors."""
         # Download and extract data in "physionet2019" directory to avoid duplication
         cache_path = pathlib.Path() / self.path_arg / ".torchtime" / "physionet_2019"
-        _physionet_download(PHYSIONET_2019_DATASETS, cache_path)
+        _physionet_download(PHYSIONET_2019_DATASETS, cache_path, self.overwrite_cache)
         # Prepare data
         print("Processing data...")
         data_directories = [cache_path / dataset for dataset in PHYSIONET_2019_DATASETS]

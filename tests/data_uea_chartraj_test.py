@@ -379,6 +379,28 @@ class TestUEACharacterTrajectories:
         assert torch.sum(torch.isnan(dataset.X_test)).item() == 103872
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
+    def test_overwrite_data(self):
+        """Overwrite cache and validate data set."""
+        UEA(
+            dataset=DATASET,
+            split="train",
+            train_prop=0.7,
+            seed=SEED,
+            overwrite_cache=True,
+        )
+        assert (
+            _get_SHA256(".torchtime/uea_" + DATASET + "/X" + OBJ_EXT)
+            == "977be55b8ed063e88991dc459c5d871136839f092dd8056dd408aa59db7dd27f"
+        )
+        assert (
+            _get_SHA256(".torchtime/uea_" + DATASET + "/y" + OBJ_EXT)
+            == "59b53905692701ec7e6c5ca2e8b61d06c44ec531a3d29c0bbb38ddec7754da80"
+        )
+        assert (
+            _get_SHA256(".torchtime/uea_" + DATASET + "/length" + OBJ_EXT)
+            == "698d1ebefff52cff3c41da20feccbd141e856b16aa618b7e44c80daf54ab0e39"
+        )
+
     def test_time(self):
         """Test time argument."""
         dataset = UEA(

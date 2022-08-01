@@ -323,6 +323,27 @@ class TestPhysioNet2012:
         assert torch.sum(torch.isnan(dataset.X_val)).item() == 20816762
         assert torch.sum(torch.isnan(dataset.X_test)).item() == 10416289
 
+    def test_overwrite_data(self):
+        """Overwrite cache and validate data set."""
+        PhysioNet2012(
+            split="train",
+            train_prop=0.7,
+            seed=SEED,
+            overwrite_cache=True,
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2012/X" + OBJ_EXT)
+            == "7cbd4b4a320facbe7a8c59664082902aab2fd2b8c2ff6cc09aaac1e0cb74f2f9"
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2012/y" + OBJ_EXT)
+            == "5b9bf1f58ff02e04397f68ae776fc519e20cae6e66a632b01fa309693c3de3e9"
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2012/length" + OBJ_EXT)
+            == "d4dbf3d19e9f03618f3113c57c5950031c22bad75c80744438e3121b1cff2204"
+        )
+
     def test_time(self):
         """Test time argument."""
         dataset = PhysioNet2012(

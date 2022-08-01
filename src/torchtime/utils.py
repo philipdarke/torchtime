@@ -141,14 +141,14 @@ def _download_to_file(url, file_path, overwrite=False):
                 _download_object(url, save_file)
 
 
-def _download_to_directory(url, path):
+def _download_to_directory(url, path, overwrite=False):
     """Download a file to the ``path`` directory if not already downloaded. Use
     ``override`` to force a new download."""
     file_name = _get_url_filename(url)
     path = Path(path)
     if not path.is_dir():
         os.mkdir(path)
-    _download_to_file(url, path / file_name)
+    _download_to_file(url, path / file_name, overwrite)
 
 
 def _download_archive(url, path):
@@ -170,12 +170,13 @@ def _download_archive(url, path):
         raise Exception("file type ({}) is unsupported".format(file_ext))
 
 
-def _physionet_download(urls, path):
-    """Download and extract ``.zip``/``.tar.gz`` files if not already downloaded.
-    ``urls`` must be a dictionary in format ``{directory: url}`` where ``directory``
-    is the name of the extracted directory."""
+def _physionet_download(urls, path, overwrite=False):
+    """Download and extract ``.zip``/``.tar.gz`` files if download folder is not
+    present. ``urls`` must be a dictionary in format ``{directory: url}`` where
+    ``directory`` is the name of the extracted directory. Use ``override`` to force a
+    new download."""
     for dataset in urls:
-        if not (path / dataset).is_dir():
+        if not (path / dataset).is_dir() or overwrite:
             _download_archive(urls[dataset], path)
 
 

@@ -334,6 +334,27 @@ class TestPhysioNet2019Binary:
         assert torch.sum(torch.isnan(dataset.X_test)).item() == 9858312
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
+    def test_overwrite_data(self):
+        """Overwrite cache and validate data set."""
+        PhysioNet2019Binary(
+            split="train",
+            train_prop=0.7,
+            seed=SEED,
+            overwrite_cache=True,
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2019binary/X" + OBJ_EXT)
+            == "52b28760d1d2420b27d8003531ae42cdca14c6e408b024273c81a65d39c2f2df"
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2019binary/y" + OBJ_EXT)
+            == "dd78b55b728fe62798cadb28741d5cb0f243dfb3146aa6732baa26ecfe32ba40"
+        )
+        assert (
+            _get_SHA256(".torchtime/physionet_2019binary/length" + OBJ_EXT)
+            == "d0c1c809d47485cb237e650d11264bcc9225f2c56d5754d4ebeda41cc87c63ba"
+        )
+
     def test_time(self):
         """Test time argument."""
         dataset = PhysioNet2019Binary(

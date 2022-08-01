@@ -373,6 +373,28 @@ class TestUEAArrowHead:
         assert torch.sum(torch.isnan(dataset.X_test)).item() == 2625
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
+    def test_overwrite_data(self):
+        """Overwrite cache and validate data set."""
+        UEA(
+            dataset=DATASET,
+            split="train",
+            train_prop=0.7,
+            seed=SEED,
+            overwrite_cache=True,
+        )
+        assert (
+            _get_SHA256(".torchtime/uea_" + DATASET + "/X" + OBJ_EXT)
+            == "9530efe27c6450c5da88a44c72ecd584b80c82599d62a3a02e0e09f572eb3a38"
+        )
+        assert (
+            _get_SHA256(".torchtime/uea_" + DATASET + "/y" + OBJ_EXT)
+            == "7f08d6239b17cad032fdc9a2d1f607b500825167a9884e2ad84f423a7513a30c"
+        )
+        assert (
+            _get_SHA256(".torchtime/uea_" + DATASET + "/length" + OBJ_EXT)
+            == "7348daeb7eb5239a1e400df18c574daabb03764e6c0422590c2ed44b014f9160"
+        )
+
     def test_time(self):
         """Test time argument."""
         dataset = UEA(
