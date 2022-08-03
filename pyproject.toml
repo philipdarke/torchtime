@@ -11,9 +11,10 @@ documentation = "https://philipdarke.com/torchtime"
 
 [tool.poetry.dependencies]
 python = ">=3.8,<3.10"
+numpy = "^1.21.0"
 requests = "^2.27.1"
 scikit-learn = "^1.1.1"
-sktime = "^0.10.1"
+sktime = "^0.12.1"
 torch = "^1.11.0"
 tqdm = "^4.64.0"
 
