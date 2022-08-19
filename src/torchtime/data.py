@@ -420,6 +420,12 @@ class _TimeSeriesDataset(Dataset):
         """Split data into training, validation and (optional) test sets using
         stratified sampling."""
         random_state = np.random.RandomState(self.seed)
+        X_test, y_test, length_test, X_static_test = (
+            float("nan"),
+            float("nan"),
+            float("nan"),
+            float("nan"),
+        )
         if X_static is None:
             if self.test_prop > EPS:
                 # Test split
@@ -442,46 +448,27 @@ class _TimeSeriesDataset(Dataset):
                     shuffle=True,
                     stratify=stratify,
                 )
-                # Validation/train split
-                (
-                    X_val,
-                    X_train,
-                    y_val,
-                    y_train,
-                    length_val,
-                    length_train,
-                ) = train_test_split(
-                    X_nontest,
-                    y_nontest,
-                    length_nontest,
-                    train_size=self.val_prop,
-                    random_state=random_state,
-                    shuffle=True,
-                    stratify=stratify_nontest,
-                )
-            else:
-                # Validation/train split
-                (
-                    X_val,
-                    X_train,
-                    y_val,
-                    y_train,
-                    length_val,
-                    length_train,
-                ) = train_test_split(
-                    X,
-                    y,
-                    length,
-                    train_size=self.val_prop,
-                    random_state=random_state,
-                    shuffle=True,
-                    stratify=stratify,
-                )
-                X_test, y_test, length_test = (
-                    float("nan"),
-                    float("nan"),
-                    float("nan"),
-                )
+                X = X_nontest
+                y = y_nontest
+                length = length_nontest
+                stratify = stratify_nontest
+            # Validation/train split
+            (
+                X_val,
+                X_train,
+                y_val,
+                y_train,
+                length_val,
+                length_train,
+            ) = train_test_split(
+                X,
+                y,
+                length,
+                train_size=self.val_prop,
+                random_state=random_state,
+                shuffle=True,
+                stratify=stratify,
+            )
             X_static_train, X_static_val, X_static_test = (
                 float("nan"),
                 float("nan"),
@@ -512,53 +499,31 @@ class _TimeSeriesDataset(Dataset):
                     shuffle=True,
                     stratify=stratify,
                 )
-                # Validation/train split
-                (
-                    X_val,
-                    X_train,
-                    y_val,
-                    y_train,
-                    length_val,
-                    length_train,
-                    X_static_val,
-                    X_static_train,
-                ) = train_test_split(
-                    X_nontest,
-                    y_nontest,
-                    length_nontest,
-                    X_static_nontest,
-                    train_size=self.val_prop,
-                    random_state=random_state,
-                    shuffle=True,
-                    stratify=stratify_nontest,
-                )
-            else:
-                # Validation/train split
-                (
-                    X_val,
-                    X_train,
-                    y_val,
-                    y_train,
-                    length_val,
-                    length_train,
-                    X_static_val,
-                    X_static_train,
-                ) = train_test_split(
-                    X,
-                    y,
-                    length,
-                    X_static,
-                    train_size=self.val_prop,
-                    random_state=random_state,
-                    shuffle=True,
-                    stratify=stratify,
-                )
-                X_test, y_test, length_test, X_static_test = (
-                    float("nan"),
-                    float("nan"),
-                    float("nan"),
-                    float("nan"),
-                )
+                X = X_nontest
+                y = y_nontest
+                length = length_nontest
+                X_static = X_static_nontest
+                stratify = stratify_nontest
+            # Validation/train split
+            (
+                X_val,
+                X_train,
+                y_val,
+                y_train,
+                length_val,
+                length_train,
+                X_static_val,
+                X_static_train,
+            ) = train_test_split(
+                X,
+                y,
+                length,
+                X_static,
+                train_size=self.val_prop,
+                random_state=random_state,
+                shuffle=True,
+                stratify=stratify,
+            )
         return (
             X_train,
             y_train,
