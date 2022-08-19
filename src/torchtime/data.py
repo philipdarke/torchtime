@@ -195,12 +195,7 @@ class _TimeSeriesDataset(Dataset):
             _simulate_missing(X_all, self.missing, seed=self.seed)
 
         # 4. Add time stamp/mask/time delta channels
-        if self.mask:
-            X_all = torch.cat([X_all, self._missing_mask(X_all)], dim=2)
-        if self.delta:
-            X_all = torch.cat([X_all, self._time_delta(X_all)], dim=2)
-        if not self.time:
-            X_all = X_all[:, :, 1:]  # drop time channel
+        X_all = self._add_channels(X_all)
 
         # 5. Form train/validation/test splits
         stratify = torch.nansum(y_all, dim=1) > 0
@@ -225,56 +220,63 @@ class _TimeSeriesDataset(Dataset):
             stratify,
         )
 
-        # 6. Impute missing data
+        # 6. Impute missing data (time series channels only)
         if self.impute != "none":
-            data_idx = None
-            fill = torch.nanmean(self.X_train, dim=(0, 1), keepdim=True).flatten()
+            time_series_idx = torch.arange(self.time, self.n_channels + self.time)
+            fill = torch.nanmean(
+                self.X_train[:, :, time_series_idx], dim=(0, 1), keepdim=True
+            ).flatten()
+            # Impute using mode if categorical variable
             if self.categorical != []:
-                # Impute using mode if categorical variable
-                assert (
-                    all([type(cat) is int for cat in self.categorical])
-                    and min(self.categorical) >= 1
-                    and max(self.categorical) <= self.n_channels
-                ), "indices in 'categorical' should be between 1 and {}".format(
-                    self.n_channels
-                )
-                categorical_idx = [idx - int(not self.time) for idx in self.categorical]
-                for idx in categorical_idx:
-                    fill[idx] = _nanmode(self.X_train[:, :, idx])
+                for idx in self.categorical:
+                    if idx <= self.n_channels:
+                        fill[idx - 1] = _nanmode(
+                            self.X_train[:, :, idx - int(not self.time)]
+                        )
             # Override mean/mode if required
             if self.channel_means != {}:
                 for idx, new_mean in self.channel_means.items():
-                    assert (
-                        type(idx) is int and idx >= 1 and idx <= self.n_channels
-                    ), "keys in 'channel_means' should be between 1 and {}".format(
-                        self.n_channels
-                    )
-                    fill[idx - int(not self.time)] = new_mean
+                    if idx <= self.n_channels:
+                        fill[idx - 1] = new_mean
+            # Impute data
             self.X_train, self.y_train = self.imputer(
-                self.X_train, self.y_train, fill, data_idx
+                self.X_train, self.y_train, fill=fill, select=time_series_idx
             )
             self.X_val, self.y_val = self.imputer(
-                self.X_val, self.y_val, fill, data_idx
+                self.X_val, self.y_val, fill=fill, select=time_series_idx
             )
             if self.test_prop > EPS:
                 self.X_test, self.y_test = self.imputer(
-                    self.X_test, self.y_test, fill, data_idx
+                    self.X_test, self.y_test, fill=fill, select=time_series_idx
                 )
 
-        # 7. Standardise data
+        # 7. Standardise data (continuous channels only)
         if self.standardise:
-            # Training data channel means/standard deviations
-            train_means = torch.nanmean(self.X_train, dim=(0, 1), keepdim=True)
-            train_stds = torch.full(
-                (1, 1, self.X_train.size(-1)), fill_value=float("nan")
+            categorical_idx = [idx - int(not self.time) for idx in self.categorical]
+            time_series_idx = torch.arange(self.time, self.n_channels + self.time)
+            standardise_idx = torch.tensor(
+                np.setdiff1d(time_series_idx.numpy(), np.array(categorical_idx))
             )
-            for c, Xc in enumerate(self.X_train.unbind(dim=-1)):
+            # Training data channel means/standard deviations
+            train_means = torch.nanmean(
+                self.X_train[:, :, standardise_idx], dim=(0, 1), keepdim=True
+            )
+            train_stds = torch.full(
+                (1, 1, standardise_idx.size(-1)), fill_value=float("nan")
+            )
+            for c, Xc in enumerate(self.X_train[:, :, standardise_idx].unbind(dim=-1)):
                 train_stds[:, :, c] = torch.std(Xc[~torch.isnan(Xc)])
             # Standardise data
-            self.X_train = (self.X_train - train_means) / (train_stds + EPS)
-            self.X_val = (self.X_val - train_means) / (train_stds + EPS)
+            self.X_train[:, :, standardise_idx] = (
+                self.X_train[:, :, standardise_idx] - train_means
+            ) / (train_stds + EPS)
+            self.X_val[:, :, standardise_idx] = (
+                self.X_val[:, :, standardise_idx] - train_means
+            ) / (train_stds + EPS)
             if self.test_prop > EPS:
-                self.X_test = (self.X_test - train_means) / (train_stds + EPS)
+                self.X_test[:, :, standardise_idx] = (
+                    self.X_test[:, :, standardise_idx] - train_means
+                ) / (train_stds + EPS)
 
         # 8. Return data split
         if split == "test":
@@ -355,34 +357,39 @@ class _TimeSeriesDataset(Dataset):
         if self.test_prop > EPS:
             splits.append("test")
         assert self.split in splits, "argument 'split' must be one of {}".format(splits)
+        # TODO: validate 'static' argument
 
     @staticmethod
     def _zero_imputation(X, y, fill, select):
         """Zero imputation. Replace missing values with zeros."""
-        X_imputed = replace_missing(X, fill=torch.zeros(X.size(-1)))
-        y_imputed = replace_missing(y, fill=torch.zeros(y.size(-1)))
-        return X_imputed, y_imputed
+        X_imputed = replace_missing(X, fill=torch.zeros(select.size(-1)), select=select)
+        return X_imputed, y
 
     @staticmethod
     def _mean_imputation(X, y, fill, select):
-        """Mean imputation. Replace missing values in ``X`` from ``fill``. Replace
-        missing values in ``y`` with zeros."""
-        X_imputed = replace_missing(X, fill=fill)
-        y_imputed = replace_missing(y, fill=torch.zeros(y.size(-1)))
-        return X_imputed, y_imputed
+        """Mean imputation. Replace missing values in ``X`` from ``fill``."""
+        X_imputed = replace_missing(X, fill=fill, select=select)
+        return X_imputed, y
 
     @staticmethod
     def _forward_imputation(X, y, fill, select):
         """Forward imputation. Replace missing values with previous observation. Replace
-        any initial missing values in ``X`` from ``fill``. Assume no missing initial
-        values in ``y`` but there may be trailing missing values due to padding."""
-        X_imputed = forward_impute(X, fill=fill)
-        y_imputed = forward_impute(y)
-        return X_imputed, y_imputed
+        any initial missing values in ``X`` from ``fill``."""
+        X_imputed = forward_impute(X, fill=fill, select=select)
+        return X_imputed, y
 
     def _get_data(self):
         """Overload this function to return ``X``, ``y`` and ``length`` tensors."""
         raise NotImplementedError
+
+    def _add_channels(self, X_all):
+        if self.mask:
+            X_all = torch.cat([X_all, self._missing_mask(X_all)], dim=2)
+        if self.delta:
+            X_all = torch.cat([X_all, self._time_delta(X_all)], dim=2)
+        if not self.time:
+            X_all = X_all[:, :, 1:]  # drop time channel
+        return X_all
 
     def _missing_mask(self, X):
         """Calculate missing data mask."""
@@ -1107,10 +1114,10 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
         y = torch.cat(all_y)
         length = torch.tensor(length)
         # Drop patients with zero length sequences
-        patient_index = torch.arange(X.size(0)).masked_select(length != 0).int()
-        X = X.index_select(index=patient_index, dim=0)
-        y = y.index_select(index=patient_index, dim=0)
-        length = length.index_select(index=patient_index, dim=0)
+        patient_idx = torch.arange(X.size(0)).masked_select(length != 0).int()
+        X = X.index_select(index=patient_idx, dim=0)
+        y = y.index_select(index=patient_idx, dim=0)
+        length = length.index_select(index=patient_idx, dim=0)
         # Save cached files to "physionet2019binary" directory
         self.path = pathlib.Path() / self.path_arg / ".torchtime" / self.DATASET_NAME
         return X, y, length
