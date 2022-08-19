@@ -87,7 +87,7 @@ class _TimeSeriesDataset(Dataset):
 
     Attributes:
         X (Tensor): A tensor of default shape (*n*, *s*, *c* + 1) where *n* = number of
-            trajectories, *s* = (longest) trajectory length and *c* = number of
+            sequences, *s* = (longest) sequence length and *c* = number of
             channels. By default, a time stamp is appended as the first channel. If
             ``time`` is False, the time stamp is omitted and the tensor has shape
             (*n*, *s*, *c*).
@@ -99,12 +99,13 @@ class _TimeSeriesDataset(Dataset):
             channels are in the order: time stamp, time series, missing data mask, time
             deltas.
 
-            Where trajectories are of unequal lengths they are padded with ``NaNs`` to
-            the length of the longest trajectory in the data.
+            Where sequences are of unequal lengths they are padded with ``NaNs`` to
+            the length of the longest sequence in the data.
         y (Tensor): One-hot encoded label data. A tensor of shape (*n*, *l*) where *l*
             is the number of classes.
-        length (Tensor): Length of each trajectory prior to padding. A tensor of shape
+        length (Tensor): Length of each sequence prior to padding. A tensor of shape
             (*n*).
+        n_time_channels: Number of time series channels in data.
 
     Returns:
         A PyTorch Dataset object which can be passed to a DataLoader.
@@ -537,7 +538,7 @@ class PhysioNet2012(_TimeSeriesDataset):
     :44. ICUType4: Type of ICU unit (4: Surgical ICU)
 
     .. note::
-        Channels 38 to 41 do not vary with time.
+        Channels 38 to 44 do not vary with time.
 
         Variables 11 (GCS) and 27 (pH) are assumed to be ordinal and are imputed using
         the same method as a continuous variable.
@@ -567,25 +568,26 @@ class PhysioNet2012(_TimeSeriesDataset):
 
     Attributes:
         X (Tensor): A tensor of default shape (*n*, *s*, *c* + 1) where *n* = number of
-            trajectories, *s* = (longest) trajectory length and *c* = number of channels
-            in the PhysioNet data (*including* the time since admission in minutes). See
-            above for the order of the PhysioNet channels. By default, a time stamp is
-            appended as the first channel. If ``time`` is False, the time stamp is
+            sequences, *s* = (longest) sequence length and *c* = number of channels
+            in the PhysioNet data (*excluding* the time since admission). See
+            above for the order of the PhysioNet channels. By default, the time since
+            admission is appended as the first channel. If ``time`` is False, it is
             omitted and the tensor has shape (*n*, *s*, *c*).
 
             A missing data mask and/or time delta channels can be appended with the
             ``mask`` and ``delta`` arguments. These each have the same number of
-            channels as the Physionet data. For example, if ``time``, ``mask`` and
+            channels as the PhysioNet data. For example, if ``time``, ``mask`` and
             ``delta`` are all True, ``X`` has shape (*n*, *s*, 3 * *c* + 1 = 127) and
             the channels are in the order: time stamp, time series, missing data mask,
             time deltas.
 
-            Note that PhysioNet trajectories are of unequal length and are therefore
-            padded with ``NaNs`` to the length of the longest trajectory in the data.
+            Note that PhysioNet sequences are of unequal length and are therefore
+            padded with ``NaNs`` to the length of the longest sequence in the data.
         y (Tensor): In-hospital survival (the ``In-hospital_death`` variable) for each
             patient. *y* = 1 indicates an in-hospital death. A tensor of shape (*n*, 1).
-        length (Tensor): Length of each trajectory prior to padding. A tensor of shape
+        length (Tensor): Length of each sequence prior to padding. A tensor of shape
             (*n*).
+        n_time_channels: Number of time series channels in data.
 
     .. note::
         ``X``, ``y`` and ``length`` are available for the training, validation and test
@@ -764,7 +766,7 @@ class PhysioNet2019(_TimeSeriesDataset):
 
     Attributes:
         X (Tensor): A tensor of default shape (*n*, *s*, *c* + 1) where *n* = number of
-            trajectories, *s* = (longest) trajectory length and *c* = number of channels
+            sequences, *s* = (longest) sequence length and *c* = number of channels
             in the PhysioNet data (*including* the ``ICULOS`` time stamp). The channels
             are ordered as set out on the PhysioNet `website
             <https://physionet.org/content/challenge-2019/1.0.0/>`_. By default, a
@@ -778,11 +780,12 @@ class PhysioNet2019(_TimeSeriesDataset):
             the channels are in the order: time stamp, time series, missing data mask,
             time deltas.
 
-            Note that PhysioNet trajectories are of unequal length and are therefore
-            padded with ``NaNs`` to the length of the longest trajectory in the data.
+            Note that PhysioNet sequences are of unequal length and are therefore
+            padded with ``NaNs`` to the length of the longest sequence in the data.
         y (Tensor): ``SepsisLabel`` at each time point. A tensor of shape (*n*, *s*, 1).
-        length (Tensor): Length of each trajectory prior to padding. A tensor of shape
+        length (Tensor): Length of each sequence prior to padding. A tensor of shape
             (*n*).
+        n_time_channels: Number of time series channels in data.
 
     .. note::
         ``X``, ``y`` and ``length`` are available for the training, validation and test
@@ -791,8 +794,7 @@ class PhysioNet2019(_TimeSeriesDataset):
         attributes are available regardless of the ``split`` argument.
 
     Returns:
-        A PyTorch Dataset object which can be passed to a
-        DataLoader.
+        A PyTorch Dataset object which can be passed to a DataLoader.
     """
 
     def __init__(
@@ -931,7 +933,7 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
 
     Attributes:
         X (Tensor): A tensor of default shape (*n*, *s*, *c* + 1) where *n* = number of
-            trajectories, *s* = (longest) trajectory length and *c* = number of channels
+            sequences, *s* = (longest) sequence length and *c* = number of channels
             in the PhysioNet data (*including* the ``ICULOS`` time stamp). The channels
             are ordered as set out on the PhysioNet `website
             <https://physionet.org/content/challenge-2019/1.0.0/>`_. By default, a
@@ -945,12 +947,13 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
             the channels are in the order: time stamp, time series, missing data mask,
             time deltas.
 
-            Note that PhysioNet trajectories are of unequal length and are therefore
-            padded with ``NaNs`` to the length of the longest trajectory in the data.
+            Note that PhysioNet sequences are of unequal length and are therefore
+            padded with ``NaNs`` to the length of the longest sequence in the data.
         y (Tensor): Whether patient is diagnosed with sepsis at any time during
             hospitalisation. A tensor of shape (*n*, 1).
-        length (Tensor): Length of each trajectory prior to padding. A tensor of shape
+        length (Tensor): Length of each sequence prior to padding. A tensor of shape
             (*n*).
+        n_time_channels: Number of time series channels in data.
 
     .. note::
         ``X``, ``y`` and ``length`` are available for the training, validation and test
@@ -1108,7 +1111,7 @@ class UEA(_TimeSeriesDataset):
 
     Attributes:
         X (Tensor): A tensor of default shape (*n*, *s*, *c* + 1) where *n* = number of
-            trajectories, *s* = (longest) trajectory length and *c* = number of
+            sequences, *s* = (longest) sequence length and *c* = number of
             channels. By default, a time stamp is appended as the first channel. If
             ``time`` is False, the time stamp is omitted and the tensor has shape
             (*n*, *s*, *c*).
@@ -1120,12 +1123,13 @@ class UEA(_TimeSeriesDataset):
             channels are in the order: time stamp, time series, missing data mask, time
             deltas.
 
-            Where trajectories are of unequal lengths they are padded with ``NaNs`` to
-            the length of the longest trajectory in the data.
+            Where sequences are of unequal lengths they are padded with ``NaNs`` to
+            the length of the longest sequence in the data.
         y (Tensor): One-hot encoded label data. A tensor of shape (*n*, *l*) where *l*
             is the number of classes.
-        length (Tensor): Length of each trajectory prior to padding. A tensor of shape
+        length (Tensor): Length of each sequence prior to padding. A tensor of shape
             (*n*).
+        n_time_channels: Number of time series channels in data.
 
     .. note::
         ``X``, ``y`` and ``length`` are available for the training, validation and test
@@ -1217,10 +1221,10 @@ class UEA(_TimeSeriesDataset):
         )
         print("Processing data...")
         X_raw, y_raw = self._extract_ts_files(data_files)
-        # Length of each trajectory
+        # Length of each sequence
         channel_lengths = X_raw.apply(lambda Xi: Xi.apply(len), axis=1)
         length = torch.tensor(channel_lengths.apply(max, axis=1).values)
-        # Form tensor with padded trajectories
+        # Form tensor with padded sequences
         X = torch.stack(
             [self._pad(X_raw.iloc[i], length.max()) for i in range(len(X_raw))],
             dim=0,
@@ -1233,7 +1237,7 @@ class UEA(_TimeSeriesDataset):
         return X, y, length
 
     def _pad(self, Xi, max_length):
-        """Pad trajectories to length ``max_length``."""
+        """Pad sequences to length ``max_length``."""
         Xi = pad_sequence([torch.tensor(Xij) for Xij in Xi])
         out = torch.full((max_length, Xi.size(1)), float("nan"))  # shape (s, c)
         out[0 : Xi.size(0)] = Xi
