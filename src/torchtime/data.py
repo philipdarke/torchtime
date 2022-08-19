@@ -145,7 +145,6 @@ class _TimeSeriesDataset(Dataset):
 
         # Constants
         self.IMPUTE_FUNCTIONS = {
-            "none": self._no_imputation,
             "zero": self._zero_imputation,
             "mean": self._mean_imputation,
             "forward": self._forward_imputation,
@@ -268,18 +267,16 @@ class _TimeSeriesDataset(Dataset):
                         n_channels - 1
                     )
                     fill[x] = y
-
-        # 6. Impute missing data
-        self.X_train, self.y_train = self.imputer(
-            self.X_train, self.y_train, fill, data_idx
-        )
-        self.X_val, self.y_val = self.imputer(self.X_val, self.y_val, fill, data_idx)
-        if self.test_prop > EPS:
-            self.X_test, self.y_test = self.imputer(
-                self.X_test, self.y_test, fill, data_idx
+            self.X_train, self.y_train = self.imputer(
+                self.X_train, self.y_train, fill, data_idx
             )
-        else:
-            del self.X_test, self.y_test, self.length_test
+            self.X_val, self.y_val = self.imputer(
+                self.X_val, self.y_val, fill, data_idx
+            )
+            if self.test_prop > EPS:
+                self.X_test, self.y_test = self.imputer(
+                    self.X_test, self.y_test, fill, data_idx
+                )
 
         # 7. Return data split
         if split == "test":
@@ -294,6 +291,8 @@ class _TimeSeriesDataset(Dataset):
             self.X = self.X_val
             self.y = self.y_val
             self.length = self.length_val
+        if self.test_prop <= EPS:
+            del self.X_test, self.y_test, self.length_test
 
     def __str__(self):
         """Print data set details."""
@@ -318,7 +317,7 @@ class _TimeSeriesDataset(Dataset):
     def _validate_arguments(self):
         """Validate arguments and set imputation function/data splits."""
         # Validate impute arguments
-        impute_options = list(self.IMPUTE_FUNCTIONS.keys())
+        impute_options = ["none"] + list(self.IMPUTE_FUNCTIONS.keys())
         impute_error = "argument 'impute' must be a string in {} or a function".format(
             impute_options
         )
@@ -355,11 +354,6 @@ class _TimeSeriesDataset(Dataset):
         if self.test_prop > EPS:
             splits.append("test")
         assert self.split in splits, "argument 'split' must be one of {}".format(splits)
-
-    @staticmethod
-    def _no_imputation(X, y, fill, select):
-        """No imputation."""
-        return X, y
 
     @staticmethod
     def _zero_imputation(X, y, fill, select):
