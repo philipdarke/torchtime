@@ -10,6 +10,9 @@ from torchtime.utils import _get_SHA256
 SEED = 456789
 RTOL = 1e-4
 ATOL = 1e-4
+SHA_X = "1a61d37501e7f45b38815e0588922f5104561cc77456de91896dcbf5f54191ad"
+SHA_Y = "5b9bf1f58ff02e04397f68ae776fc519e20cae6e66a632b01fa309693c3de3e9"
+SHA_LENGTH = "d4dbf3d19e9f03618f3113c57c5950031c22bad75c80744438e3121b1cff2204"
 
 
 class TestPhysioNet2012:
@@ -71,18 +74,9 @@ class TestPhysioNet2012:
             train_prop=0.7,
             seed=SEED,
         )
-        assert (
-            _get_SHA256(".torchtime/physionet_2012/X" + OBJ_EXT)
-            == "7cbd4b4a320facbe7a8c59664082902aab2fd2b8c2ff6cc09aaac1e0cb74f2f9"
-        )
-        assert (
-            _get_SHA256(".torchtime/physionet_2012/y" + OBJ_EXT)
-            == "5b9bf1f58ff02e04397f68ae776fc519e20cae6e66a632b01fa309693c3de3e9"
-        )
-        assert (
-            _get_SHA256(".torchtime/physionet_2012/length" + OBJ_EXT)
-            == "d4dbf3d19e9f03618f3113c57c5950031c22bad75c80744438e3121b1cff2204"
-        )
+        assert _get_SHA256(".torchtime/physionet_2012/X" + OBJ_EXT) == SHA_X
+        assert _get_SHA256(".torchtime/physionet_2012/y" + OBJ_EXT) == SHA_Y
+        assert _get_SHA256(".torchtime/physionet_2012/length" + OBJ_EXT) == SHA_LENGTH
 
     def test_train_val(self):
         """Test training/validation split sizes."""
@@ -331,18 +325,9 @@ class TestPhysioNet2012:
             seed=SEED,
             overwrite_cache=True,
         )
-        assert (
-            _get_SHA256(".torchtime/physionet_2012/X" + OBJ_EXT)
-            == "7cbd4b4a320facbe7a8c59664082902aab2fd2b8c2ff6cc09aaac1e0cb74f2f9"
-        )
-        assert (
-            _get_SHA256(".torchtime/physionet_2012/y" + OBJ_EXT)
-            == "5b9bf1f58ff02e04397f68ae776fc519e20cae6e66a632b01fa309693c3de3e9"
-        )
-        assert (
-            _get_SHA256(".torchtime/physionet_2012/length" + OBJ_EXT)
-            == "d4dbf3d19e9f03618f3113c57c5950031c22bad75c80744438e3121b1cff2204"
-        )
+        assert _get_SHA256(".torchtime/physionet_2012/X" + OBJ_EXT) == SHA_X
+        assert _get_SHA256(".torchtime/physionet_2012/y" + OBJ_EXT) == SHA_Y
+        assert _get_SHA256(".torchtime/physionet_2012/length" + OBJ_EXT) == SHA_LENGTH
 
     def test_time(self):
         """Test time argument."""
