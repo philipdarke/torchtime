@@ -14,6 +14,46 @@ SHA_X = "1a61d37501e7f45b38815e0588922f5104561cc77456de91896dcbf5f54191ad"
 SHA_Y = "5b9bf1f58ff02e04397f68ae776fc519e20cae6e66a632b01fa309693c3de3e9"
 SHA_LENGTH = "d4dbf3d19e9f03618f3113c57c5950031c22bad75c80744438e3121b1cff2204"
 N_TIME_CHANNELS = 44
+CONTINUOUS_CHANNELS = [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    21,
+    22,
+    23,
+    24,
+    25,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    40,
+]
 
 
 class TestPhysioNet2012:
@@ -241,11 +281,11 @@ class TestPhysioNet2012:
             seed=SEED,
         )
         # Check no NaNs post imputation
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_train[:, :, 1:])).item() == 0
         assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_val[:, :, 1:])).item() == 0
         assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_test[:, :, 1:])).item() == 0
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
     def test_mean_impute(self):
@@ -258,11 +298,11 @@ class TestPhysioNet2012:
             seed=SEED,
         )
         # Check no NaNs post imputation
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_train[:, :, 1:])).item() == 0
         assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_val[:, :, 1:])).item() == 0
         assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_test[:, :, 1:])).item() == 0
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
     def test_forward_impute(self):
@@ -275,11 +315,11 @@ class TestPhysioNet2012:
             seed=SEED,
         )
         # Check no NaNs post imputation
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_train[:, :, 1:])).item() == 0
         assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_val[:, :, 1:])).item() == 0
         assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_test[:, :, 1:])).item() == 0
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
     def test_custom_imputation_1(self):
@@ -423,16 +463,15 @@ class TestPhysioNet2012:
             dataset.X_test[:, 0, 91], torch.zeros([1200], dtype=torch.float)
         )
 
-    def test_standarisation_1(self):
+    def test_standardisation_1(self):
         """Check training data is standardised."""
         dataset = PhysioNet2012(
             split="train",
             train_prop=0.7,
-            time=False,
             standardise=True,
             seed=SEED,
         )
-        for Xc in dataset.X_train.unbind(dim=-1):
+        for Xc in dataset.X_train[:, :, CONTINUOUS_CHANNELS].unbind(dim=-1):
             assert torch.allclose(
                 torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
             )
@@ -448,17 +487,16 @@ class TestPhysioNet2012:
                 atol=ATOL,
             )
 
-    def test_standarisation_2(self):
+    def test_standardisation_2(self):
         """Check imputed training data is standardised."""
         dataset = PhysioNet2012(
             split="train",
             train_prop=0.7,
             impute="forward",
-            time=False,
             standardise=True,
             seed=SEED,
         )
-        for Xc in dataset.X_train.unbind(dim=-1):
+        for Xc in dataset.X_train[:, :, CONTINUOUS_CHANNELS].unbind(dim=-1):
             assert torch.allclose(
                 torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
             )
