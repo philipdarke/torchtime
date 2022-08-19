@@ -371,8 +371,7 @@ class _TimeSeriesDataset(Dataset):
         time_delta = torch.cat(
             (
                 time_delta[:, :, 0].unsqueeze(2),  # t = 0
-                time_stamp[:, :, 1:]
-                - time_delta[:, :, :-1],  # i.e. time minus time of previous observation
+                time_stamp[:, :, 1:] - time_delta[:, :, :-1],
             ),
             dim=2,
         )
@@ -502,19 +501,20 @@ class _TimeSeriesDataset(Dataset):
         )
 
     def _impute(self):
-        """Impute missing data."""
+        """Impute missing data (time series channels only)."""
+        # Indices to impute
         time_series_idx = torch.arange(self.time, self.n_channels + self.time)
         fill = torch.nanmean(
             self.X_train[:, :, time_series_idx], dim=(0, 1), keepdim=True
         ).flatten()
-        # Impute using mode if categorical variable
+        # Impute with channel mode if categorical variable
         if self.categorical != []:
             for idx in self.categorical:
                 if idx <= self.n_channels:
                     fill[idx - 1] = _nanmode(
                         self.X_train[:, :, idx - int(not self.time)]
                     )
-        # Override mean/mode if required
+        # Override mean/mode if specified
         if self.channel_means != {}:
             for idx, new_mean in self.channel_means.items():
                 if idx <= self.n_channels:
@@ -535,13 +535,13 @@ class _TimeSeriesDataset(Dataset):
             fill_static = torch.nanmean(
                 self.X_static_train, dim=0, keepdim=True
             ).flatten()
-            # Impute using mode if categorical variable
+            # Impute with channel mode if categorical variable
             if self.categorical != []:
                 for idx in [
                     self.static.index(i) for i in self.categorical if i in self.static
                 ]:
                     fill_static[idx] = _nanmode(self.X_static_train[:, idx])
-            # Override mean/mode if required
+            # Override mean/mode if specified
             if self.channel_means != {}:
                 for idx, new_mean in self.channel_means.items():
                     if idx in self.static:
@@ -555,12 +555,23 @@ class _TimeSeriesDataset(Dataset):
                 )
 
     def _standardise(self):
-        """Standardise data."""
+        """Standardise data (continuous channels only)."""
+        # Indices to standardise
+        time_series_idx = torch.arange(0, self.time + self.n_channels)  # including time
         categorical_idx = [idx - int(not self.time) for idx in self.categorical]
-        time_series_idx = torch.arange(self.time, self.n_channels + self.time)
         standardise_idx = torch.tensor(
             np.setdiff1d(time_series_idx.numpy(), categorical_idx)
         )
+        if self.delta:
+            if self.mask:
+                delta_idx = torch.arange(
+                    self.time + 2 * self.n_channels, self.time + 3 * self.n_channels
+                )
+            else:
+                delta_idx = torch.arange(
+                    self.time + self.n_channels, self.time + 2 * self.n_channels
+                )
+            standardise_idx = torch.cat((standardise_idx, delta_idx))
         # Training data channel means/standard deviations
         train_means = torch.nanmean(
             self.X_train[:, :, standardise_idx], dim=(0, 1), keepdim=True
@@ -583,11 +594,10 @@ class _TimeSeriesDataset(Dataset):
             ) / (train_stds + EPS)
         # Standardise static channels
         if self.X_static_train is not None:
-            standardise_idx_static = torch.tensor(
-                np.setdiff1d(self.static, categorical_idx)
-            )
             standardise_idx_static = [
-                self.static.index(i) for i in standardise_idx_static if i in self.static
+                self.static.index(i)
+                for i in np.setdiff1d(self.static, categorical_idx)
+                if i in self.static
             ]
             # Training data channel means/standard deviations
             train_means_static = torch.nanmean(

@@ -1,9 +1,10 @@
 import re
 
+import numpy as np
 import pytest
 import torch
 
-from torchtime.constants import OBJ_EXT
+from torchtime.constants import OBJ_EXT, PHYSIONET_2012_CATEGORICAL
 from torchtime.data import PhysioNet2012
 from torchtime.utils import _get_SHA256
 
@@ -14,46 +15,6 @@ SHA_X = "1a61d37501e7f45b38815e0588922f5104561cc77456de91896dcbf5f54191ad"
 SHA_Y = "5b9bf1f58ff02e04397f68ae776fc519e20cae6e66a632b01fa309693c3de3e9"
 SHA_LENGTH = "d4dbf3d19e9f03618f3113c57c5950031c22bad75c80744438e3121b1cff2204"
 N_TIME_CHANNELS = 44
-CONTINUOUS_CHANNELS = [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    17,
-    18,
-    19,
-    21,
-    22,
-    23,
-    24,
-    25,
-    26,
-    27,
-    28,
-    29,
-    30,
-    31,
-    32,
-    33,
-    34,
-    35,
-    36,
-    37,
-    38,
-    40,
-]
 
 
 class TestPhysioNet2012:
@@ -471,7 +432,10 @@ class TestPhysioNet2012:
             standardise=True,
             seed=SEED,
         )
-        for Xc in dataset.X_train[:, :, CONTINUOUS_CHANNELS].unbind(dim=-1):
+        continuous_channels = np.setdiff1d(
+            np.arange(dataset.X_train.size(-1)), PHYSIONET_2012_CATEGORICAL
+        )
+        for Xc in dataset.X_train[:, :, continuous_channels].unbind(dim=-1):
             assert torch.allclose(
                 torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
             )
@@ -496,7 +460,10 @@ class TestPhysioNet2012:
             standardise=True,
             seed=SEED,
         )
-        for Xc in dataset.X_train[:, :, CONTINUOUS_CHANNELS].unbind(dim=-1):
+        continuous_channels = np.setdiff1d(
+            np.arange(dataset.X_train.size(-1)), PHYSIONET_2012_CATEGORICAL
+        )
+        for Xc in dataset.X_train[:, :, continuous_channels].unbind(dim=-1):
             assert torch.allclose(
                 torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
             )
