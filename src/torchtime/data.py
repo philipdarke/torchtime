@@ -205,27 +205,10 @@ class _TimeSeriesDataset(Dataset):
             stratify,
         )
 
-        # Set up for standardisation/imputation
-        data_idx = None
-        train_means = torch.nanmean(self.X_train, dim=(0, 1), keepdim=True)
-        fill = train_means.flatten()
-
-        # 5. Standardise data
-        if self.standardise:
-            # Training data channel means/standard deviations
-            train_stds = torch.full(
-                (1, 1, self.X_train.size(-1)), fill_value=float("nan")
-            )
-            for c, Xc in enumerate(self.X_train.unbind(dim=-1)):
-                train_stds[:, :, c] = torch.std(Xc[~torch.isnan(Xc)])
-            # Standardise data
-            self.X_train = (self.X_train - train_means) / (train_stds + EPS)
-            self.X_val = (self.X_val - train_means) / (train_stds + EPS)
-            if self.test_prop > EPS:
-                self.X_test = (self.X_test - train_means) / (train_stds + EPS)
-
-        # Additional set up for imputation
+        # 5. Impute missing data
         if self.impute != "none":
+            data_idx = None
+            fill = torch.nanmean(self.X_train, dim=(0, 1), keepdim=True).flatten()
             if self.categorical != []:
                 # Impute using mode if categorical variable
                 assert (
@@ -260,6 +243,21 @@ class _TimeSeriesDataset(Dataset):
                 self.X_test, self.y_test = self.imputer(
                     self.X_test, self.y_test, fill, data_idx
                 )
+
+        # 6. Standardise data
+        if self.standardise:
+            # Training data channel means/standard deviations
+            train_means = torch.nanmean(self.X_train, dim=(0, 1), keepdim=True)
+            train_stds = torch.full(
+                (1, 1, self.X_train.size(-1)), fill_value=float("nan")
+            )
+            for c, Xc in enumerate(self.X_train.unbind(dim=-1)):
+                train_stds[:, :, c] = torch.std(Xc[~torch.isnan(Xc)])
+            # Standardise data
+            self.X_train = (self.X_train - train_means) / (train_stds + EPS)
+            self.X_val = (self.X_val - train_means) / (train_stds + EPS)
+            if self.test_prop > EPS:
+                self.X_test = (self.X_test - train_means) / (train_stds + EPS)
 
         # 7. Return data split
         if split == "test":

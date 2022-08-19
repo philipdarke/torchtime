@@ -343,20 +343,6 @@ class TestPhysioNet2012:
         assert dataset.X_train.shape == torch.Size([8400, 215, N_TIME_CHANNELS + 1])
         assert dataset.X_val.shape == torch.Size([2400, 215, N_TIME_CHANNELS + 1])
         assert dataset.X_test.shape == torch.Size([1200, 215, N_TIME_CHANNELS + 1])
-        # Check time channel
-        for i in range(215):
-            assert torch.equal(
-                dataset.X_train[:, i, 0],
-                torch.full([8400], fill_value=i, dtype=torch.float),
-            )
-            assert torch.equal(
-                dataset.X_val[:, i, 0],
-                torch.full([2400], fill_value=i, dtype=torch.float),
-            )
-            assert torch.equal(
-                dataset.X_test[:, i, 0],
-                torch.full([1200], fill_value=i, dtype=torch.float),
-            )
 
     def test_no_time(self):
         """Test time argument."""
@@ -426,20 +412,6 @@ class TestPhysioNet2012:
         assert dataset.X_train.shape == torch.Size([8400, 215, 3 * N_TIME_CHANNELS + 1])
         assert dataset.X_val.shape == torch.Size([2400, 215, 3 * N_TIME_CHANNELS + 1])
         assert dataset.X_test.shape == torch.Size([1200, 215, 3 * N_TIME_CHANNELS + 1])
-        # Check time channel
-        for i in range(215):
-            assert torch.equal(
-                dataset.X_train[:, i, 0],
-                torch.full([8400], fill_value=i, dtype=torch.float),
-            )
-            assert torch.equal(
-                dataset.X_val[:, i, 0],
-                torch.full([2400], fill_value=i, dtype=torch.float),
-            )
-            assert torch.equal(
-                dataset.X_test[:, i, 0],
-                torch.full([1200], fill_value=i, dtype=torch.float),
-            )
         # Check time delta channel
         assert torch.equal(
             dataset.X_train[:, 0, 91], torch.zeros([8400], dtype=torch.float)
@@ -451,7 +423,7 @@ class TestPhysioNet2012:
             dataset.X_test[:, 0, 91], torch.zeros([1200], dtype=torch.float)
         )
 
-    def test_standarisation(self):
+    def test_standarisation_1(self):
         """Check training data is standardised."""
         dataset = PhysioNet2012(
             split="train",
@@ -460,8 +432,7 @@ class TestPhysioNet2012:
             standardise=True,
             seed=SEED,
         )
-        for c, Xc in enumerate(dataset.X_train.unbind(dim=-1)):
-            print(Xc)
+        for Xc in dataset.X_train.unbind(dim=-1):
             assert torch.allclose(
                 torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
             )
@@ -472,7 +443,33 @@ class TestPhysioNet2012:
                 atol=ATOL,
             ) or torch.allclose(
                 torch.std(Xc[~torch.isnan(Xc)]),
-                torch.Tensor([0.0]),  # if all values are the same
+                torch.Tensor([0.0]),  # if all values are the same e.g. MechVent
+                rtol=RTOL,
+                atol=ATOL,
+            )
+
+    def test_standarisation_2(self):
+        """Check imputed training data is standardised."""
+        dataset = PhysioNet2012(
+            split="train",
+            train_prop=0.7,
+            impute="forward",
+            time=False,
+            standardise=True,
+            seed=SEED,
+        )
+        for Xc in dataset.X_train.unbind(dim=-1):
+            assert torch.allclose(
+                torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
+            )
+            assert torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            ) or torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([0.0]),  # if all values are the same e.g. MechVent
                 rtol=RTOL,
                 atol=ATOL,
             )
@@ -485,15 +482,15 @@ class TestPhysioNet2012:
             val_prop=0.2,
             seed=SEED,
         )
-        # Check first value in 39th channel
+        # Check first value in 38th channel
         assert torch.allclose(
-            dataset.X_train[0, 0, 39], torch.tensor(80.0), rtol=RTOL, atol=ATOL
+            dataset.X_train[0, 0, 38], torch.tensor(80.0), rtol=RTOL, atol=ATOL
         )
         assert torch.allclose(
-            dataset.X_val[0, 0, 39], torch.tensor(63.0), rtol=RTOL, atol=ATOL
+            dataset.X_val[0, 0, 38], torch.tensor(63.0), rtol=RTOL, atol=ATOL
         )
         assert torch.allclose(
-            dataset.X_test[0, 0, 39], torch.tensor(61.0), rtol=RTOL, atol=ATOL
+            dataset.X_test[0, 0, 38], torch.tensor(61.0), rtol=RTOL, atol=ATOL
         )
 
     def test_reproducibility_2(self):
@@ -504,13 +501,13 @@ class TestPhysioNet2012:
             val_prop=0.2,
             seed=999999,
         )
-        # Check first value in 39th channel
+        # Check first value in 38th channel
         assert torch.allclose(
-            dataset.X_train[0, 0, 39], torch.tensor(49.0), rtol=RTOL, atol=ATOL
+            dataset.X_train[0, 0, 38], torch.tensor(49.0), rtol=RTOL, atol=ATOL
         )
         assert torch.allclose(
-            dataset.X_val[0, 0, 39], torch.tensor(64.0), rtol=RTOL, atol=ATOL
+            dataset.X_val[0, 0, 38], torch.tensor(64.0), rtol=RTOL, atol=ATOL
         )
         assert torch.allclose(
-            dataset.X_test[0, 0, 39], torch.tensor(47.0), rtol=RTOL, atol=ATOL
+            dataset.X_test[0, 0, 38], torch.tensor(47.0), rtol=RTOL, atol=ATOL
         )
