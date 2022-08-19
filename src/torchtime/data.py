@@ -177,6 +177,7 @@ class _TimeSeriesDataset(Dataset):
             y_all = y_all.float()  # float32 precision
             length_all = length_all.long()  # int64 precision
             _cache_data(self.path, X_all, y_all, length_all)
+        print("Preparing data...")
 
         # 2. Split out static channels
         X_all_static = None
@@ -220,63 +221,13 @@ class _TimeSeriesDataset(Dataset):
             stratify,
         )
 
-        # 6. Impute missing data (time series channels only)
+        # 6. Impute missing data (time series/static channels only)
         if self.impute != "none":
-            time_series_idx = torch.arange(self.time, self.n_channels + self.time)
-            fill = torch.nanmean(
-                self.X_train[:, :, time_series_idx], dim=(0, 1), keepdim=True
-            ).flatten()
-            # Impute using mode if categorical variable
-            if self.categorical != []:
-                for idx in self.categorical:
-                    if idx <= self.n_channels:
-                        fill[idx - 1] = _nanmode(
-                            self.X_train[:, :, idx - int(not self.time)]
-                        )
-            # Override mean/mode if required
-            if self.channel_means != {}:
-                for idx, new_mean in self.channel_means.items():
-                    if idx <= self.n_channels:
-                        fill[idx - 1] = new_mean
-            # Impute data
-            self.X_train, self.y_train = self.imputer(
-                self.X_train, self.y_train, fill=fill, select=time_series_idx
-            )
-            self.X_val, self.y_val = self.imputer(
-                self.X_val, self.y_val, fill=fill, select=time_series_idx
-            )
-            if self.test_prop > EPS:
-                self.X_test, self.y_test = self.imputer(
-                    self.X_test, self.y_test, fill=fill, select=time_series_idx
-                )
+            self._impute()
 
         # 7. Standardise data (continuous channels only)
         if self.standardise:
-            categorical_idx = [idx - int(not self.time) for idx in self.categorical]
-            time_series_idx = torch.arange(self.time, self.n_channels + self.time)
-            standardise_idx = torch.tensor(
-                np.setdiff1d(time_series_idx.numpy(), np.array(categorical_idx))
-            )
-            # Training data channel means/standard deviations
-            train_means = torch.nanmean(
-                self.X_train[:, :, standardise_idx], dim=(0, 1), keepdim=True
-            )
-            train_stds = torch.full(
-                (1, 1, standardise_idx.size(-1)), fill_value=float("nan")
-            )
-            for c, Xc in enumerate(self.X_train[:, :, standardise_idx].unbind(dim=-1)):
-                train_stds[:, :, c] = torch.std(Xc[~torch.isnan(Xc)])
-            # Standardise data
-            self.X_train[:, :, standardise_idx] = (
-                self.X_train[:, :, standardise_idx] - train_means
-            ) / (train_stds + EPS)
-            self.X_val[:, :, standardise_idx] = (
-                self.X_val[:, :, standardise_idx] - train_means
-            ) / (train_stds + EPS)
-            if self.test_prop > EPS:
-                self.X_test[:, :, standardise_idx] = (
-                    self.X_test[:, :, standardise_idx] - train_means
-                ) / (train_stds + EPS)
+            self._standardise()
 
         # 8. Return data split
         if split == "test":
@@ -301,12 +252,14 @@ class _TimeSeriesDataset(Dataset):
         """Print data set details."""
         return """TimeSeriesDataset: {}
  - cache location = {}
- - data split = {:.0f}/{:.0f}/{:.0f} (training/validation/test)
+ - data split = {:.0f}/{:.0f}/{:.0f}% (training/validation/test)
  - time/mask/delta channels = {}/{}/{}
  - random seed = {}
+ - static channels = {}
+ - categorical channels = {}
  - X, y, length attributes return the {} split""".format(
             self.dataset,
-            self.path,
+            self.path.resolve(),
             100 * self.train_prop,
             100 * self.val_prop,
             100 * self.test_prop,
@@ -314,6 +267,8 @@ class _TimeSeriesDataset(Dataset):
             self.mask,
             self.delta,
             self.seed,
+            self.static,
+            self.categorical,
             self.split,
         )
 
@@ -428,10 +383,10 @@ class _TimeSeriesDataset(Dataset):
         stratified sampling."""
         random_state = np.random.RandomState(self.seed)
         X_test, y_test, length_test, X_static_test = (
-            float("nan"),
-            float("nan"),
-            float("nan"),
-            float("nan"),
+            None,
+            None,
+            None,
+            None,
         )
         if X_static is None:
             if self.test_prop > EPS:
@@ -477,9 +432,9 @@ class _TimeSeriesDataset(Dataset):
                 stratify=stratify,
             )
             X_static_train, X_static_val, X_static_test = (
-                float("nan"),
-                float("nan"),
-                float("nan"),
+                None,
+                None,
+                None,
             )
         else:
             if self.test_prop > EPS:
@@ -545,6 +500,118 @@ class _TimeSeriesDataset(Dataset):
             length_test,
             X_static_test,
         )
+
+    def _impute(self):
+        """Impute missing data."""
+        time_series_idx = torch.arange(self.time, self.n_channels + self.time)
+        fill = torch.nanmean(
+            self.X_train[:, :, time_series_idx], dim=(0, 1), keepdim=True
+        ).flatten()
+        # Impute using mode if categorical variable
+        if self.categorical != []:
+            for idx in self.categorical:
+                if idx <= self.n_channels:
+                    fill[idx - 1] = _nanmode(
+                        self.X_train[:, :, idx - int(not self.time)]
+                    )
+        # Override mean/mode if required
+        if self.channel_means != {}:
+            for idx, new_mean in self.channel_means.items():
+                if idx <= self.n_channels:
+                    fill[idx - 1] = new_mean
+        # Impute time series data
+        self.X_train, self.y_train = self.imputer(
+            self.X_train, self.y_train, fill=fill, select=time_series_idx
+        )
+        self.X_val, self.y_val = self.imputer(
+            self.X_val, self.y_val, fill=fill, select=time_series_idx
+        )
+        if self.test_prop > EPS:
+            self.X_test, self.y_test = self.imputer(
+                self.X_test, self.y_test, fill=fill, select=time_series_idx
+            )
+        # Impute static channels
+        if self.X_static_train is not None:
+            fill_static = torch.nanmean(
+                self.X_static_train, dim=0, keepdim=True
+            ).flatten()
+            # Impute using mode if categorical variable
+            if self.categorical != []:
+                for idx in [
+                    self.static.index(i) for i in self.categorical if i in self.static
+                ]:
+                    fill_static[idx] = _nanmode(self.X_static_train[:, idx])
+            # Override mean/mode if required
+            if self.channel_means != {}:
+                for idx, new_mean in self.channel_means.items():
+                    if idx in self.static:
+                        fill_static[self.static.index(idx)] = new_mean
+            # Impute static channels
+            self.X_static_train = replace_missing(self.X_static_train, fill=fill_static)
+            self.X_static_val = replace_missing(self.X_static_val, fill=fill_static)
+            if self.test_prop > EPS:
+                self.X_static_test = replace_missing(
+                    self.X_static_test, fill=fill_static
+                )
+
+    def _standardise(self):
+        """Standardise data."""
+        categorical_idx = [idx - int(not self.time) for idx in self.categorical]
+        time_series_idx = torch.arange(self.time, self.n_channels + self.time)
+        standardise_idx = torch.tensor(
+            np.setdiff1d(time_series_idx.numpy(), categorical_idx)
+        )
+        # Training data channel means/standard deviations
+        train_means = torch.nanmean(
+            self.X_train[:, :, standardise_idx], dim=(0, 1), keepdim=True
+        )
+        train_stds = torch.full(
+            (1, 1, standardise_idx.size(-1)), fill_value=float("nan")
+        )
+        for c, Xc in enumerate(self.X_train[:, :, standardise_idx].unbind(dim=-1)):
+            train_stds[:, :, c] = torch.std(Xc[~torch.isnan(Xc)])
+        # Standardise time series data
+        self.X_train[:, :, standardise_idx] = (
+            self.X_train[:, :, standardise_idx] - train_means
+        ) / (train_stds + EPS)
+        self.X_val[:, :, standardise_idx] = (
+            self.X_val[:, :, standardise_idx] - train_means
+        ) / (train_stds + EPS)
+        if self.test_prop > EPS:
+            self.X_test[:, :, standardise_idx] = (
+                self.X_test[:, :, standardise_idx] - train_means
+            ) / (train_stds + EPS)
+        # Standardise static channels
+        if self.X_static_train is not None:
+            standardise_idx_static = torch.tensor(
+                np.setdiff1d(self.static, categorical_idx)
+            )
+            standardise_idx_static = [
+                self.static.index(i) for i in standardise_idx_static if i in self.static
+            ]
+            # Training data channel means/standard deviations
+            train_means_static = torch.nanmean(
+                self.X_static_train[:, standardise_idx_static], dim=0, keepdim=True
+            )
+            train_stds_static = torch.full(
+                (1, self.X_static_train[:, standardise_idx_static].size(-1)),
+                fill_value=float("nan"),
+            )
+            for c, Xc in enumerate(
+                self.X_static_train[:, standardise_idx_static].unbind(dim=-1)
+            ):
+                train_stds_static[:, c] = torch.std(Xc[~torch.isnan(Xc)])
+            # Standardise static channels
+            self.X_static_train[:, standardise_idx_static] = (
+                self.X_static_train[:, standardise_idx_static] - train_means_static
+            ) / (train_stds_static + EPS)
+            self.X_static_val[:, standardise_idx_static] = (
+                self.X_static_val[:, standardise_idx_static] - train_means_static
+            ) / (train_stds_static + EPS)
+            if self.test_prop > EPS:
+                self.X_static_test[:, standardise_idx_static] = (
+                    self.X_static_test[:, standardise_idx_static] - train_means_static
+                ) / (train_stds_static + EPS)
 
     def __len__(self):
         return self.X.size(0)
@@ -636,7 +703,8 @@ class PhysioNet2012(_TimeSeriesDataset):
         ``NaN`` indicates either missing data or no mechanical ventilation. Accordingly,
         the channel mode is assumed to be zero.
 
-        Variables 41-44 are the one-hot encoded value of ICUType.
+        Variables 41-44 are the one-hot encoded value of ICUType. Missing ICUType values
+        are assumed to be 3 i.e. Medical ICU.
 
     Args:
         split: The data split to return, either *train*, *val* (validation) or *test*.

@@ -74,7 +74,7 @@ PHYSIONET_2012_VARS: Final[list] = [
 ]
 PHYSIONET_2012_CATEGORICAL: Final[list] = [20, 39, 41, 42, 43, 44]
 PHYSIONET_2012_STATIC: Final[list] = [38, 39, 40, 41, 42, 43, 44]
-PHYSIONET_2012_MEANS: Final[dict] = {20: 0.0}
+PHYSIONET_2012_MEANS: Final[dict] = {20: 0.0, 41: 0.0, 42: 0.0, 43: 1.0, 44: 0.0}
 
 # PhysioNet 2019
 PHYSIONET_2019_DATASETS: Final[dict] = {
