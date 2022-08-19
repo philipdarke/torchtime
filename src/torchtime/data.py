@@ -206,40 +206,23 @@ class _TimeSeriesDataset(Dataset):
         )
 
         # Set up for standardisation/imputation
-        if self.standardise or self.impute != "none":
-            # Number of channels
-            n_channels = int(
-                (self.X_train.size(2) - self.time) / (1 + self.mask + self.delta)
-            )
-            # Time series channels
-            data_idx = torch.arange(self.time, self.time + n_channels)
-            X_train_data = self.X_train[:, :, data_idx]
-            # Training data channel means
-            train_means = torch.nanmean(X_train_data, dim=(0, 1), keepdim=True)
-            fill = train_means.flatten()
-        else:
-            # Null values to pass to imputer()
-            fill = None
-            data_idx = None
+        data_idx = None
+        train_means = torch.nanmean(self.X_train, dim=(0, 1), keepdim=True)
+        fill = train_means.flatten()
 
         # 5. Standardise data
         if self.standardise:
-            # Training data channel standard deviations
-            train_stds = torch.full((1, 1, n_channels), fill_value=float("nan"))
-            for c, Xc in enumerate(X_train_data.unbind(dim=-1)):
+            # Training data channel means/standard deviations
+            train_stds = torch.full(
+                (1, 1, self.X_train.size(-1)), fill_value=float("nan")
+            )
+            for c, Xc in enumerate(self.X_train.unbind(dim=-1)):
                 train_stds[:, :, c] = torch.std(Xc[~torch.isnan(Xc)])
             # Standardise data
-            self.X_train[:, :, self.time : (self.time + n_channels)] = (
-                self.X_train[:, :, self.time : (self.time + n_channels)] - train_means
-            ) / (train_stds + EPS)
-            self.X_val[:, :, self.time : (self.time + n_channels)] = (
-                self.X_val[:, :, self.time : (self.time + n_channels)] - train_means
-            ) / (train_stds + EPS)
+            self.X_train = (self.X_train - train_means) / (train_stds + EPS)
+            self.X_val = (self.X_val - train_means) / (train_stds + EPS)
             if self.test_prop > EPS:
-                self.X_test[:, :, self.time : (self.time + n_channels)] = (
-                    self.X_test[:, :, self.time : (self.time + n_channels)]
-                    - train_means
-                ) / (train_stds + EPS)
+                self.X_test = (self.X_test - train_means) / (train_stds + EPS)
 
         # Additional set up for imputation
         if self.impute != "none":
@@ -248,12 +231,12 @@ class _TimeSeriesDataset(Dataset):
                 assert (
                     all([type(cat) is int for cat in self.categorical])
                     and min(self.categorical) >= 0
-                    and max(self.categorical) < n_channels
+                    and max(self.categorical) < self.n_time_channels
                 ), "indices in 'categorical' should be between 0 and {}".format(
-                    n_channels - 1
+                    self.n_time_channels - 1
                 )
                 train_modes = [
-                    _nanmode(X_train_data[:, :, channel])
+                    _nanmode(self.X_train[:, :, channel])
                     for channel in self.categorical
                 ]
                 for i, idx in enumerate(self.categorical):
@@ -262,9 +245,9 @@ class _TimeSeriesDataset(Dataset):
             if self.channel_means != {}:
                 for x, y in self.channel_means.items():
                     assert (
-                        type(x) is int and x >= 0 and x < n_channels
+                        type(x) is int and x >= 0 and x < self.n_time_channels
                     ), "keys in 'channel_means' should be between 0 and {}".format(
-                        n_channels - 1
+                        self.n_time_channels - 1
                     )
                     fill[x] = y
             self.X_train, self.y_train = self.imputer(
@@ -358,7 +341,7 @@ class _TimeSeriesDataset(Dataset):
     @staticmethod
     def _zero_imputation(X, y, fill, select):
         """Zero imputation. Replace missing values with zeros."""
-        X_imputed = replace_missing(X, fill=torch.zeros(select.size(-1)), select=select)
+        X_imputed = replace_missing(X, fill=torch.zeros(X.size(-1)))
         y_imputed = replace_missing(y, fill=torch.zeros(y.size(-1)))
         return X_imputed, y_imputed
 
@@ -366,7 +349,7 @@ class _TimeSeriesDataset(Dataset):
     def _mean_imputation(X, y, fill, select):
         """Mean imputation. Replace missing values in ``X`` from ``fill``. Replace
         missing values in ``y`` with zeros."""
-        X_imputed = replace_missing(X, fill=fill, select=select)
+        X_imputed = replace_missing(X, fill=fill)
         y_imputed = replace_missing(y, fill=torch.zeros(y.size(-1)))
         return X_imputed, y_imputed
 
@@ -375,7 +358,7 @@ class _TimeSeriesDataset(Dataset):
         """Forward imputation. Replace missing values with previous observation. Replace
         any initial missing values in ``X`` from ``fill``. Assume no missing initial
         values in ``y`` but there may be trailing missing values due to padding."""
-        X_imputed = forward_impute(X, fill=fill, select=select)
+        X_imputed = forward_impute(X, fill=fill)
         y_imputed = forward_impute(y)
         return X_imputed, y_imputed
 
