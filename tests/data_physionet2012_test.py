@@ -340,9 +340,9 @@ class TestPhysioNet2012:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([8400, 215, 46])
-        assert dataset.X_val.shape == torch.Size([2400, 215, 46])
-        assert dataset.X_test.shape == torch.Size([1200, 215, 46])
+        assert dataset.X_train.shape == torch.Size([8400, 215, N_TIME_CHANNELS + 1])
+        assert dataset.X_val.shape == torch.Size([2400, 215, N_TIME_CHANNELS + 1])
+        assert dataset.X_test.shape == torch.Size([1200, 215, N_TIME_CHANNELS + 1])
         # Check time channel
         for i in range(215):
             assert torch.equal(
@@ -368,9 +368,9 @@ class TestPhysioNet2012:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([8400, 215, 45])
-        assert dataset.X_val.shape == torch.Size([2400, 215, 45])
-        assert dataset.X_test.shape == torch.Size([1200, 215, 45])
+        assert dataset.X_train.shape == torch.Size([8400, 215, N_TIME_CHANNELS])
+        assert dataset.X_val.shape == torch.Size([2400, 215, N_TIME_CHANNELS])
+        assert dataset.X_test.shape == torch.Size([1200, 215, N_TIME_CHANNELS])
 
     def test_mask(self):
         """Test mask argument."""
@@ -383,9 +383,9 @@ class TestPhysioNet2012:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([8400, 215, 90])
-        assert dataset.X_val.shape == torch.Size([2400, 215, 90])
-        assert dataset.X_test.shape == torch.Size([1200, 215, 90])
+        assert dataset.X_train.shape == torch.Size([8400, 215, 2 * N_TIME_CHANNELS])
+        assert dataset.X_val.shape == torch.Size([2400, 215, 2 * N_TIME_CHANNELS])
+        assert dataset.X_test.shape == torch.Size([1200, 215, 2 * N_TIME_CHANNELS])
 
     def test_delta(self):
         """Test time delta argument."""
@@ -398,9 +398,9 @@ class TestPhysioNet2012:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([8400, 215, 90])
-        assert dataset.X_val.shape == torch.Size([2400, 215, 90])
-        assert dataset.X_test.shape == torch.Size([1200, 215, 90])
+        assert dataset.X_train.shape == torch.Size([8400, 215, 2 * N_TIME_CHANNELS])
+        assert dataset.X_val.shape == torch.Size([2400, 215, 2 * N_TIME_CHANNELS])
+        assert dataset.X_test.shape == torch.Size([1200, 215, 2 * N_TIME_CHANNELS])
         # Check time delta channel
         assert torch.equal(
             dataset.X_train[:, 0, 45], torch.zeros([8400], dtype=torch.float)
@@ -423,9 +423,9 @@ class TestPhysioNet2012:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([8400, 215, 136])
-        assert dataset.X_val.shape == torch.Size([2400, 215, 136])
-        assert dataset.X_test.shape == torch.Size([1200, 215, 136])
+        assert dataset.X_train.shape == torch.Size([8400, 215, 3 * N_TIME_CHANNELS + 1])
+        assert dataset.X_val.shape == torch.Size([2400, 215, 3 * N_TIME_CHANNELS + 1])
+        assert dataset.X_test.shape == torch.Size([1200, 215, 3 * N_TIME_CHANNELS + 1])
         # Check time channel
         for i in range(215):
             assert torch.equal(
