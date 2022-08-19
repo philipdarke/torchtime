@@ -52,37 +52,9 @@ class _TimeSeriesDataset(Dataset):
     """**Generic time series PyTorch Dataset.**
 
     .. warning::
-        Overload the ``_get_data()`` method to define a data set.
-
-    The proportion of data in the training, validation and (optional) test data sets are
-    specified by the ``train_prop`` and ``val_prop`` arguments. For a
-    training/validation split specify ``train_prop`` only. For a
-    training/validation/test split specify both ``train_prop`` and ``val_prop``.
-
-    For example ``train_prop=0.8`` generates a 80/20% train/validation split, but
-    ``train_prop=0.8``, ``val_prop=0.1`` generates a 80/10/10% train/validation/test
-    split. Splits are formed using stratified sampling.
-
-    When passed to a PyTorch DataLoader, batches are a named dictionary with ``X``,
-    ``y`` and ``length`` data. The ``split`` argument determines whether training,
-    validation or test data are returned.
-
-    Missing data can be simulated by dropping data at random. Support is also provided
-    to impute missing data. These options are controlled by the ``missing`` and
-    ``impute`` arguments. See the `missing data tutorial
-    <https://philipdarke.com/torchtime/tutorials/missing_data.html>`_ for more
-    information.
-
-    .. warning::
-        Mean imputation is unsuitable for categorical variables. To impute missing
-        values for a categorical variable with the channel mode (rather than the channel
-        mean), pass the channel indices to the ``categorical`` argument. Note this is
-        also required for forward imputation to appropriately impute initial missing
-        values.
-
-        Alternatively, the calculated channel mean/mode can be overridden using the
-        ``channel_means`` argument. This can be used to impute missing data with a fixed
-        value.
+        Inherit from this class to define a time series. Overload the ``_get_data()``
+        method to return the time series. This must contain a time stamp in the first
+        channel followed by the time series channels.
 
     Args:
         dataset: Name of the cache directory for the data set.
@@ -131,12 +103,6 @@ class _TimeSeriesDataset(Dataset):
             is the number of classes.
         length (Tensor): Length of each trajectory prior to padding. A tensor of shape
             (*n*).
-
-    .. note::
-        ``X``, ``y`` and ``length`` are available for the training, validation and test
-        splits by appending ``_train``, ``_val`` and ``_test`` respectively. For
-        example, ``y_val`` returns the labels for the validation data set. These
-        attributes are available regardless of the ``split`` argument.
 
     Returns:
         A PyTorch Dataset object which can be passed to a DataLoader.
@@ -204,20 +170,22 @@ class _TimeSeriesDataset(Dataset):
             y_all = y_all.float()  # float32 precision
             length_all = length_all.long()  # int64 precision
             _cache_data(self.path, X_all, y_all, length_all)
+        self.n_time_channels = X_all.size(-1) - 1
 
         # 2. Simulate missing data
         if (type(self.missing) is list and sum(self.missing) > EPS) or (
             type(self.missing) is float and self.missing > EPS
         ):
+            # TODO: do not drop values from time channel
             _simulate_missing(X_all, self.missing, seed=self.seed)
 
         # 3. Add time stamp/mask/time delta channels
-        if self.time:
-            X_all = torch.cat([self._time_stamp(X_all), X_all], dim=2)
         if self.mask:
             X_all = torch.cat([X_all, self._missing_mask(X_all)], dim=2)
-        if delta:
+        if self.delta:
             X_all = torch.cat([X_all, self._time_delta(X_all)], dim=2)
+        if not self.time:
+            X_all = X_all[:, :, 1:]  # drop time channel
 
         # 4. Form train/validation/test splits
         stratify = torch.nansum(y_all, dim=1) > 0
@@ -421,34 +389,24 @@ class _TimeSeriesDataset(Dataset):
         """Overload this function to return ``X``, ``y`` and ``length`` tensors."""
         raise NotImplementedError
 
-    @staticmethod
-    def _time_stamp(X):
-        """Calculate time stamp."""
-        time_stamp = torch.arange(X.size(1)).unsqueeze(0)
-        time_stamp = time_stamp.tile((X.size(0), 1)).unsqueeze(2)
-        return time_stamp
-
     def _missing_mask(self, X):
         """Calculate missing data mask."""
-        mask = torch.logical_not(torch.isnan(X[:, :, self.time :]))
+        mask = torch.logical_not(torch.isnan(X[:, :, 1:]))
         return mask
 
     def _time_delta(self, X):
         """Calculate time delta calculated as in Che et al, 2018, see
         https://www.nature.com/articles/s41598-018-24271-9."""
-        # Add time and mask channels
-        if not self.time:
-            X = torch.cat([self._time_stamp(X), X], dim=2)
+        # Add mask channels
         if not self.mask:
             X = torch.cat([X, self._missing_mask(X)], dim=2)
         # Time of each observation by channel
-        n_channels = int((X.size(-1) - 1) / 2)
         X = X.transpose(1, 2)  # shape (n, c, s)
-        time_stamp = X[:, 0].unsqueeze(1).repeat(1, n_channels, 1)
+        time_stamp = X[:, 0].unsqueeze(1).repeat(1, self.n_time_channels, 1)
         # Time delta/mask are 0/1 at time 0 by definition
         time_delta = time_stamp.clone()
         time_delta[:, :, 0] = 0
-        time_mask = X[:, -n_channels:].clone()
+        time_mask = X[:, -self.n_time_channels :].clone()
         time_mask[:, :, 0] = 1
         # Time of previous observation if data missing
         time_delta = time_delta.gather(-1, torch.cummax(time_mask, -1)[1])
