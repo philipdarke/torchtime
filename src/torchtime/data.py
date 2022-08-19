@@ -31,6 +31,7 @@ from torchtime.constants import (
     PHYSIONET_2012_DATASETS,
     PHYSIONET_2012_MEANS,
     PHYSIONET_2012_OUTCOMES,
+    PHYSIONET_2012_STATIC,
     PHYSIONET_2012_VARS,
     PHYSIONET_2019_DATASETS,
     TQDM_FORMAT,
@@ -70,6 +71,7 @@ class _TimeSeriesDataset(Dataset):
         impute: Method used to impute missing data, either *none*, *zero*, *mean*,
             *forward* or a custom imputation function (default "none"). See warning
             above.
+        static: TODO
         categorical: List with channel indices of categorical variables. Only required
             if imputing data. Default ``[]`` i.e. no categorical variables.
         channel_means: Override the calculated channel mean/mode when imputing data.
@@ -101,11 +103,12 @@ class _TimeSeriesDataset(Dataset):
 
             Where sequences are of unequal lengths they are padded with ``NaNs`` to
             the length of the longest sequence in the data.
+        X_static (Tensor): TODO
         y (Tensor): One-hot encoded label data. A tensor of shape (*n*, *l*) where *l*
             is the number of classes.
         length (Tensor): Length of each sequence prior to padding. A tensor of shape
             (*n*).
-        n_time_channels: Number of time series channels in data.
+        n_channels: Number of time series channels in data.
 
     Returns:
         A PyTorch Dataset object which can be passed to a DataLoader.
@@ -119,6 +122,7 @@ class _TimeSeriesDataset(Dataset):
         val_prop: float = None,
         missing: Union[float, List[float]] = 0.0,
         impute: Union[str, Callable[[Tensor], Tensor]] = "none",
+        static: List[int] = [],
         categorical: List[int] = [],
         channel_means: Dict[int, float] = {},
         time: bool = True,
@@ -136,6 +140,7 @@ class _TimeSeriesDataset(Dataset):
         self.test_prop = 0
         self.missing = missing
         self.impute = impute
+        self.static = static
         self.categorical = categorical
         self.channel_means = channel_means
         self.time = time
@@ -172,16 +177,24 @@ class _TimeSeriesDataset(Dataset):
             y_all = y_all.float()  # float32 precision
             length_all = length_all.long()  # int64 precision
             _cache_data(self.path, X_all, y_all, length_all)
-        self.n_time_channels = X_all.size(-1) - 1
 
-        # 2. Simulate missing data
+        # 2. Split out static channels
+        X_all_static = None
+        if self.static != []:
+            X_all_static = X_all[:, 0, self.static]
+            time_idx = np.setdiff1d(np.arange(X_all.size(-1)), self.static)
+            X_all = X_all[:, :, time_idx]
+        self.n_channels = X_all.size(-1)
+        self.n_channels -= 1  # do not count time channel
+
+        # 3. Simulate missing data
         if (type(self.missing) is list and sum(self.missing) > EPS) or (
             type(self.missing) is float and self.missing > EPS
         ):
             # TODO: do not drop values from time channel
             _simulate_missing(X_all, self.missing, seed=self.seed)
 
-        # 3. Add time stamp/mask/time delta channels
+        # 4. Add time stamp/mask/time delta channels
         if self.mask:
             X_all = torch.cat([X_all, self._missing_mask(X_all)], dim=2)
         if self.delta:
@@ -189,26 +202,30 @@ class _TimeSeriesDataset(Dataset):
         if not self.time:
             X_all = X_all[:, :, 1:]  # drop time channel
 
-        # 4. Form train/validation/test splits
+        # 5. Form train/validation/test splits
         stratify = torch.nansum(y_all, dim=1) > 0
         (
             self.X_train,
             self.y_train,
             self.length_train,
+            self.X_static_train,
             self.X_val,
             self.y_val,
             self.length_val,
+            self.X_static_val,
             self.X_test,
             self.y_test,
             self.length_test,
+            self.X_static_test,
         ) = self._split_data(
             X_all,
             y_all,
             length_all,
+            X_all_static,
             stratify,
         )
 
-        # 5. Impute missing data
+        # 6. Impute missing data
         if self.impute != "none":
             data_idx = None
             fill = torch.nanmean(self.X_train, dim=(0, 1), keepdim=True).flatten()
@@ -217,9 +234,9 @@ class _TimeSeriesDataset(Dataset):
                 assert (
                     all([type(cat) is int for cat in self.categorical])
                     and min(self.categorical) >= 1
-                    and max(self.categorical) <= self.n_time_channels
+                    and max(self.categorical) <= self.n_channels
                 ), "indices in 'categorical' should be between 1 and {}".format(
-                    self.n_time_channels
+                    self.n_channels
                 )
                 categorical_idx = [idx - int(not self.time) for idx in self.categorical]
                 for idx in categorical_idx:
@@ -228,9 +245,9 @@ class _TimeSeriesDataset(Dataset):
             if self.channel_means != {}:
                 for idx, new_mean in self.channel_means.items():
                     assert (
-                        type(idx) is int and idx >= 1 and idx <= self.n_time_channels
+                        type(idx) is int and idx >= 1 and idx <= self.n_channels
                     ), "keys in 'channel_means' should be between 1 and {}".format(
-                        self.n_time_channels
+                        self.n_channels
                     )
                     fill[idx - int(not self.time)] = new_mean
             self.X_train, self.y_train = self.imputer(
@@ -244,7 +261,7 @@ class _TimeSeriesDataset(Dataset):
                     self.X_test, self.y_test, fill, data_idx
                 )
 
-        # 6. Standardise data
+        # 7. Standardise data
         if self.standardise:
             # Training data channel means/standard deviations
             train_means = torch.nanmean(self.X_train, dim=(0, 1), keepdim=True)
@@ -259,21 +276,24 @@ class _TimeSeriesDataset(Dataset):
             if self.test_prop > EPS:
                 self.X_test = (self.X_test - train_means) / (train_stds + EPS)
 
-        # 7. Return data split
+        # 8. Return data split
         if split == "test":
             self.X = self.X_test
             self.y = self.y_test
             self.length = self.length_test
+            self.X_static = self.X_static_test
         elif split == "train":
             self.X = self.X_train
             self.y = self.y_train
             self.length = self.length_train
+            self.X_static = self.X_static_train
         else:
             self.X = self.X_val
             self.y = self.y_val
             self.length = self.length_val
+            self.X_static = self.X_static_val
         if self.test_prop <= EPS:
-            del self.X_test, self.y_test, self.length_test
+            del self.X_test, self.y_test, self.length_test, self.X_static_test
 
     def __str__(self):
         """Print data set details."""
@@ -377,11 +397,11 @@ class _TimeSeriesDataset(Dataset):
             X = torch.cat([X, self._missing_mask(X)], dim=2)
         # Time of each observation by channel
         X = X.transpose(1, 2)  # shape (n, c, s)
-        time_stamp = X[:, 0].unsqueeze(1).repeat(1, self.n_time_channels, 1)
+        time_stamp = X[:, 0].unsqueeze(1).repeat(1, self.n_channels, 1)
         # Time delta/mask are 0/1 at time 0 by definition
         time_delta = time_stamp.clone()
         time_delta[:, :, 0] = 0
-        time_mask = X[:, -self.n_time_channels :].clone()
+        time_mask = X[:, -self.n_channels :].clone()
         time_mask[:, :, 0] = 1
         # Time of previous observation if data missing
         time_delta = time_delta.gather(-1, torch.cummax(time_mask, -1)[1])
@@ -396,66 +416,162 @@ class _TimeSeriesDataset(Dataset):
         )
         return time_delta.transpose(1, 2)
 
-    def _split_data(self, X, y, length, stratify):
-        """Split data (``X``, ``y``, ``length``) into training, validation and
-        (optional) test sets using stratified sampling."""
+    def _split_data(self, X, y, length, X_static, stratify):
+        """Split data into training, validation and (optional) test sets using
+        stratified sampling."""
         random_state = np.random.RandomState(self.seed)
-        if self.test_prop > EPS:
-            # Test split
-            test_nontest_split = train_test_split(
-                X,
-                y,
-                length,
-                stratify,
-                train_size=self.test_prop,
-                random_state=random_state,
-                shuffle=True,
-                stratify=stratify,
+        if X_static is None:
+            if self.test_prop > EPS:
+                # Test split
+                (
+                    X_test,
+                    X_nontest,
+                    y_test,
+                    y_nontest,
+                    length_test,
+                    length_nontest,
+                    _,
+                    stratify_nontest,
+                ) = train_test_split(
+                    X,
+                    y,
+                    length,
+                    stratify,
+                    train_size=self.test_prop,
+                    random_state=random_state,
+                    shuffle=True,
+                    stratify=stratify,
+                )
+                # Validation/train split
+                (
+                    X_val,
+                    X_train,
+                    y_val,
+                    y_train,
+                    length_val,
+                    length_train,
+                ) = train_test_split(
+                    X_nontest,
+                    y_nontest,
+                    length_nontest,
+                    train_size=self.val_prop,
+                    random_state=random_state,
+                    shuffle=True,
+                    stratify=stratify_nontest,
+                )
+            else:
+                # Validation/train split
+                (
+                    X_val,
+                    X_train,
+                    y_val,
+                    y_train,
+                    length_val,
+                    length_train,
+                ) = train_test_split(
+                    X,
+                    y,
+                    length,
+                    train_size=self.val_prop,
+                    random_state=random_state,
+                    shuffle=True,
+                    stratify=stratify,
+                )
+                X_test, y_test, length_test = (
+                    float("nan"),
+                    float("nan"),
+                    float("nan"),
+                )
+            X_static_train, X_static_val, X_static_test = (
+                float("nan"),
+                float("nan"),
+                float("nan"),
             )
-            (
-                X_test,
-                X_nontest,
-                y_test,
-                y_nontest,
-                length_test,
-                length_nontest,
-                _,
-                stratify_nontest,
-            ) = test_nontest_split
-            # Validation/train split
-            val_train_split = train_test_split(
-                X_nontest,
-                y_nontest,
-                length_nontest,
-                train_size=self.val_prop,
-                random_state=random_state,
-                shuffle=True,
-                stratify=stratify_nontest,
-            )
-            X_val, X_train, y_val, y_train, length_val, length_train = val_train_split
         else:
-            # Validation/train split
-            val_train_split = train_test_split(
-                X,
-                y,
-                length,
-                train_size=self.val_prop,
-                random_state=random_state,
-                shuffle=True,
-                stratify=stratify,
-            )
-            X_val, X_train, y_val, y_train, length_val, length_train = val_train_split
-            X_test, y_test, length_test = float("nan"), float("nan"), float("nan")
+            if self.test_prop > EPS:
+                # Test split
+                (
+                    X_test,
+                    X_nontest,
+                    y_test,
+                    y_nontest,
+                    length_test,
+                    length_nontest,
+                    X_static_test,
+                    X_static_nontest,
+                    _,
+                    stratify_nontest,
+                ) = train_test_split(
+                    X,
+                    y,
+                    length,
+                    X_static,
+                    stratify,
+                    train_size=self.test_prop,
+                    random_state=random_state,
+                    shuffle=True,
+                    stratify=stratify,
+                )
+                # Validation/train split
+                (
+                    X_val,
+                    X_train,
+                    y_val,
+                    y_train,
+                    length_val,
+                    length_train,
+                    X_static_val,
+                    X_static_train,
+                ) = train_test_split(
+                    X_nontest,
+                    y_nontest,
+                    length_nontest,
+                    X_static_nontest,
+                    train_size=self.val_prop,
+                    random_state=random_state,
+                    shuffle=True,
+                    stratify=stratify_nontest,
+                )
+            else:
+                # Validation/train split
+                (
+                    X_val,
+                    X_train,
+                    y_val,
+                    y_train,
+                    length_val,
+                    length_train,
+                    X_static_val,
+                    X_static_train,
+                ) = train_test_split(
+                    X,
+                    y,
+                    length,
+                    X_static,
+                    train_size=self.val_prop,
+                    random_state=random_state,
+                    shuffle=True,
+                    stratify=stratify,
+                )
+                X_test, y_test, length_test, X_static_test = (
+                    float("nan"),
+                    float("nan"),
+                    float("nan"),
+                    float("nan"),
+                )
         return (
             X_train,
             y_train,
             length_train,
+            X_static_train,
             X_val,
             y_val,
             length_val,
+            X_static_val,
             X_test,
             y_test,
             length_test,
+            X_static_test,
         )
 
     def __len__(self):
@@ -556,6 +672,7 @@ class PhysioNet2012(_TimeSeriesDataset):
         val_prop: Proportion of data in the validation set (optional, see above).
         impute: Method used to impute missing data, either *none*, *zero*, *mean*,
             *forward* or a custom imputation function (default "none").
+        static: TODO
         time: Append time stamp in the first channel (default True).
         mask: Append missing data mask for each channel (default False).
         delta: Append time since previous observation for each channel calculated as in
@@ -583,11 +700,12 @@ class PhysioNet2012(_TimeSeriesDataset):
 
             Note that PhysioNet sequences are of unequal length and are therefore
             padded with ``NaNs`` to the length of the longest sequence in the data.
+        X_static: TODO
         y (Tensor): In-hospital survival (the ``In-hospital_death`` variable) for each
             patient. *y* = 1 indicates an in-hospital death. A tensor of shape (*n*, 1).
         length (Tensor): Length of each sequence prior to padding. A tensor of shape
             (*n*).
-        n_time_channels: Number of time series channels in data.
+        n_channels: Number of time series channels in data.
 
     .. note::
         ``X``, ``y`` and ``length`` are available for the training, validation and test
@@ -605,6 +723,7 @@ class PhysioNet2012(_TimeSeriesDataset):
         train_prop: float,
         val_prop: float = None,
         impute: Union[str, Callable[[Tensor], Tensor]] = "none",
+        static: bool = False,
         time: bool = True,
         mask: bool = False,
         delta: bool = False,
@@ -614,12 +733,17 @@ class PhysioNet2012(_TimeSeriesDataset):
         seed: int = None,
     ) -> None:
         self.dataset_path = pathlib.Path() / path / ".torchtime" / "physionet_2012"
+        if static:
+            static_idx = PHYSIONET_2012_STATIC
+        else:
+            static_idx = []
         super(PhysioNet2012, self).__init__(
             dataset="physionet_2012",
             split=split,
             train_prop=train_prop,
             val_prop=val_prop,
             impute=impute,
+            static=static_idx,
             categorical=PHYSIONET_2012_CATEGORICAL,
             channel_means=PHYSIONET_2012_MEANS,
             time=time,
@@ -785,7 +909,7 @@ class PhysioNet2019(_TimeSeriesDataset):
         y (Tensor): ``SepsisLabel`` at each time point. A tensor of shape (*n*, *s*, 1).
         length (Tensor): Length of each sequence prior to padding. A tensor of shape
             (*n*).
-        n_time_channels: Number of time series channels in data.
+        n_channels: Number of time series channels in data.
 
     .. note::
         ``X``, ``y`` and ``length`` are available for the training, validation and test
@@ -953,7 +1077,7 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
             hospitalisation. A tensor of shape (*n*, 1).
         length (Tensor): Length of each sequence prior to padding. A tensor of shape
             (*n*).
-        n_time_channels: Number of time series channels in data.
+        n_channels: Number of time series channels in data.
 
     .. note::
         ``X``, ``y`` and ``length`` are available for the training, validation and test
@@ -1129,7 +1253,7 @@ class UEA(_TimeSeriesDataset):
             is the number of classes.
         length (Tensor): Length of each sequence prior to padding. A tensor of shape
             (*n*).
-        n_time_channels: Number of time series channels in data.
+        n_channels: Number of time series channels in data.
 
     .. note::
         ``X``, ``y`` and ``length`` are available for the training, validation and test
