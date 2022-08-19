@@ -27,7 +27,9 @@ from tqdm import tqdm
 from torchtime.constants import (
     EPS,
     OBJ_EXT,
+    PHYSIONET_2012_CATEGORICAL,
     PHYSIONET_2012_DATASETS,
+    PHYSIONET_2012_MEANS,
     PHYSIONET_2012_OUTCOMES,
     PHYSIONET_2012_VARS,
     PHYSIONET_2019_DATASETS,
@@ -213,26 +215,23 @@ class _TimeSeriesDataset(Dataset):
                 # Impute using mode if categorical variable
                 assert (
                     all([type(cat) is int for cat in self.categorical])
-                    and min(self.categorical) >= 0
-                    and max(self.categorical) < self.n_time_channels
-                ), "indices in 'categorical' should be between 0 and {}".format(
-                    self.n_time_channels - 1
+                    and min(self.categorical) >= 1
+                    and max(self.categorical) <= self.n_time_channels
+                ), "indices in 'categorical' should be between 1 and {}".format(
+                    self.n_time_channels
                 )
-                train_modes = [
-                    _nanmode(self.X_train[:, :, channel])
-                    for channel in self.categorical
-                ]
-                for i, idx in enumerate(self.categorical):
-                    fill[idx] = train_modes[i]
+                categorical_idx = [idx - int(not self.time) for idx in self.categorical]
+                for idx in categorical_idx:
+                    fill[idx] = _nanmode(self.X_train[:, :, idx])
             # Override mean/mode if required
             if self.channel_means != {}:
-                for x, y in self.channel_means.items():
+                for idx, new_mean in self.channel_means.items():
                     assert (
-                        type(x) is int and x >= 0 and x < self.n_time_channels
-                    ), "keys in 'channel_means' should be between 0 and {}".format(
-                        self.n_time_channels - 1
+                        type(idx) is int and idx >= 1 and idx <= self.n_time_channels
+                    ), "keys in 'channel_means' should be between 1 and {}".format(
+                        self.n_time_channels
                     )
-                    fill[x] = y
+                    fill[idx - int(not self.time)] = new_mean
             self.X_train, self.y_train = self.imputer(
                 self.X_train, self.y_train, fill, data_idx
             )
@@ -619,8 +618,8 @@ class PhysioNet2012(_TimeSeriesDataset):
             train_prop=train_prop,
             val_prop=val_prop,
             impute=impute,
-            categorical=[20],
-            channel_means={20: 0.0},
+            categorical=PHYSIONET_2012_CATEGORICAL,
+            channel_means=PHYSIONET_2012_MEANS,
             time=time,
             mask=mask,
             delta=delta,

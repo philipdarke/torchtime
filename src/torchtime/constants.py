@@ -72,9 +72,15 @@ PHYSIONET_2012_VARS: Final[list] = [
     "ICUType3",
     "ICUType4",
 ]
+PHYSIONET_2012_CATEGORICAL: Final[list] = [20, 39, 41, 42, 43, 44]
+PHYSIONET_2012_STATIC: Final[list] = [38, 39, 40, 41, 42, 43, 44]
+PHYSIONET_2012_MEANS: Final[dict] = {20: 0.0}
 
 # PhysioNet 2019
 PHYSIONET_2019_DATASETS: Final[dict] = {
     "training": "https://archive.physionet.org/users/shared/challenge-2019/training_setA.zip",  # noqa: E501
     "training_setB": "https://archive.physionet.org/users/shared/challenge-2019/training_setB.zip",  # noqa: E501
 }
+PHYSIONET_2019_CATEGORICAL: Final[list] = [35, 36, 37]
+PHYSIONET_2019_STATIC: Final[list] = [34, 35, 36, 37, 38, 39]
+PHYSIONET_2019_MEANS: Final[dict] = {}
