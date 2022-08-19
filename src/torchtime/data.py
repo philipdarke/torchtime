@@ -556,7 +556,7 @@ class PhysioNet2012(_TimeSeriesDataset):
 
     Data channels are in the following order:
 
-    :0. Mins: Minutes since ICU admission. Derived from the PhysioNet time stamp.
+    :0. Time: Hours since ICU admission. Derived from the PhysioNet time stamp.
     :1. Albumin: Albumin (g/dL)
     :2. ALP: Alkaline phosphatase (IU/L)
     :3. ALT: Alanine transaminase (IU/L)
@@ -761,7 +761,7 @@ class PhysioNet2012(_TimeSeriesDataset):
             with open(file_i) as file:
                 Xi = pd.read_csv(file)
                 Xi = Xi.pivot_table(index="Time", columns="Parameter", values="Value")
-                Xi["Mins"] = [int(t[:2]) * 60 + int(t[3:]) for t in Xi.index]
+                Xi["Hours"] = [float(t[:2]) + float(t[3:]) / 60.0 for t in Xi.index]
                 Xi = pd.concat([template_dataframe, Xi])
                 Xi = Xi.apply(pd.to_numeric, downcast="float")
                 # Add static variables
@@ -774,7 +774,6 @@ class PhysioNet2012(_TimeSeriesDataset):
                 for j in range(icu_classes):
                     Xi["ICUType" + str(j + 1)] = icu_onehot[j]
                 X[i, : Xi.shape[0], :] = Xi[channels]
-                # TODO: only include time 0 if a weight is provided
         return torch.tensor(X)
 
     @staticmethod

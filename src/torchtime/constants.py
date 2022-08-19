@@ -26,7 +26,7 @@ PHYSIONET_2012_OUTCOMES: Final[list] = [
     "https://physionet.org/files/challenge-2012/1.0.0/Outcomes-c.txt?download",
 ]
 PHYSIONET_2012_VARS: Final[list] = [
-    "Mins",
+    "Hours",
     "Albumin",
     "ALP",
     "ALT",
