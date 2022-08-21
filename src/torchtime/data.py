@@ -172,6 +172,7 @@ class _TimeSeriesDataset(Dataset):
                     "Cache is corrupted! Use 'overwrite_cache' = True to rebuild."
                 )
         else:
+            print("Processing raw data...")
             X_all, y_all, length_all = self._get_data()
             X_all = X_all.float()  # float32 precision
             y_all = y_all.float()  # float32 precision
@@ -823,7 +824,6 @@ class PhysioNet2012(_TimeSeriesDataset):
             for url in PHYSIONET_2012_OUTCOMES
         ]
         # Prepare time series data
-        print("Processing data...")
         data_directories = [
             self.dataset_path / directory for directory in PHYSIONET_2012_DATASETS
         ]
@@ -1010,7 +1010,6 @@ class PhysioNet2019(_TimeSeriesDataset):
         # Download and extract data
         _physionet_download(PHYSIONET_2019_DATASETS, self.path, self.overwrite_cache)
         # Prepare data
-        print("Processing data...")
         data_directories = [self.path / dataset for dataset in PHYSIONET_2019_DATASETS]
         data_files = _get_file_list(data_directories)
         length, channels = self._get_lengths_channels(data_files)
@@ -1182,7 +1181,6 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
         cache_path = pathlib.Path() / self.path_arg / ".torchtime" / "physionet_2019"
         _physionet_download(PHYSIONET_2019_DATASETS, cache_path, self.overwrite_cache)
         # Prepare data
-        print("Processing data...")
         data_directories = [cache_path / dataset for dataset in PHYSIONET_2019_DATASETS]
         data_files = _get_file_list(data_directories)
         length, channels = PhysioNet2019._get_lengths_channels(
@@ -1398,7 +1396,6 @@ class UEA(_TimeSeriesDataset):
         data_files = self._download_uea_data(
             UEA_DOWNLOAD_URL + self.dataset_name + ".zip", self.raw_path
         )
-        print("Processing data...")
         X_raw, y_raw = self._extract_ts_files(data_files)
         # Length of each sequence
         channel_lengths = X_raw.apply(lambda Xi: Xi.apply(len), axis=1)
