@@ -255,6 +255,8 @@ class _TimeSeriesDataset(Dataset):
             self.X_static = self.X_static_val
         if self.test_prop <= EPS:
             del self.X_test, self.y_test, self.length_test, self.X_static_test
+        if self.X_static is None:
+            del self.X_static, self.X_static_train, self.X_static_val
 
     def __str__(self):
         """Print data set details."""
