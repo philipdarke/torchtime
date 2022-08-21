@@ -180,14 +180,21 @@ class _TimeSeriesDataset(Dataset):
             _cache_data(self.path, X_all, y_all, length_all)
         print("Preparing data...")
 
+        # Attributes for time, data, mask and time delta indices
+        self.time_idx = [0]
+        self.data_idx = list(np.arange(1, X_all.size(-1)))
+        self.mask_idx = []
+        self.delta_idx = []
+
         # 2. Split out static channels
+        self.n_channels_static = 0
         X_all_static = None
         if self.static != []:
             X_all_static = X_all[:, 0, self.static]
-            time_idx = np.setdiff1d(np.arange(X_all.size(-1)), self.static)
-            X_all = X_all[:, :, time_idx]
-        self.n_channels = X_all.size(-1)
-        self.n_channels -= 1  # do not count time channel
+            self.data_idx = list(np.setdiff1d(self.data_idx, self.static))
+            X_all = X_all[:, :, self.time_idx + self.data_idx]
+            self.n_channels_static = len(self.static)
+        self.n_channels = X_all.size(-1) - 1  # do not count time channel
 
         # 3. Simulate missing data
         if (type(self.missing) is list and sum(self.missing) > EPS) or (
@@ -339,12 +346,26 @@ class _TimeSeriesDataset(Dataset):
         raise NotImplementedError
 
     def _add_channels(self, X_all):
+        """Add/remove time, mask and time delta channels and set/update indices
+        attributes."""
         if self.mask:
-            X_all = torch.cat([X_all, self._missing_mask(X_all)], dim=2)
+            mask = self._missing_mask(X_all)
+            self.mask_idx = list(
+                np.arange(X_all.size(-1), X_all.size(-1) + mask.size(-1))
+            )
+            X_all = torch.cat([X_all, mask], dim=2)
         if self.delta:
-            X_all = torch.cat([X_all, self._time_delta(X_all)], dim=2)
+            delta = self._time_delta(X_all)
+            self.delta_idx = list(
+                np.arange(X_all.size(-1), X_all.size(-1) + delta.size(-1))
+            )
+            X_all = torch.cat([X_all, delta], dim=2)
         if not self.time:
             X_all = X_all[:, :, 1:]  # drop time channel
+            self.time_idx = []
+            self.data_idx = [idx - 1 for idx in self.data_idx]
+            self.mask_idx = [idx - 1 for idx in self.mask_idx]
+            self.delta_idx = [idx - 1 for idx in self.delta_idx]
         return X_all
 
     def _missing_mask(self, X):
