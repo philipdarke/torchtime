@@ -627,7 +627,12 @@ class _TimeSeriesDataset(Dataset):
         return self.X.size(0)
 
     def __getitem__(self, idx):
-        return {"X": self.X[idx], "y": self.y[idx], "length": self.length[idx]}
+        return {
+            "X": self.X[idx],
+            "X_static": self.X_static[idx],
+            "y": self.y[idx],
+            "length": self.length[idx],
+        }
 
 
 class PhysioNet2012(_TimeSeriesDataset):
