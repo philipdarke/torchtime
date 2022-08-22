@@ -82,7 +82,8 @@ class _TimeSeriesDataset(Dataset):
         delta: Append time since previous observation for each channel calculated as in
             `Che et al (2018) <https://doi.org/10.1038/s41598-018-24271-9>`_. Default
             False.
-        standardise: Standardise the time series (default False).
+        standardise: Standardise the time series, either *all* (all channels), *data*
+            (time series channels only) or *none* (no standardisation) (default "none").
         overwrite_cache: Overwrite saved cache (default False).
         path: Location of the ``.torchtime`` cache directory (default ".").
         seed: Random seed for reproducibility (optional).
@@ -128,7 +129,7 @@ class _TimeSeriesDataset(Dataset):
         time: bool = True,
         mask: bool = False,
         delta: bool = False,
-        standardise: bool = False,
+        standardise: str = "none",
         overwrite_cache: bool = False,
         path: str = ".",
         seed: int = None,
@@ -236,7 +237,7 @@ class _TimeSeriesDataset(Dataset):
                 self._impute_static()
 
         # 7. Standardise data
-        if self.standardise:
+        if self.standardise != "none":
             self._standardise()
             if self.X_static_train is not None:
                 self._standardise_static()
@@ -271,6 +272,7 @@ class _TimeSeriesDataset(Dataset):
  - random seed = {}
  - static channels = {}
  - categorical channels = {}
+ - standardise = {}
  - X, y, length attributes return the {} split""".format(
             self.dataset,
             self.path.resolve(),
@@ -283,6 +285,7 @@ class _TimeSeriesDataset(Dataset):
             self.seed,
             self.static,
             self.categorical,
+            self.standardise,
             self.split,
         )
 
@@ -308,6 +311,13 @@ class _TimeSeriesDataset(Dataset):
             self.imputer = self.impute
         else:
             raise Exception(impute_error)
+        # Validate standardise argument
+        standardise_options = ["none", "all", "data"]
+        standardise_error = "argument 'standardise' must be a string in {}".format(
+            standardise_options
+        )
+        assert type(self.standardise) is str, standardise_error
+        assert self.standardise in standardise_options, standardise_error
         # Validate/set data splits
         assert (
             self.train_prop > EPS and self.train_prop < 1
@@ -578,7 +588,9 @@ class _TimeSeriesDataset(Dataset):
 
     def _standardise(self):
         """Standardise data (continuous channels only)."""
-        continuous_idx = self.time_idx + self.data_idx + self.delta_idx
+        continuous_idx = self.data_idx
+        if self.standardise == "all":
+            continuous_idx = self.time_idx + self.data_idx + self.delta_idx
         categorical_idx = [idx - int(not self.time) for idx in self.categorical]
         standardise_idx = torch.tensor(np.setdiff1d(continuous_idx, categorical_idx))
         # Training data channel means/standard deviations
@@ -751,7 +763,8 @@ class PhysioNet2012(_TimeSeriesDataset):
         delta: Append time since previous observation for each channel calculated as in
             `Che et al (2018) <https://doi.org/10.1038/s41598-018-24271-9>`_. Default
             False.
-        standardise: Standardise the time series (default False).
+        standardise: Standardise the time series, either *all* (all channels), *data*
+            (time series channels only) or *none* (no standardisation) (default "none").
         overwrite_cache: Overwrite saved cache (default False).
         path: Location of the ``.torchtime`` cache directory (default ".").
         seed: Random seed for reproducibility (optional).
@@ -800,7 +813,7 @@ class PhysioNet2012(_TimeSeriesDataset):
         time: bool = True,
         mask: bool = False,
         delta: bool = False,
-        standardise: bool = False,
+        standardise: str = "none",
         overwrite_cache: bool = False,
         path: str = ".",
         seed: int = None,
@@ -955,7 +968,8 @@ class PhysioNet2019(_TimeSeriesDataset):
         delta: Append time since previous observation for each channel calculated as in
             `Che et al (2018) <https://doi.org/10.1038/s41598-018-24271-9>`_. Default
             False.
-        standardise: Standardise the time series (default False).
+        standardise: Standardise the time series, either *all* (all channels), *data*
+            (time series channels only) or *none* (no standardisation) (default "none").
         overwrite_cache: Overwrite saved cache (default False).
         path: Location of the ``.torchtime`` cache directory (default ".").
         seed: Random seed for reproducibility (optional).
@@ -1002,7 +1016,7 @@ class PhysioNet2019(_TimeSeriesDataset):
         time: bool = True,
         mask: bool = False,
         delta: bool = False,
-        standardise: bool = False,
+        standardise: str = "none",
         overwrite_cache: bool = False,
         path: str = ".",
         seed: int = None,
@@ -1121,7 +1135,8 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
         delta: Append time since previous observation for each channel calculated as in
             `Che et al (2018) <https://doi.org/10.1038/s41598-018-24271-9>`_. Default
             False.
-        standardise: Standardise the time series (default False).
+        standardise: Standardise the time series, either *all* (all channels), *data*
+            (time series channels only) or *none* (no standardisation) (default "none").
         overwrite_cache: Overwrite saved cache (default False).
         path: Location of the ``.torchtime`` cache directory (default ".").
         seed: Random seed for reproducibility (optional).
@@ -1169,7 +1184,7 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
         time: bool = True,
         mask: bool = False,
         delta: bool = False,
-        standardise: bool = False,
+        standardise: str = "none",
         overwrite_cache: bool = False,
         path: str = ".",
         seed: int = None,
@@ -1298,7 +1313,8 @@ class UEA(_TimeSeriesDataset):
         delta: Append time since previous observation for each channel calculated as in
             `Che et al (2018) <https://doi.org/10.1038/s41598-018-24271-9>`_. Default
             False.
-        standardise: Standardise the time series (default False).
+        standardise: Standardise the time series, either *all* (all channels), *data*
+            (time series channels only) or *none* (no standardisation) (default "none").
         overwrite_cache: Overwrite saved cache (default False).
         path: Location of the ``.torchtime`` cache directory (default ".").
         seed: Random seed for reproducibility (optional).
@@ -1348,7 +1364,7 @@ class UEA(_TimeSeriesDataset):
         time: bool = True,
         mask: bool = False,
         delta: bool = False,
-        standardise: bool = False,
+        standardise: str = "none",
         overwrite_cache: bool = False,
         path: str = ".",
         seed: int = None,

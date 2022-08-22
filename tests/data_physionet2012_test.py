@@ -429,7 +429,7 @@ class TestPhysioNet2012:
         dataset = PhysioNet2012(
             split="train",
             train_prop=0.7,
-            standardise=True,
+            standardise="all",
             seed=SEED,
         )
         continuous_channels = np.setdiff1d(
@@ -457,12 +457,63 @@ class TestPhysioNet2012:
             split="train",
             train_prop=0.7,
             impute="forward",
-            standardise=True,
+            standardise="all",
             seed=SEED,
         )
         continuous_channels = np.setdiff1d(
             np.arange(dataset.X_train.size(-1)), PHYSIONET_2012_CATEGORICAL
         )
+        for Xc in dataset.X_train[:, :, continuous_channels].unbind(dim=-1):
+            assert torch.allclose(
+                torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
+            )
+            assert torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            ) or torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([0.0]),  # if all values are the same e.g. MechVent
+                rtol=RTOL,
+                atol=ATOL,
+            )
+
+    def test_standardisation_3(self):
+        """Check training data is standardised (time series only)."""
+        dataset = PhysioNet2012(
+            split="train",
+            train_prop=0.7,
+            standardise="data",
+            seed=SEED,
+        )
+        continuous_channels = np.setdiff1d(dataset.data_idx, PHYSIONET_2012_CATEGORICAL)
+        for Xc in dataset.X_train[:, :, continuous_channels].unbind(dim=-1):
+            assert torch.allclose(
+                torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
+            )
+            assert torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            ) or torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([0.0]),  # if all values are the same e.g. MechVent
+                rtol=RTOL,
+                atol=ATOL,
+            )
+
+    def test_standardisation_4(self):
+        """Check imputed training data is standardised (time series only)."""
+        dataset = PhysioNet2012(
+            split="train",
+            train_prop=0.7,
+            impute="forward",
+            standardise="data",
+            seed=SEED,
+        )
+        continuous_channels = np.setdiff1d(dataset.data_idx, PHYSIONET_2012_CATEGORICAL)
         for Xc in dataset.X_train[:, :, continuous_channels].unbind(dim=-1):
             assert torch.allclose(
                 torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
