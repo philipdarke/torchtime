@@ -738,7 +738,8 @@ class PhysioNet2012(_TimeSeriesDataset):
     :44. ICUType4: Type of ICU unit (4: Surgical ICU)
 
     .. note::
-        Channels 38 to 44 do not vary with time.
+        Channels 38 to 44 do not vary with time. These channels are returned by the
+        ``X_static`` attribute if the ``static`` argument is True.
 
         Variables 11 (GCS) and 27 (pH) are assumed to be ordinal and are imputed using
         the same method as a continuous variable.
@@ -757,12 +758,12 @@ class PhysioNet2012(_TimeSeriesDataset):
         val_prop: Proportion of data in the validation set (optional, see above).
         impute: Method used to impute missing data, either *none*, *zero*, *mean*,
             *forward* or a custom imputation function (default "none").
-        static: TODO
+        static: Split out static channels as above (default False).
         time: Append time stamp in the first channel (default True).
         mask: Append missing data mask for each channel (default False).
         delta: Append time since previous observation for each channel calculated as in
-            `Che et al (2018) <https://doi.org/10.1038/s41598-018-24271-9>`_. Default
-            False.
+            `Che et al (2018) <https://doi.org/10.1038/s41598-018-24271-9>`_ (default
+            False).
         standardise: Standardise the time series, either *all* (all channels), *data*
             (time series channels only) or *none* (no standardisation) (default "none").
         overwrite_cache: Overwrite saved cache (default False).
