@@ -191,6 +191,9 @@ class _TimeSeriesDataset(Dataset):
         self.n_channels_static = 0
         X_all_static = None
         if self.static != []:
+            assert np.all(
+                [id in self.data_idx for idx in self.static]
+            ), "channels in argument 'static' are not included in the data"
             X_all_static = X_all[:, 0, self.static]
             self.data_idx = list(np.setdiff1d(self.data_idx, self.static))
             X_all = X_all[:, :, self.time_idx + self.data_idx]
@@ -297,12 +300,19 @@ class _TimeSeriesDataset(Dataset):
             impute_options
         )
         if self.impute != "none":
-            assert (
-                type(self.categorical) is list
-            ), "argument 'categorical' must be a list"
-            assert (
-                type(self.channel_means) is dict
-            ), "argument 'channel_means' must be a dictionary"
+            categorical_error = "argument 'categorical' must be a list of integers"
+            means_error = "argument 'channel_means' must be a dictionary"
+            assert type(self.categorical) is list, categorical_error
+            assert np.all(
+                [type(idx) is int for idx in self.categorical]
+            ), categorical_error
+            assert type(self.channel_means) is dict, means_error
+            assert np.all(
+                [type(idx) is int for idx in self.channel_means.keys()]
+            ), means_error
+            assert np.all(
+                [type(mean) is float for mean in self.channel_means.values()]
+            ), means_error
         # Set impute function
         if type(self.impute) is str:
             assert self.impute in impute_options, impute_error
@@ -336,7 +346,10 @@ class _TimeSeriesDataset(Dataset):
         if self.test_prop > EPS:
             splits.append("test")
         assert self.split in splits, "argument 'split' must be one of {}".format(splits)
-        # TODO: validate 'static' argument
+        # Validate 'static' argument
+        static_error = "argument 'static' must be a list of integers"
+        assert type(self.static) is list, static_error
+        assert np.all([type(idx) is int for idx in self.static]), static_error
 
     @staticmethod
     def _zero_imputation(X, y, fill, select):
@@ -544,6 +557,9 @@ class _TimeSeriesDataset(Dataset):
         data_idx = torch.tensor(self.data_idx)
         # Impute with channel mode if categorical variable
         if self.categorical != []:
+            assert np.all([idx in self.data_idx for idx in self.categorical]) or np.all(
+                [idx in self.static for idx in self.categorical]
+            ), "channels in argument 'static' are not included in the data"
             for idx in self.categorical:
                 if idx <= self.n_channels:
                     data_fill[idx - 1] = _nanmode(
@@ -551,6 +567,11 @@ class _TimeSeriesDataset(Dataset):
                     )
         # Override mean/mode if specified
         if self.channel_means != {}:
+            assert np.all(
+                [idx in self.data_idx for idx in self.channel_means.keys()]
+            ) or np.all(
+                [idx in self.static for idx in self.channel_means.keys()]
+            ), "channels in argument 'channel_means' are not included in the data"
             for idx, new_mean in self.channel_means.items():
                 if idx <= self.n_channels:
                     data_fill[idx - 1] = new_mean
