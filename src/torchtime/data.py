@@ -192,7 +192,7 @@ class _TimeSeriesDataset(Dataset):
         X_all_static = None
         if self.static != []:
             assert np.all(
-                [id in self.data_idx for idx in self.static]
+                [idx in self.data_idx for idx in self.static]
             ), "channels in argument 'static' are not included in the data"
             X_all_static = X_all[:, 0, self.static]
             self.data_idx = list(np.setdiff1d(self.data_idx, self.static))
@@ -557,8 +557,8 @@ class _TimeSeriesDataset(Dataset):
         data_idx = torch.tensor(self.data_idx)
         # Impute with channel mode if categorical variable
         if self.categorical != []:
-            assert np.all([idx in self.data_idx for idx in self.categorical]) or np.all(
-                [idx in self.static for idx in self.categorical]
+            assert np.all(
+                [idx in self.data_idx or idx in self.static for idx in self.categorical]
             ), "channels in argument 'static' are not included in the data"
             for idx in self.categorical:
                 if idx <= self.n_channels:
@@ -568,9 +568,10 @@ class _TimeSeriesDataset(Dataset):
         # Override mean/mode if specified
         if self.channel_means != {}:
             assert np.all(
-                [idx in self.data_idx for idx in self.channel_means.keys()]
-            ) or np.all(
-                [idx in self.static for idx in self.channel_means.keys()]
+                [
+                    idx in self.data_idx or idx in self.static
+                    for idx in self.channel_means.keys()
+                ]
             ), "channels in argument 'channel_means' are not included in the data"
             for idx, new_mean in self.channel_means.items():
                 if idx <= self.n_channels:

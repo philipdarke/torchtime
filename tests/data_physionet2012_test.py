@@ -319,6 +319,25 @@ class TestPhysioNet2012:
         assert torch.sum(torch.isnan(dataset.X_val)).item() == 20816762
         assert torch.sum(torch.isnan(dataset.X_test)).item() == 10416289
 
+    def test_static(self):
+        """TODO"""
+        PhysioNet2012(
+            split="train",
+            train_prop=0.7,
+            static=True,
+            seed=SEED,
+        )
+
+    def test_static_impute(self):
+        """TODO"""
+        PhysioNet2012(
+            split="train",
+            train_prop=0.7,
+            impute="mean",
+            static=True,
+            seed=SEED,
+        )
+
     def test_overwrite_data(self):
         """Overwrite cache and validate data set."""
         PhysioNet2012(
