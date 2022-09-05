@@ -1482,6 +1482,13 @@ class UEA(_TimeSeriesDataset):
             [self._pad(X_raw.iloc[i], length.max()) for i in range(len(X_raw))],
             dim=0,
         )
+        # Add time channel
+        time_channel = torch.arange(X.size(1)).unsqueeze(0)
+        time_channel = time_channel.tile((X.size(0), 1)).unsqueeze(2)
+        X = torch.cat((time_channel, X), dim=2)
+        if any(length != X.size(1)):
+            for i in range(X.size(0)):
+                X[i, length[i] :, 0] = float("nan")
         # One-hot encode labels (start from zero)
         y = torch.tensor(y_raw.astype(int))
         if all(y != 0):
