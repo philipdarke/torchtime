@@ -867,36 +867,6 @@ class PhysioNet2012(_TimeSeriesDataset):
             seed=seed,
         )
 
-    def _get_data(self):
-        """Download data and form ``X``, ``y``, ``length`` tensors."""
-        outcome_path = self.dataset_path / "outcomes"
-        all_X = [None for _ in PHYSIONET_2012_DATASETS]
-        # Download and extract data
-        _physionet_download(
-            PHYSIONET_2012_DATASETS, self.dataset_path, self.overwrite_cache
-        )
-        [
-            _download_to_directory(url, outcome_path, self.overwrite_cache)
-            for url in PHYSIONET_2012_OUTCOMES
-        ]
-        # Prepare time series data
-        data_directories = [
-            self.dataset_path / directory for directory in PHYSIONET_2012_DATASETS
-        ]
-        data_files = _get_file_list(data_directories)
-        length = self._get_lengths(data_files)
-        for i, files in enumerate(data_files):
-            all_X[i] = self._process_files(files, max(length), PHYSIONET_2012_VARS)
-        # Prepare labels
-        outcome_files = _get_file_list(outcome_path)
-        all_y = self._get_labels(outcome_files, data_files)
-        # Form tensors
-        X = torch.cat(all_X)
-        X[X == -1] = float("nan")  # replace -1 missing data indicator with NaNs
-        y = torch.cat(all_y)
-        length = torch.tensor(length)
-        return X, y, length
-
     @staticmethod
     def _get_lengths(data_files):
         """Get length of each time series."""
@@ -959,6 +929,36 @@ class PhysioNet2012(_TimeSeriesDataset):
                 y_i = torch.tensor(y_i.loc[ids_i].values)
                 y.append(y_i)
         return y
+
+    def _get_data(self):
+        """Download data and form ``X``, ``y``, ``length`` tensors."""
+        outcome_path = self.dataset_path / "outcomes"
+        all_X = [None for _ in PHYSIONET_2012_DATASETS]
+        # Download and extract data
+        _physionet_download(
+            PHYSIONET_2012_DATASETS, self.dataset_path, self.overwrite_cache
+        )
+        [
+            _download_to_directory(url, outcome_path, self.overwrite_cache)
+            for url in PHYSIONET_2012_OUTCOMES
+        ]
+        # Prepare time series data
+        data_directories = [
+            self.dataset_path / directory for directory in PHYSIONET_2012_DATASETS
+        ]
+        data_files = _get_file_list(data_directories)
+        length = self._get_lengths(data_files)
+        for i, files in enumerate(data_files):
+            all_X[i] = self._process_files(files, max(length), PHYSIONET_2012_VARS)
+        # Prepare labels
+        outcome_files = _get_file_list(outcome_path)
+        all_y = self._get_labels(outcome_files, data_files)
+        # Form tensors
+        X = torch.cat(all_X)
+        X[X == -1] = float("nan")  # replace -1 missing data indicator with NaNs
+        y = torch.cat(all_y)
+        length = torch.tensor(length)
+        return X, y, length
 
 
 class PhysioNet2019(_TimeSeriesDataset):
@@ -1071,26 +1071,6 @@ class PhysioNet2019(_TimeSeriesDataset):
             seed=seed,
         )
 
-    def _get_data(self):
-        """Download data and form ``X``, ``y``, ``length`` tensors."""
-        # Download and extract data
-        _physionet_download(PHYSIONET_2019_DATASETS, self.path, self.overwrite_cache)
-        # Prepare data
-        data_directories = [self.path / dataset for dataset in PHYSIONET_2019_DATASETS]
-        data_files = _get_file_list(data_directories)
-        length, channels = self._get_lengths_channels(data_files)
-        all_X = [None for _ in PHYSIONET_2019_DATASETS]
-        all_y = [None for _ in PHYSIONET_2019_DATASETS]
-        for i, files in enumerate(data_files):
-            all_X[i], all_y[i] = self._process_files(files, max(length), channels)
-        # Form tensors
-        X = torch.cat(all_X)
-        y = torch.cat(all_y)
-        length = torch.tensor(length)
-        # Move time channel (ICULOS) to first channel
-        X = torch.cat((X[:, :, -1].unsqueeze(-1), X[:, :, :-1]), dim=2)
-        return X, y, length
-
     @staticmethod
     def _get_lengths_channels(data_files, max_time=None):
         """Get length of each time series and number of channels. Time series can be
@@ -1132,6 +1112,26 @@ class PhysioNet2019(_TimeSeriesDataset):
                         X[i, j - 1] = Xij[:-1]
                         y[i, j - 1, 0] = Xij[-1]
         return torch.tensor(X), torch.tensor(y)
+
+    def _get_data(self):
+        """Download data and form ``X``, ``y``, ``length`` tensors."""
+        # Download and extract data
+        _physionet_download(PHYSIONET_2019_DATASETS, self.path, self.overwrite_cache)
+        # Prepare data
+        data_directories = [self.path / dataset for dataset in PHYSIONET_2019_DATASETS]
+        data_files = _get_file_list(data_directories)
+        length, channels = self._get_lengths_channels(data_files)
+        all_X = [None for _ in PHYSIONET_2019_DATASETS]
+        all_y = [None for _ in PHYSIONET_2019_DATASETS]
+        for i, files in enumerate(data_files):
+            all_X[i], all_y[i] = self._process_files(files, max(length), channels)
+        # Form tensors
+        X = torch.cat(all_X)
+        y = torch.cat(all_y)
+        length = torch.tensor(length)
+        # Move time channel (ICULOS) to first channel
+        X = torch.cat((X[:, :, -1].unsqueeze(-1), X[:, :, :-1]), dim=2)
+        return X, y, length
 
 
 class PhysioNet2019Binary(_TimeSeriesDataset):
@@ -1244,6 +1244,24 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
             seed=seed,
         )
 
+    def _process_files(self, files, max_length, channels):
+        """Process ``.psv`` files."""
+        X = np.full((len(files), max_length, channels - 1), float("nan"))
+        y = np.full((len(files), 1), 0.0)
+        for i, file_i in tqdm(
+            enumerate(files),
+            total=len(files),
+            bar_format=TQDM_FORMAT,
+        ):
+            with open(file_i) as file:
+                reader = csv.reader(file, delimiter="|")
+                for j, Xij in enumerate(reader):
+                    if j > 0:  # ignore header
+                        if int(Xij[39]) <= self.max_time:
+                            X[i, j - 1] = Xij[:-1]
+                        y[i, 0] = max(y[i, 0], int(Xij[-1]))  # sepsis at any point
+        return torch.tensor(X), torch.tensor(y)
+
     def _get_data(self):
         """Download data and form ``X``, ``y``, ``length`` tensors."""
         # Download and extract data in "physionet2019" directory to avoid duplication
@@ -1271,24 +1289,6 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
         # Save cached files to "physionet2019binary" directory
         self.path = pathlib.Path() / self.path_arg / ".torchtime" / self.DATASET_NAME
         return X, y, length
-
-    def _process_files(self, files, max_length, channels):
-        """Process ``.psv`` files."""
-        X = np.full((len(files), max_length, channels - 1), float("nan"))
-        y = np.full((len(files), 1), 0.0)
-        for i, file_i in tqdm(
-            enumerate(files),
-            total=len(files),
-            bar_format=TQDM_FORMAT,
-        ):
-            with open(file_i) as file:
-                reader = csv.reader(file, delimiter="|")
-                for j, Xij in enumerate(reader):
-                    if j > 0:  # ignore header
-                        if int(Xij[39]) <= self.max_time:
-                            X[i, j - 1] = Xij[:-1]
-                        y[i, 0] = max(y[i, 0], int(Xij[-1]))  # sepsis at any point
-        return torch.tensor(X), torch.tensor(y)
 
 
 class UEA(_TimeSeriesDataset):
@@ -1461,6 +1461,13 @@ class UEA(_TimeSeriesDataset):
         y = pd.Series.to_numpy(y, dtype=str)
         return X, y
 
+    def _pad(self, Xi, max_length):
+        """Pad sequences to length ``max_length``."""
+        Xi = pad_sequence([torch.tensor(Xij) for Xij in Xi])
+        out = torch.full((max_length, Xi.size(1)), float("nan"))  # shape (s, c)
+        out[0 : Xi.size(0)] = Xi
+        return out
+
     def _get_data(self):
         """Download data and form ``X``, ``y`` and ``length`` tensors."""
         data_files = self._download_uea_data(
@@ -1481,10 +1488,3 @@ class UEA(_TimeSeriesDataset):
             y -= 1
         y = F.one_hot(y)
         return X, y, length
-
-    def _pad(self, Xi, max_length):
-        """Pad sequences to length ``max_length``."""
-        Xi = pad_sequence([torch.tensor(Xij) for Xij in Xi])
-        out = torch.full((max_length, Xi.size(1)), float("nan"))  # shape (s, c)
-        out[0 : Xi.size(0)] = Xi
-        return out
