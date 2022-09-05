@@ -1,15 +1,20 @@
 import re
 
+import numpy as np
 import pytest
 import torch
 
-from torchtime.constants import OBJ_EXT
+from torchtime.constants import OBJ_EXT, PHYSIONET_2019_CATEGORICAL
 from torchtime.data import PhysioNet2019
 from torchtime.utils import _get_SHA256
 
 SEED = 456789
 RTOL = 1e-4
 ATOL = 1e-4
+SHA_X = "53fe42b3529c4ca4ff4fb0728ec87be631ebd3c3bf6180dc5608788f0ff8292d"
+SHA_Y = "5f3cf8f30e4bebf166c5a4f9d4c2030dfb82d57729e6b4e67409047150345c0e"
+SHA_LENGTH = "209672aa41dc2f092a63e49accc4203598b2d4deb9b28b910cbbb4082518c618"
+N_DATA_CHANNELS = 39
 
 
 class TestPhysioNet2019:
@@ -71,18 +76,9 @@ class TestPhysioNet2019:
             train_prop=0.7,
             seed=SEED,
         )
-        assert (
-            _get_SHA256(".torchtime/physionet_2019/X" + OBJ_EXT)
-            == "ea94129dd03e594da80efae132b674b284499c613174d0314e13e8aaac179ba7"
-        )
-        assert (
-            _get_SHA256(".torchtime/physionet_2019/y" + OBJ_EXT)
-            == "5f3cf8f30e4bebf166c5a4f9d4c2030dfb82d57729e6b4e67409047150345c0e"
-        )
-        assert (
-            _get_SHA256(".torchtime/physionet_2019/length" + OBJ_EXT)
-            == "209672aa41dc2f092a63e49accc4203598b2d4deb9b28b910cbbb4082518c618"
-        )
+        assert _get_SHA256(".torchtime/physionet_2019/X" + OBJ_EXT) == SHA_X
+        assert _get_SHA256(".torchtime/physionet_2019/y" + OBJ_EXT) == SHA_Y
+        assert _get_SHA256(".torchtime/physionet_2019/length" + OBJ_EXT) == SHA_LENGTH
 
     def test_train_val(self):
         """Test training/validation split sizes."""
@@ -92,10 +88,10 @@ class TestPhysioNet2019:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([28236, 336, 41])
+        assert dataset.X_train.shape == torch.Size([28236, 336, N_DATA_CHANNELS + 1])
         assert dataset.y_train.shape == torch.Size([28236, 336, 1])
         assert dataset.length_train.shape == torch.Size([28236])
-        assert dataset.X_val.shape == torch.Size([12100, 336, 41])
+        assert dataset.X_val.shape == torch.Size([12100, 336, N_DATA_CHANNELS + 1])
         assert dataset.y_val.shape == torch.Size([12100, 336, 1])
         assert dataset.length_val.shape == torch.Size([12100])
         # Ensure no test data is returned
@@ -124,13 +120,13 @@ class TestPhysioNet2019:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([28236, 336, 41])
+        assert dataset.X_train.shape == torch.Size([28236, 336, N_DATA_CHANNELS + 1])
         assert dataset.y_train.shape == torch.Size([28236, 336, 1])
         assert dataset.length_train.shape == torch.Size([28236])
-        assert dataset.X_val.shape == torch.Size([8067, 336, 41])
+        assert dataset.X_val.shape == torch.Size([8067, 336, N_DATA_CHANNELS + 1])
         assert dataset.y_val.shape == torch.Size([8067, 336, 1])
         assert dataset.length_val.shape == torch.Size([8067])
-        assert dataset.X_test.shape == torch.Size([4033, 336, 41])
+        assert dataset.X_test.shape == torch.Size([4033, 336, N_DATA_CHANNELS + 1])
         assert dataset.y_test.shape == torch.Size([4033, 336, 1])
         assert dataset.length_test.shape == torch.Size([4033])
 
@@ -249,12 +245,12 @@ class TestPhysioNet2019:
             seed=SEED,
         )
         # Check no NaNs post imputation
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
-        assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_train[:, :, 1:])).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_train)).item() == 8401181
+        assert torch.sum(torch.isnan(dataset.X_val[:, :, 1:])).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_val)).item() == 2399984
+        assert torch.sum(torch.isnan(dataset.X_test[:, :, 1:])).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_test)).item() == 1199521
 
     def test_mean_impute(self):
         """Test mean imputation."""
@@ -266,12 +262,12 @@ class TestPhysioNet2019:
             seed=SEED,
         )
         # Check no NaNs post imputation
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
-        assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_train[:, :, 1:])).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_train)).item() == 8401181
+        assert torch.sum(torch.isnan(dataset.X_val[:, :, 1:])).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_val)).item() == 2399984
+        assert torch.sum(torch.isnan(dataset.X_test[:, :, 1:])).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_test)).item() == 1199521
 
     def test_forward_impute(self):
         """Test forward imputation."""
@@ -283,12 +279,12 @@ class TestPhysioNet2019:
             seed=SEED,
         )
         # Check no NaNs post imputation
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
-        assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_train[:, :, 1:])).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_train)).item() == 8401181
+        assert torch.sum(torch.isnan(dataset.X_val[:, :, 1:])).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_val)).item() == 2399984
+        assert torch.sum(torch.isnan(dataset.X_test[:, :, 1:])).item() == 0
+        assert torch.sum(torch.isnan(dataset.y_test)).item() == 1199521
 
     def test_custom_imputation_1(self):
         """Test custom imputation function."""
@@ -341,18 +337,9 @@ class TestPhysioNet2019:
             seed=SEED,
             overwrite_cache=True,
         )
-        assert (
-            _get_SHA256(".torchtime/physionet_2019/X" + OBJ_EXT)
-            == "ea94129dd03e594da80efae132b674b284499c613174d0314e13e8aaac179ba7"
-        )
-        assert (
-            _get_SHA256(".torchtime/physionet_2019/y" + OBJ_EXT)
-            == "5f3cf8f30e4bebf166c5a4f9d4c2030dfb82d57729e6b4e67409047150345c0e"
-        )
-        assert (
-            _get_SHA256(".torchtime/physionet_2019/length" + OBJ_EXT)
-            == "209672aa41dc2f092a63e49accc4203598b2d4deb9b28b910cbbb4082518c618"
-        )
+        assert _get_SHA256(".torchtime/physionet_2019/X" + OBJ_EXT) == SHA_X
+        assert _get_SHA256(".torchtime/physionet_2019/y" + OBJ_EXT) == SHA_Y
+        assert _get_SHA256(".torchtime/physionet_2019/length" + OBJ_EXT) == SHA_LENGTH
 
     def test_time(self):
         """Test time argument."""
@@ -364,23 +351,9 @@ class TestPhysioNet2019:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([28236, 336, 41])
-        assert dataset.X_val.shape == torch.Size([8067, 336, 41])
-        assert dataset.X_test.shape == torch.Size([4033, 336, 41])
-        # Check time channel
-        for i in range(182):
-            assert torch.equal(
-                dataset.X_train[:, i, 0],
-                torch.full([28236], fill_value=i, dtype=torch.float),
-            )
-            assert torch.equal(
-                dataset.X_val[:, i, 0],
-                torch.full([8067], fill_value=i, dtype=torch.float),
-            )
-            assert torch.equal(
-                dataset.X_test[:, i, 0],
-                torch.full([4033], fill_value=i, dtype=torch.float),
-            )
+        assert dataset.X_train.shape == torch.Size([28236, 336, N_DATA_CHANNELS + 1])
+        assert dataset.X_val.shape == torch.Size([8067, 336, N_DATA_CHANNELS + 1])
+        assert dataset.X_test.shape == torch.Size([4033, 336, N_DATA_CHANNELS + 1])
 
     def test_no_time(self):
         """Test time argument."""
@@ -392,9 +365,9 @@ class TestPhysioNet2019:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([28236, 336, 40])
-        assert dataset.X_val.shape == torch.Size([8067, 336, 40])
-        assert dataset.X_test.shape == torch.Size([4033, 336, 40])
+        assert dataset.X_train.shape == torch.Size([28236, 336, N_DATA_CHANNELS])
+        assert dataset.X_val.shape == torch.Size([8067, 336, N_DATA_CHANNELS])
+        assert dataset.X_test.shape == torch.Size([4033, 336, N_DATA_CHANNELS])
 
     def test_mask(self):
         """Test mask argument."""
@@ -407,9 +380,9 @@ class TestPhysioNet2019:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([28236, 336, 80])
-        assert dataset.X_val.shape == torch.Size([8067, 336, 80])
-        assert dataset.X_test.shape == torch.Size([4033, 336, 80])
+        assert dataset.X_train.shape == torch.Size([28236, 336, 2 * N_DATA_CHANNELS])
+        assert dataset.X_val.shape == torch.Size([8067, 336, 2 * N_DATA_CHANNELS])
+        assert dataset.X_test.shape == torch.Size([4033, 336, 2 * N_DATA_CHANNELS])
 
     def test_delta(self):
         """Test time delta argument."""
@@ -422,9 +395,9 @@ class TestPhysioNet2019:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([28236, 336, 80])
-        assert dataset.X_val.shape == torch.Size([8067, 336, 80])
-        assert dataset.X_test.shape == torch.Size([4033, 336, 80])
+        assert dataset.X_train.shape == torch.Size([28236, 336, 2 * N_DATA_CHANNELS])
+        assert dataset.X_val.shape == torch.Size([8067, 336, 2 * N_DATA_CHANNELS])
+        assert dataset.X_test.shape == torch.Size([4033, 336, 2 * N_DATA_CHANNELS])
         # Check time delta channel
         assert torch.equal(
             dataset.X_train[:, 0, 40], torch.zeros([28236], dtype=torch.float)
@@ -447,9 +420,11 @@ class TestPhysioNet2019:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([28236, 336, 121])
-        assert dataset.X_val.shape == torch.Size([8067, 336, 121])
-        assert dataset.X_test.shape == torch.Size([4033, 336, 121])
+        assert dataset.X_train.shape == torch.Size(
+            [28236, 336, 3 * N_DATA_CHANNELS + 1]
+        )
+        assert dataset.X_val.shape == torch.Size([8067, 336, 3 * N_DATA_CHANNELS + 1])
+        assert dataset.X_test.shape == torch.Size([4033, 336, 3 * N_DATA_CHANNELS + 1])
         # Check time channel
         for i in range(182):
             assert torch.equal(
@@ -475,22 +450,108 @@ class TestPhysioNet2019:
             dataset.X_test[:, 0, 81], torch.zeros([4033], dtype=torch.float)
         )
 
-    def test_standarisation(self):
+    def test_standarisation_1(self):
         """Check training data is standardised."""
         dataset = PhysioNet2019(
             split="train",
             train_prop=0.7,
-            time=False,
-            standardise=True,
+            standardise="all",
             seed=SEED,
         )
-        for c, Xc in enumerate(dataset.X_train.unbind(dim=-1)):
+        continuous_channels = np.setdiff1d(
+            np.arange(dataset.X_train.size(-1)), PHYSIONET_2019_CATEGORICAL
+        )
+        for Xc in dataset.X_train[:, :, continuous_channels].unbind(dim=-1):
             assert torch.allclose(
                 torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
             )
             assert torch.allclose(
                 torch.std(Xc[~torch.isnan(Xc)]),
                 torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            ) or torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([0.0]),  # if all values are the same e.g. MechVent
+                rtol=RTOL,
+                atol=ATOL,
+            )
+
+    def test_standardisation_2(self):
+        """Check imputed training data is standardised."""
+        dataset = PhysioNet2019(
+            split="train",
+            train_prop=0.7,
+            impute="forward",
+            standardise="all",
+            seed=SEED,
+        )
+        continuous_channels = np.setdiff1d(
+            np.arange(dataset.X_train.size(-1)), PHYSIONET_2019_CATEGORICAL
+        )
+        for Xc in dataset.X_train[:, :, continuous_channels].unbind(dim=-1):
+            assert torch.allclose(
+                torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
+            )
+            assert torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            ) or torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([0.0]),  # if all values are the same e.g. MechVent
+                rtol=RTOL,
+                atol=ATOL,
+            )
+
+    def test_standardisation_3(self):
+        """Check training data is standardised (time series only)."""
+        dataset = PhysioNet2019(
+            split="train",
+            train_prop=0.7,
+            standardise="data",
+            seed=SEED,
+        )
+        continuous_channels = np.setdiff1d(dataset.data_idx, PHYSIONET_2019_CATEGORICAL)
+        for Xc in dataset.X_train[:, :, continuous_channels].unbind(dim=-1):
+            assert torch.allclose(
+                torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
+            )
+            assert torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            ) or torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([0.0]),  # if all values are the same e.g. MechVent
+                rtol=RTOL,
+                atol=ATOL,
+            )
+
+    def test_standardisation_4(self):
+        """Check imputed training data is standardised (time series only)."""
+        dataset = PhysioNet2019(
+            split="train",
+            train_prop=0.7,
+            impute="forward",
+            standardise="data",
+            seed=SEED,
+        )
+        continuous_channels = np.setdiff1d(dataset.data_idx, PHYSIONET_2019_CATEGORICAL)
+        for Xc in dataset.X_train[:, :, continuous_channels].unbind(dim=-1):
+            assert torch.allclose(
+                torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
+            )
+            assert torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            ) or torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([0.0]),  # if all values are the same e.g. MechVent
                 rtol=RTOL,
                 atol=ATOL,
             )

@@ -33,7 +33,10 @@ from torchtime.constants import (
     PHYSIONET_2012_OUTCOMES,
     PHYSIONET_2012_STATIC,
     PHYSIONET_2012_VARS,
+    PHYSIONET_2019_CATEGORICAL,
     PHYSIONET_2019_DATASETS,
+    PHYSIONET_2019_MEANS,
+    PHYSIONET_2019_STATIC,
     TQDM_FORMAT,
     UEA_DOWNLOAD_URL,
 )
@@ -986,6 +989,7 @@ class PhysioNet2019(_TimeSeriesDataset):
         val_prop: Proportion of data in the validation set (optional, see above).
         impute: Method used to impute missing data, either *none*, *zero*, *mean*,
             *forward* or a custom imputation function (default "none").
+        static: Split out static channels as above (default False).
         time: Append time stamp in the first channel (default True).
         mask: Append missing data mask for each channel (default False).
         delta: Append time since previous observation for each channel calculated as in
@@ -1036,6 +1040,7 @@ class PhysioNet2019(_TimeSeriesDataset):
         train_prop: float,
         val_prop: float = None,
         impute: Union[str, Callable[[Tensor], Tensor]] = "none",
+        static: bool = False,
         time: bool = True,
         mask: bool = False,
         delta: bool = False,
@@ -1044,12 +1049,19 @@ class PhysioNet2019(_TimeSeriesDataset):
         path: str = ".",
         seed: int = None,
     ) -> None:
+        if static:
+            static_idx = PHYSIONET_2019_STATIC
+        else:
+            static_idx = []
         super(PhysioNet2019, self).__init__(
             dataset="physionet_2019",
             split=split,
             train_prop=train_prop,
             val_prop=val_prop,
             impute=impute,
+            static=static_idx,
+            categorical=PHYSIONET_2019_CATEGORICAL,
+            channel_means=PHYSIONET_2019_MEANS,
             time=time,
             mask=mask,
             delta=delta,
@@ -1075,6 +1087,8 @@ class PhysioNet2019(_TimeSeriesDataset):
         X = torch.cat(all_X)
         y = torch.cat(all_y)
         length = torch.tensor(length)
+        # Move time channel (ICULOS) to first channel
+        X = torch.cat((X[:, :, -1].unsqueeze(-1), X[:, :, :-1]), dim=2)
         return X, y, length
 
     @staticmethod
