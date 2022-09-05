@@ -137,7 +137,7 @@ def _download_object(url, save_file):
             download.close()
     except Exception:
         raise Exception(
-            "could not download {}, check URL and internet access".format(url)
+            "could not download, check URL ({}) and internet access".format(url)
         )
 
 
@@ -179,7 +179,11 @@ def _download_archive(url, path):
                 else:
                     tarfile.open(temp_file.name).extractall(path)
         except Exception:
-            raise Exception("could not extract archive, check URL")
+            raise Exception(
+                "could not extract archive, check URL ({}) and internet access".format(
+                    url
+                )
+            )
     else:
         raise Exception("file type ({}) is unsupported".format(file_ext))
 
