@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-* ``n_channels`` attribute
+* ``n_channels`` attribute - MORE?
 * Split out static channels
 
 ### Changed
@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PhysioNet 2012 challenge time stamp is now in hours (previously minutes) for consistency with the PhysioNet 2019 challenge
 * PhysioNet 2012 challenge time stamp is now time since admission, not row index
 * Impute time series channels only
-* Standardise continuous channels only
+* Standardise continuous channels only - WHAT ABOUT ORDINAL?
 
 ### Fixed
 

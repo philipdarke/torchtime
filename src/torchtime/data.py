@@ -207,7 +207,6 @@ class _TimeSeriesDataset(Dataset):
         if (type(self.missing) is list and sum(self.missing) > EPS) or (
             type(self.missing) is float and self.missing > EPS
         ):
-            # TODO: do not drop values from time channel
             _simulate_missing(X_all, self.missing, seed=self.seed)
 
         # 4. Add time stamp/mask/time delta channels

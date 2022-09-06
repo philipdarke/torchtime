@@ -71,7 +71,7 @@ def _simulate_missing(X, missing, generator=None, seed=None):
     for Xi in X:
         if type(missing) in [int, float]:
             idx = _sample_indices(length, missing, generator)
-            Xi[idx] = float("nan")
+            Xi[idx, 1:] = float("nan")
         else:
             assert Xi.size(-1) == len(
                 missing
