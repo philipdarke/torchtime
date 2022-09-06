@@ -11,6 +11,11 @@ DATASET = "CharacterTrajectories"
 SEED = 456789
 RTOL = 1e-4
 ATOL = 1e-4
+SHA_X = "fb5077e0da758b241caff0270c28e1a3b2ac0ea2aebc4e5b2276b89947a5d257"
+SHA_Y = "59b53905692701ec7e6c5ca2e8b61d06c44ec531a3d29c0bbb38ddec7754da80"
+SHA_LENGTH = "698d1ebefff52cff3c41da20feccbd141e856b16aa618b7e44c80daf54ab0e39"
+N_DATA_CHANNELS = 3
+N_CLASSES = 20
 
 
 class TestUEACharacterTrajectories:
@@ -77,17 +82,10 @@ class TestUEACharacterTrajectories:
             train_prop=0.7,
             seed=SEED,
         )
+        assert _get_SHA256(".torchtime/uea_" + DATASET + "/X" + OBJ_EXT) == SHA_X
+        assert _get_SHA256(".torchtime/uea_" + DATASET + "/y" + OBJ_EXT) == SHA_Y
         assert (
-            _get_SHA256(".torchtime/uea_" + DATASET + "/X" + OBJ_EXT)
-            == "977be55b8ed063e88991dc459c5d871136839f092dd8056dd408aa59db7dd27f"
-        )
-        assert (
-            _get_SHA256(".torchtime/uea_" + DATASET + "/y" + OBJ_EXT)
-            == "59b53905692701ec7e6c5ca2e8b61d06c44ec531a3d29c0bbb38ddec7754da80"
-        )
-        assert (
-            _get_SHA256(".torchtime/uea_" + DATASET + "/length" + OBJ_EXT)
-            == "698d1ebefff52cff3c41da20feccbd141e856b16aa618b7e44c80daf54ab0e39"
+            _get_SHA256(".torchtime/uea_" + DATASET + "/length" + OBJ_EXT) == SHA_LENGTH
         )
 
     def test_train_val(self):
@@ -99,11 +97,11 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2001, 182, 4])
-        assert dataset.y_train.shape == torch.Size([2001, 20])
+        assert dataset.X_train.shape == torch.Size([2001, 182, N_DATA_CHANNELS + 1])
+        assert dataset.y_train.shape == torch.Size([2001, N_CLASSES])
         assert dataset.length_train.shape == torch.Size([2001])
-        assert dataset.X_val.shape == torch.Size([857, 182, 4])
-        assert dataset.y_val.shape == torch.Size([857, 20])
+        assert dataset.X_val.shape == torch.Size([857, 182, N_DATA_CHANNELS + 1])
+        assert dataset.y_val.shape == torch.Size([857, N_CLASSES])
         assert dataset.length_val.shape == torch.Size([857])
         # Ensure no test data is returned
         with pytest.raises(
@@ -130,14 +128,14 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2002, 182, 4])
-        assert dataset.y_train.shape == torch.Size([2002, 20])
+        assert dataset.X_train.shape == torch.Size([2002, 182, N_DATA_CHANNELS + 1])
+        assert dataset.y_train.shape == torch.Size([2002, N_CLASSES])
         assert dataset.length_train.shape == torch.Size([2002])
-        assert dataset.X_val.shape == torch.Size([571, 182, 4])
-        assert dataset.y_val.shape == torch.Size([571, 20])
+        assert dataset.X_val.shape == torch.Size([571, 182, N_DATA_CHANNELS + 1])
+        assert dataset.y_val.shape == torch.Size([571, N_CLASSES])
         assert dataset.length_val.shape == torch.Size([571])
-        assert dataset.X_test.shape == torch.Size([285, 182, 4])
-        assert dataset.y_test.shape == torch.Size([285, 20])
+        assert dataset.X_test.shape == torch.Size([285, 182, N_DATA_CHANNELS + 1])
+        assert dataset.y_test.shape == torch.Size([285, N_CLASSES])
         assert dataset.length_test.shape == torch.Size([285])
 
     def test_train_split(self):
@@ -217,13 +215,16 @@ class TestUEACharacterTrajectories:
         )
         # Check number of NaNs
         assert (
-            torch.sum(torch.isnan(dataset.X_train)).item() == 732969
+            torch.sum(torch.isnan(dataset.X_train[:, :, dataset.data_idx])).item()
+            == 732969
         )  # expect around 3 * (239873 * 0.5 + 2002 * 182 - 239873) = 733,283
         assert (
-            torch.sum(torch.isnan(dataset.X_val)).item() == 208686
+            torch.sum(torch.isnan(dataset.X_val[:, :, dataset.data_idx])).item()
+            == 208686
         )  # expect around 3 * (68797 * 0.5 + 571 * 182 - 68797) = 208,571
         assert (
-            torch.sum(torch.isnan(dataset.X_test)).item() == 103872
+            torch.sum(torch.isnan(dataset.X_test[:, :, dataset.data_idx])).item()
+            == 103872
         )  # expect around 3 * (34269 * 0.5 + 285 * 182 - 34269) = 104,207
 
     def test_invalid_impute(self):
@@ -269,11 +270,20 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check number of NaNs
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 732969
+        assert (
+            torch.sum(torch.isnan(dataset.X_train[:, :, dataset.data_idx])).item()
+            == 732969
+        )
         assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 208686
+        assert (
+            torch.sum(torch.isnan(dataset.X_val[:, :, dataset.data_idx])).item()
+            == 208686
+        )
         assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 103872
+        assert (
+            torch.sum(torch.isnan(dataset.X_test[:, :, dataset.data_idx])).item()
+            == 103872
+        )
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
     def test_zero_impute(self):
@@ -288,11 +298,15 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check no NaNs post imputation
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
+        assert (
+            torch.sum(torch.isnan(dataset.X_train[:, :, dataset.data_idx])).item() == 0
+        )
         assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_val[:, :, dataset.data_idx])).item() == 0
         assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
+        assert (
+            torch.sum(torch.isnan(dataset.X_test[:, :, dataset.data_idx])).item() == 0
+        )
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
     def test_mean_impute(self):
@@ -307,11 +321,15 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check no NaNs post imputation
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
+        assert (
+            torch.sum(torch.isnan(dataset.X_train[:, :, dataset.data_idx])).item() == 0
+        )
         assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_val[:, :, dataset.data_idx])).item() == 0
         assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
+        assert (
+            torch.sum(torch.isnan(dataset.X_test[:, :, dataset.data_idx])).item() == 0
+        )
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
     def test_forward_impute(self):
@@ -326,11 +344,15 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check no NaNs post imputation
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
+        assert (
+            torch.sum(torch.isnan(dataset.X_train[:, :, dataset.data_idx])).item() == 0
+        )
         assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_val[:, :, dataset.data_idx])).item() == 0
         assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
+        assert (
+            torch.sum(torch.isnan(dataset.X_test[:, :, dataset.data_idx])).item() == 0
+        )
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
     def test_custom_imputation_1(self):
@@ -349,11 +371,15 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check number of NaNs
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 0
+        assert (
+            torch.sum(torch.isnan(dataset.X_train[:, :, dataset.data_idx])).item() == 0
+        )
         assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 0
+        assert torch.sum(torch.isnan(dataset.X_val[:, :, dataset.data_idx])).item() == 0
         assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 0
+        assert (
+            torch.sum(torch.isnan(dataset.X_test[:, :, dataset.data_idx])).item() == 0
+        )
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
     def test_custom_imputation_2(self):
@@ -372,11 +398,20 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check number of NaNs
-        assert torch.sum(torch.isnan(dataset.X_train)).item() == 732969
+        assert (
+            torch.sum(torch.isnan(dataset.X_train[:, :, dataset.data_idx])).item()
+            == 732969
+        )
         assert torch.sum(torch.isnan(dataset.y_train)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_val)).item() == 208686
+        assert (
+            torch.sum(torch.isnan(dataset.X_val[:, :, dataset.data_idx])).item()
+            == 208686
+        )
         assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
-        assert torch.sum(torch.isnan(dataset.X_test)).item() == 103872
+        assert (
+            torch.sum(torch.isnan(dataset.X_test[:, :, dataset.data_idx])).item()
+            == 103872
+        )
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
 
     def test_overwrite_data(self):
@@ -388,17 +423,10 @@ class TestUEACharacterTrajectories:
             seed=SEED,
             overwrite_cache=True,
         )
+        assert _get_SHA256(".torchtime/uea_" + DATASET + "/X" + OBJ_EXT) == SHA_X
+        assert _get_SHA256(".torchtime/uea_" + DATASET + "/y" + OBJ_EXT) == SHA_Y
         assert (
-            _get_SHA256(".torchtime/uea_" + DATASET + "/X" + OBJ_EXT)
-            == "977be55b8ed063e88991dc459c5d871136839f092dd8056dd408aa59db7dd27f"
-        )
-        assert (
-            _get_SHA256(".torchtime/uea_" + DATASET + "/y" + OBJ_EXT)
-            == "59b53905692701ec7e6c5ca2e8b61d06c44ec531a3d29c0bbb38ddec7754da80"
-        )
-        assert (
-            _get_SHA256(".torchtime/uea_" + DATASET + "/length" + OBJ_EXT)
-            == "698d1ebefff52cff3c41da20feccbd141e856b16aa618b7e44c80daf54ab0e39"
+            _get_SHA256(".torchtime/uea_" + DATASET + "/length" + OBJ_EXT) == SHA_LENGTH
         )
 
     def test_time(self):
@@ -412,22 +440,24 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2002, 182, 4])
-        assert dataset.X_val.shape == torch.Size([571, 182, 4])
-        assert dataset.X_test.shape == torch.Size([285, 182, 4])
-        # Check time channel
-        for i in range(182):
+        assert dataset.X_train.shape == torch.Size([2002, 182, N_DATA_CHANNELS + 1])
+        assert dataset.X_val.shape == torch.Size([571, 182, N_DATA_CHANNELS + 1])
+        assert dataset.X_test.shape == torch.Size([285, 182, N_DATA_CHANNELS + 1])
+        # Check time channels
+        for i, Xi in enumerate(dataset.X_train):
             assert torch.equal(
-                dataset.X_train[:, i, 0],
-                torch.full([2002], fill_value=i, dtype=torch.float),
+                Xi[: dataset.length_train[i], 0],
+                torch.arange(dataset.length_train[i], dtype=torch.float),
             )
+        for i, Xi in enumerate(dataset.X_val):
             assert torch.equal(
-                dataset.X_val[:, i, 0],
-                torch.full([571], fill_value=i, dtype=torch.float),
+                Xi[: dataset.length_val[i], 0],
+                torch.arange(dataset.length_val[i], dtype=torch.float),
             )
+        for i, Xi in enumerate(dataset.X_test):
             assert torch.equal(
-                dataset.X_test[:, i, 0],
-                torch.full([285], fill_value=i, dtype=torch.float),
+                Xi[: dataset.length_test[i], 0],
+                torch.arange(dataset.length_test[i], dtype=torch.float),
             )
 
     def test_no_time(self):
@@ -441,9 +471,9 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2002, 182, 3])
-        assert dataset.X_val.shape == torch.Size([571, 182, 3])
-        assert dataset.X_test.shape == torch.Size([285, 182, 3])
+        assert dataset.X_train.shape == torch.Size([2002, 182, N_DATA_CHANNELS])
+        assert dataset.X_val.shape == torch.Size([571, 182, N_DATA_CHANNELS])
+        assert dataset.X_test.shape == torch.Size([285, 182, N_DATA_CHANNELS])
 
     def test_mask(self):
         """Test mask argument."""
@@ -457,13 +487,23 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2002, 182, 6])
-        assert dataset.X_val.shape == torch.Size([571, 182, 6])
-        assert dataset.X_test.shape == torch.Size([285, 182, 6])
-        # Check mask channel
-        assert torch.sum(dataset.X_train[:, :, 3]) == torch.sum(dataset.length_train)
-        assert torch.sum(dataset.X_val[:, :, 3]) == torch.sum(dataset.length_val)
-        assert torch.sum(dataset.X_test[:, :, 3]) == torch.sum(dataset.length_test)
+        assert dataset.X_train.shape == torch.Size([2002, 182, 2 * N_DATA_CHANNELS])
+        assert dataset.X_val.shape == torch.Size([571, 182, 2 * N_DATA_CHANNELS])
+        assert dataset.X_test.shape == torch.Size([285, 182, 2 * N_DATA_CHANNELS])
+        # Check mask channels
+        max_sequence = int(dataset.X.size(1))
+        for i, Xi in enumerate(dataset.X_train):
+            mask = torch.zeros((max_sequence, N_DATA_CHANNELS), dtype=torch.float)
+            mask[: dataset.length_train[i], :] = 1
+            assert torch.equal(Xi[:, N_DATA_CHANNELS:], mask)
+        for i, Xi in enumerate(dataset.X_val):
+            mask = torch.zeros((max_sequence, N_DATA_CHANNELS), dtype=torch.float)
+            mask[: dataset.length_val[i], :] = 1
+            assert torch.equal(Xi[:, N_DATA_CHANNELS:], mask)
+        for i, Xi in enumerate(dataset.X_test):
+            mask = torch.zeros((max_sequence, N_DATA_CHANNELS), dtype=torch.float)
+            mask[: dataset.length_test[i], :] = 1
+            assert torch.equal(Xi[:, N_DATA_CHANNELS:], mask)
 
     def test_delta(self):
         """Test time delta argument."""
@@ -477,19 +517,28 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2002, 182, 6])
-        assert dataset.X_val.shape == torch.Size([571, 182, 6])
-        assert dataset.X_test.shape == torch.Size([285, 182, 6])
-        # Check time delta channel
-        assert torch.equal(
-            dataset.X_train[:, 0, 3], torch.zeros([2002], dtype=torch.float)
-        )
-        assert torch.equal(
-            dataset.X_val[:, 0, 3], torch.zeros([571], dtype=torch.float)
-        )
-        assert torch.equal(
-            dataset.X_test[:, 0, 3], torch.zeros([285], dtype=torch.float)
-        )
+        assert dataset.X_train.shape == torch.Size([2002, 182, 2 * N_DATA_CHANNELS])
+        assert dataset.X_val.shape == torch.Size([571, 182, 2 * N_DATA_CHANNELS])
+        assert dataset.X_test.shape == torch.Size([285, 182, 2 * N_DATA_CHANNELS])
+        # Check time delta channels
+        for i, Xi in enumerate(dataset.X_train):
+            delta = torch.ones(
+                (dataset.length_train[i], N_DATA_CHANNELS), dtype=torch.float
+            )
+            delta[0, :] = 0
+            assert torch.equal(Xi[: dataset.length_train[i], N_DATA_CHANNELS:], delta)
+        for i, Xi in enumerate(dataset.X_val):
+            delta = torch.ones(
+                (dataset.length_val[i], N_DATA_CHANNELS), dtype=torch.float
+            )
+            delta[0, :] = 0
+            assert torch.equal(Xi[: dataset.length_val[i], N_DATA_CHANNELS:], delta)
+        for i, Xi in enumerate(dataset.X_test):
+            delta = torch.ones(
+                (dataset.length_test[i], N_DATA_CHANNELS), dtype=torch.float
+            )
+            delta[0, :] = 0
+            assert torch.equal(Xi[: dataset.length_test[i], N_DATA_CHANNELS:], delta)
 
     def test_time_mask_delta(self):
         """Test combination of time/mask/delta arguments."""
@@ -503,55 +552,171 @@ class TestUEACharacterTrajectories:
             seed=SEED,
         )
         # Check data set size
-        assert dataset.X_train.shape == torch.Size([2002, 182, 10])
-        assert dataset.X_val.shape == torch.Size([571, 182, 10])
-        assert dataset.X_test.shape == torch.Size([285, 182, 10])
+        assert dataset.X_train.shape == torch.Size([2002, 182, 3 * N_DATA_CHANNELS + 1])
+        assert dataset.X_val.shape == torch.Size([571, 182, 3 * N_DATA_CHANNELS + 1])
+        assert dataset.X_test.shape == torch.Size([285, 182, 3 * N_DATA_CHANNELS + 1])
         # Check time channel
-        for i in range(182):
+        for i, Xi in enumerate(dataset.X_train):
             assert torch.equal(
-                dataset.X_train[:, i, 0],
-                torch.full([2002], fill_value=i, dtype=torch.float),
+                Xi[: dataset.length_train[i], 0],
+                torch.arange(dataset.length_train[i], dtype=torch.float),
             )
+        for i, Xi in enumerate(dataset.X_val):
             assert torch.equal(
-                dataset.X_val[:, i, 0],
-                torch.full([571], fill_value=i, dtype=torch.float),
+                Xi[: dataset.length_val[i], 0],
+                torch.arange(dataset.length_val[i], dtype=torch.float),
             )
+        for i, Xi in enumerate(dataset.X_test):
             assert torch.equal(
-                dataset.X_test[:, i, 0],
-                torch.full([285], fill_value=i, dtype=torch.float),
+                Xi[: dataset.length_test[i], 0],
+                torch.arange(dataset.length_test[i], dtype=torch.float),
             )
-        # Check mask channel
-        assert torch.sum(dataset.X_train[:, :, 4]) == torch.sum(dataset.length_train)
-        assert torch.sum(dataset.X_val[:, :, 4]) == torch.sum(dataset.length_val)
-        assert torch.sum(dataset.X_test[:, :, 4]) == torch.sum(dataset.length_test)
-        # Check time delta channel
-        assert torch.equal(
-            dataset.X_train[:, 0, 7], torch.zeros([2002], dtype=torch.float)
-        )
-        assert torch.equal(
-            dataset.X_val[:, 0, 7], torch.zeros([571], dtype=torch.float)
-        )
-        assert torch.equal(
-            dataset.X_test[:, 0, 7], torch.zeros([285], dtype=torch.float)
-        )
+        # Check mask channels
+        max_sequence = int(dataset.X.size(1))
+        for i, Xi in enumerate(dataset.X_train):
+            mask = torch.zeros((max_sequence, N_DATA_CHANNELS), dtype=torch.float)
+            mask[: dataset.length_train[i], :] = 1
+            assert torch.equal(
+                Xi[:, (N_DATA_CHANNELS + 1) : (2 * N_DATA_CHANNELS + 1)], mask
+            )
+        for i, Xi in enumerate(dataset.X_val):
+            mask = torch.zeros((max_sequence, N_DATA_CHANNELS), dtype=torch.float)
+            mask[: dataset.length_val[i], :] = 1
+            assert torch.equal(
+                Xi[:, (N_DATA_CHANNELS + 1) : (2 * N_DATA_CHANNELS + 1)], mask
+            )
+        for i, Xi in enumerate(dataset.X_test):
+            mask = torch.zeros((max_sequence, N_DATA_CHANNELS), dtype=torch.float)
+            mask[: dataset.length_test[i], :] = 1
+            assert torch.equal(
+                Xi[:, (N_DATA_CHANNELS + 1) : (2 * N_DATA_CHANNELS + 1)], mask
+            )
+        # Check time delta channels
+        for i, Xi in enumerate(dataset.X_train):
+            delta = torch.ones(
+                (dataset.length_train[i], N_DATA_CHANNELS), dtype=torch.float
+            )
+            delta[0, :] = 0
+            assert torch.equal(
+                Xi[: dataset.length_train[i], (2 * N_DATA_CHANNELS + 1) :], delta
+            )
+        for i, Xi in enumerate(dataset.X_val):
+            delta = torch.ones(
+                (dataset.length_val[i], N_DATA_CHANNELS), dtype=torch.float
+            )
+            delta[0, :] = 0
+            assert torch.equal(
+                Xi[: dataset.length_val[i], (2 * N_DATA_CHANNELS + 1) :], delta
+            )
+        for i, Xi in enumerate(dataset.X_test):
+            delta = torch.ones(
+                (dataset.length_test[i], N_DATA_CHANNELS), dtype=torch.float
+            )
+            delta[0, :] = 0
+            assert torch.equal(
+                Xi[: dataset.length_test[i], (2 * N_DATA_CHANNELS + 1) :], delta
+            )
 
-    def test_standarisation(self):
+    def test_standarisation_1(self):
         """Check training data is standardised."""
         dataset = UEA(
             dataset=DATASET,
             split="train",
             train_prop=0.7,
-            time=False,
-            standardise=True,
+            standardise="all",
             seed=SEED,
         )
-        for c, Xc in enumerate(dataset.X_train.unbind(dim=-1)):
+        for Xc in dataset.X_train.unbind(dim=-1):
             assert torch.allclose(
                 torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
             )
             assert torch.allclose(
                 torch.std(Xc[~torch.isnan(Xc)]),
                 torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            ) or torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([0.0]),  # if all values are the same
+                rtol=RTOL,
+                atol=ATOL,
+            )
+
+    def test_standarisation_2(self):
+        """Check imputed training data is standardised."""
+        dataset = UEA(
+            dataset=DATASET,
+            split="train",
+            train_prop=0.7,
+            impute="forward",
+            standardise="all",
+            seed=SEED,
+        )
+        for Xc in dataset.X_train.unbind(dim=-1):
+            assert torch.allclose(
+                torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
+            )
+            assert torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            ) or torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([0.0]),  # if all values are the same
+                rtol=RTOL,
+                atol=ATOL,
+            )
+
+    def test_standarisation_3(self):
+        """Check training data is standardised (time series only)."""
+        dataset = UEA(
+            dataset=DATASET,
+            split="train",
+            train_prop=0.7,
+            delta=True,
+            standardise="data",
+            seed=SEED,
+        )
+        for Xc in dataset.X_train[:, :, dataset.data_idx].unbind(dim=-1):
+            assert torch.allclose(
+                torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
+            )
+            assert torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            ) or torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([0.0]),  # if all values are the same
+                rtol=RTOL,
+                atol=ATOL,
+            )
+
+    def test_standarisation_4(self):
+        """Check imputed training data is standardised (time series only)."""
+        dataset = UEA(
+            dataset=DATASET,
+            split="train",
+            train_prop=0.7,
+            delta=True,
+            impute="forward",
+            standardise="data",
+            seed=SEED,
+        )
+        for Xc in dataset.X_train[:, :, dataset.data_idx].unbind(dim=-1):
+            assert torch.allclose(
+                torch.nanmean(Xc), torch.Tensor([0.0]), rtol=RTOL, atol=ATOL
+            )
+            assert torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([1.0]),
+                rtol=RTOL,
+                atol=ATOL,
+            ) or torch.allclose(
+                torch.std(Xc[~torch.isnan(Xc)]),
+                torch.Tensor([0.0]),  # if all values are the same
                 rtol=RTOL,
                 atol=ATOL,
             )

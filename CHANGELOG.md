@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * PhysioNet 2012 challenge time stamp is now time since admission, not row index
 * Impute time series channels only
 * Standardise continuous channels only - WHAT ABOUT ORDINAL?
+* Unit tests
 
 ### Fixed
 
