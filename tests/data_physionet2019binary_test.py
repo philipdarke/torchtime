@@ -507,6 +507,7 @@ class TestPhysioNet2019Binary:
         dataset = PhysioNet2019Binary(
             split="train",
             train_prop=0.7,
+            delta=True,
             standardise="data",
             seed=SEED,
         )
@@ -532,6 +533,7 @@ class TestPhysioNet2019Binary:
         dataset = PhysioNet2019Binary(
             split="train",
             train_prop=0.7,
+            delta=True,
             impute="forward",
             standardise="data",
             seed=SEED,
