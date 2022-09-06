@@ -121,11 +121,14 @@ class TestReplace:
             val_prop=0.2,
             seed=456789,
         )
-        # Check no NaNs post imputation
+        # Check no NaNs post imputation (use select)
         X_impute = replace_missing(
-            dataset.X, fill=torch.Tensor([1, 2, 3]), select=torch.Tensor([1, 2, 3])
+            dataset.X, fill=torch.tensor([1, 2, 3]), select=torch.tensor([1, 2, 3])
         )
-        assert torch.sum(torch.isnan(X_impute)).item() == 0
+        assert torch.sum(torch.isnan(X_impute[:, :, dataset.data_idx])).item() == 0
+        # Check no NaNs post imputation (no select argument)
+        X_impute = replace_missing(dataset.X, fill=torch.tensor([0, 1, 2, 3]))
+        assert torch.sum(torch.isnan(X_impute[:, :, dataset.data_idx])).item() == 0
 
 
 class TestForward:
@@ -264,5 +267,10 @@ class TestForward:
             seed=SEED,
         )
         # Check no NaNs post imputation
-        X_impute = forward_impute(dataset.X, fill=torch.Tensor([float("nan"), 1, 2, 3]))
-        assert torch.sum(torch.isnan(X_impute)).item() == 0
+        X_impute = forward_impute(
+            dataset.X, fill=torch.tensor([1, 2, 3]), select=torch.tensor([1, 2, 3])
+        )
+        assert torch.sum(torch.isnan(X_impute[:, :, dataset.data_idx])).item() == 0
+        # Check no NaNs post imputation (no select argument)
+        X_impute = forward_impute(dataset.X, fill=torch.tensor([0, 1, 2, 3]))
+        assert torch.sum(torch.isnan(X_impute[:, :, dataset.data_idx])).item() == 0
