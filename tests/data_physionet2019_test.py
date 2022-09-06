@@ -400,13 +400,16 @@ class TestPhysioNet2019:
         assert dataset.X_test.shape == torch.Size([4033, 336, 2 * N_DATA_CHANNELS])
         # Check time delta channel
         assert torch.equal(
-            dataset.X_train[:, 0, 40], torch.zeros([28236], dtype=torch.float)
+            dataset.X_train[:, 0, N_DATA_CHANNELS + 1],
+            torch.zeros([28236], dtype=torch.float),
         )
         assert torch.equal(
-            dataset.X_val[:, 0, 40], torch.zeros([8067], dtype=torch.float)
+            dataset.X_val[:, 0, N_DATA_CHANNELS + 1],
+            torch.zeros([8067], dtype=torch.float),
         )
         assert torch.equal(
-            dataset.X_test[:, 0, 40], torch.zeros([4033], dtype=torch.float)
+            dataset.X_test[:, 0, N_DATA_CHANNELS + 1],
+            torch.zeros([4033], dtype=torch.float),
         )
 
     def test_time_mask_delta(self):
@@ -425,29 +428,18 @@ class TestPhysioNet2019:
         )
         assert dataset.X_val.shape == torch.Size([8067, 336, 3 * N_DATA_CHANNELS + 1])
         assert dataset.X_test.shape == torch.Size([4033, 336, 3 * N_DATA_CHANNELS + 1])
-        # Check time channel
-        for i in range(182):
-            assert torch.equal(
-                dataset.X_train[:, i, 0],
-                torch.full([28236], fill_value=i, dtype=torch.float),
-            )
-            assert torch.equal(
-                dataset.X_val[:, i, 0],
-                torch.full([8067], fill_value=i, dtype=torch.float),
-            )
-            assert torch.equal(
-                dataset.X_test[:, i, 0],
-                torch.full([4033], fill_value=i, dtype=torch.float),
-            )
         # Check time delta channel
         assert torch.equal(
-            dataset.X_train[:, 0, 81], torch.zeros([28236], dtype=torch.float)
+            dataset.X_train[:, 0, 2 * N_DATA_CHANNELS + 1],
+            torch.zeros([28236], dtype=torch.float),
         )
         assert torch.equal(
-            dataset.X_val[:, 0, 81], torch.zeros([8067], dtype=torch.float)
+            dataset.X_val[:, 0, 2 * N_DATA_CHANNELS + 1],
+            torch.zeros([8067], dtype=torch.float),
         )
         assert torch.equal(
-            dataset.X_test[:, 0, 81], torch.zeros([4033], dtype=torch.float)
+            dataset.X_test[:, 0, 2 * N_DATA_CHANNELS + 1],
+            torch.zeros([4033], dtype=torch.float),
         )
 
     def test_standarisation_1(self):
@@ -566,13 +558,22 @@ class TestPhysioNet2019:
         )
         # Check first value in 39th channel
         assert torch.allclose(
-            dataset.X_train[0, 0, 39], torch.tensor(-1.53), rtol=RTOL, atol=ATOL
+            dataset.X_train[0, 0, N_DATA_CHANNELS],
+            torch.tensor(-1.53),
+            rtol=RTOL,
+            atol=ATOL,
         )
         assert torch.allclose(
-            dataset.X_val[0, 0, 39], torch.tensor(-0.02), rtol=RTOL, atol=ATOL
+            dataset.X_val[0, 0, N_DATA_CHANNELS],
+            torch.tensor(-0.02),
+            rtol=RTOL,
+            atol=ATOL,
         )
         assert torch.allclose(
-            dataset.X_test[0, 0, 39], torch.tensor(-6.73), rtol=RTOL, atol=ATOL
+            dataset.X_test[0, 0, N_DATA_CHANNELS],
+            torch.tensor(-6.73),
+            rtol=RTOL,
+            atol=ATOL,
         )
 
     def test_reproducibility_2(self):
@@ -585,11 +586,20 @@ class TestPhysioNet2019:
         )
         # Check first value in 39th channel
         assert torch.allclose(
-            dataset.X_train[0, 0, 39], torch.tensor(-13.01), rtol=RTOL, atol=ATOL
+            dataset.X_train[0, 0, N_DATA_CHANNELS],
+            torch.tensor(-13.01),
+            rtol=RTOL,
+            atol=ATOL,
         )
         assert torch.allclose(
-            dataset.X_val[0, 0, 39], torch.tensor(-109.75), rtol=RTOL, atol=ATOL
+            dataset.X_val[0, 0, N_DATA_CHANNELS],
+            torch.tensor(-109.75),
+            rtol=RTOL,
+            atol=ATOL,
         )
         assert torch.allclose(
-            dataset.X_test[0, 0, 39], torch.tensor(-131.18), rtol=RTOL, atol=ATOL
+            dataset.X_test[0, 0, N_DATA_CHANNELS],
+            torch.tensor(-131.18),
+            rtol=RTOL,
+            atol=ATOL,
         )

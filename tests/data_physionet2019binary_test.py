@@ -11,7 +11,7 @@ from torchtime.utils import _get_SHA256
 SEED = 456789
 RTOL = 1e-4
 ATOL = 1e-4
-SHA_X = "52b28760d1d2420b27d8003531ae42cdca14c6e408b024273c81a65d39c2f2df"
+SHA_X = "42d96c00f5062332f99e0d0d5edb4f959f5293874f37a0cfbd6b21ad44a51a09"
 SHA_Y = "dd78b55b728fe62798cadb28741d5cb0f243dfb3146aa6732baa26ecfe32ba40"
 SHA_LENGTH = "d0c1c809d47485cb237e650d11264bcc9225f2c56d5754d4ebeda41cc87c63ba"
 N_DATA_CHANNELS = 39
@@ -361,20 +361,6 @@ class TestPhysioNet2019Binary:
         assert dataset.X_train.shape == torch.Size([28234, 72, N_DATA_CHANNELS + 1])
         assert dataset.X_val.shape == torch.Size([8066, 72, N_DATA_CHANNELS + 1])
         assert dataset.X_test.shape == torch.Size([4033, 72, N_DATA_CHANNELS + 1])
-        # Check time channel
-        for i in range(72):
-            assert torch.equal(
-                dataset.X_train[:, i, 0],
-                torch.full([28234], fill_value=i, dtype=torch.float),
-            )
-            assert torch.equal(
-                dataset.X_val[:, i, 0],
-                torch.full([8066], fill_value=i, dtype=torch.float),
-            )
-            assert torch.equal(
-                dataset.X_test[:, i, 0],
-                torch.full([4033], fill_value=i, dtype=torch.float),
-            )
 
     def test_no_time(self):
         """Test time argument."""
@@ -421,13 +407,16 @@ class TestPhysioNet2019Binary:
         assert dataset.X_test.shape == torch.Size([4033, 72, 2 * N_DATA_CHANNELS])
         # Check time delta channel
         assert torch.equal(
-            dataset.X_train[:, 0, 40], torch.zeros([28234], dtype=torch.float)
+            dataset.X_train[:, 0, N_DATA_CHANNELS + 1],
+            torch.zeros([28234], dtype=torch.float),
         )
         assert torch.equal(
-            dataset.X_val[:, 0, 40], torch.zeros([8066], dtype=torch.float)
+            dataset.X_val[:, 0, N_DATA_CHANNELS + 1],
+            torch.zeros([8066], dtype=torch.float),
         )
         assert torch.equal(
-            dataset.X_test[:, 0, 40], torch.zeros([4033], dtype=torch.float)
+            dataset.X_test[:, 0, N_DATA_CHANNELS + 1],
+            torch.zeros([4033], dtype=torch.float),
         )
 
     def test_time_mask_delta(self):
@@ -444,29 +433,18 @@ class TestPhysioNet2019Binary:
         assert dataset.X_train.shape == torch.Size([28234, 72, 3 * N_DATA_CHANNELS + 1])
         assert dataset.X_val.shape == torch.Size([8066, 72, 3 * N_DATA_CHANNELS + 1])
         assert dataset.X_test.shape == torch.Size([4033, 72, 3 * N_DATA_CHANNELS + 1])
-        # Check time channel
-        for i in range(72):
-            assert torch.equal(
-                dataset.X_train[:, i, 0],
-                torch.full([28234], fill_value=i, dtype=torch.float),
-            )
-            assert torch.equal(
-                dataset.X_val[:, i, 0],
-                torch.full([8066], fill_value=i, dtype=torch.float),
-            )
-            assert torch.equal(
-                dataset.X_test[:, i, 0],
-                torch.full([4033], fill_value=i, dtype=torch.float),
-            )
         # Check time delta channel
         assert torch.equal(
-            dataset.X_train[:, 0, 81], torch.zeros([28234], dtype=torch.float)
+            dataset.X_train[:, 0, 2 * N_DATA_CHANNELS + 1],
+            torch.zeros([28234], dtype=torch.float),
         )
         assert torch.equal(
-            dataset.X_val[:, 0, 81], torch.zeros([8066], dtype=torch.float)
+            dataset.X_val[:, 0, 2 * N_DATA_CHANNELS + 1],
+            torch.zeros([8066], dtype=torch.float),
         )
         assert torch.equal(
-            dataset.X_test[:, 0, 81], torch.zeros([4033], dtype=torch.float)
+            dataset.X_test[:, 0, 2 * N_DATA_CHANNELS + 1],
+            torch.zeros([4033], dtype=torch.float),
         )
 
     def test_standarisation_1(self):
@@ -585,13 +563,22 @@ class TestPhysioNet2019Binary:
         )
         # Check first value in 39th channel
         assert torch.allclose(
-            dataset.X_train[0, 0, 39], torch.tensor(-0.03), rtol=RTOL, atol=ATOL
+            dataset.X_train[0, 0, N_DATA_CHANNELS],
+            torch.tensor(-0.03),
+            rtol=RTOL,
+            atol=ATOL,
         )
         assert torch.allclose(
-            dataset.X_val[0, 0, 39], torch.tensor(-27.55), rtol=RTOL, atol=ATOL
+            dataset.X_val[0, 0, N_DATA_CHANNELS],
+            torch.tensor(-27.55),
+            rtol=RTOL,
+            atol=ATOL,
         )
         assert torch.allclose(
-            dataset.X_test[0, 0, 39], torch.tensor(-0.66), rtol=RTOL, atol=ATOL
+            dataset.X_test[0, 0, N_DATA_CHANNELS],
+            torch.tensor(-0.66),
+            rtol=RTOL,
+            atol=ATOL,
         )
 
     def test_reproducibility_2(self):
@@ -604,11 +591,20 @@ class TestPhysioNet2019Binary:
         )
         # Check first value in 39th channel
         assert torch.allclose(
-            dataset.X_train[0, 0, 39], torch.tensor(-0.01), rtol=RTOL, atol=ATOL
+            dataset.X_train[0, 0, N_DATA_CHANNELS],
+            torch.tensor(-0.01),
+            rtol=RTOL,
+            atol=ATOL,
         )
         assert torch.allclose(
-            dataset.X_val[0, 0, 39], torch.tensor(-90.73), rtol=RTOL, atol=ATOL
+            dataset.X_val[0, 0, N_DATA_CHANNELS],
+            torch.tensor(-90.73),
+            rtol=RTOL,
+            atol=ATOL,
         )
         assert torch.allclose(
-            dataset.X_test[0, 0, 39], torch.tensor(-199.47), rtol=RTOL, atol=ATOL
+            dataset.X_test[0, 0, N_DATA_CHANNELS],
+            torch.tensor(-199.47),
+            rtol=RTOL,
+            atol=ATOL,
         )
