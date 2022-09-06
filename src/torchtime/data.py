@@ -1129,7 +1129,7 @@ class PhysioNet2019(_TimeSeriesDataset):
         X = torch.cat(all_X)
         y = torch.cat(all_y)
         length = torch.tensor(length)
-        # Move time channel (ICULOS) to first channel
+        # Move time (ICULOS) to first channel
         X = torch.cat((X[:, :, -1].unsqueeze(-1), X[:, :, :-1]), dim=2)
         return X, y, length
 
@@ -1281,11 +1281,13 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
         X = torch.cat(all_X)
         y = torch.cat(all_y)
         length = torch.tensor(length)
-        # Drop patients with zero length sequences
+        # Drop patients with less than 72 hours of data
         patient_idx = torch.arange(X.size(0)).masked_select(length != 0).int()
         X = X.index_select(index=patient_idx, dim=0)
         y = y.index_select(index=patient_idx, dim=0)
         length = length.index_select(index=patient_idx, dim=0)
+        # Move time (ICULOS) to first channel
+        X = torch.cat((X[:, :, -1].unsqueeze(-1), X[:, :, :-1]), dim=2)
         # Save cached files to "physionet2019binary" directory
         self.path = pathlib.Path() / self.path_arg / ".torchtime" / self.DATASET_NAME
         return X, y, length
