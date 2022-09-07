@@ -74,16 +74,15 @@ def _simulate_missing(X, missing, generator=None, seed=None):
             idx = _sample_indices(length, missing, generator)
             Xi[idx, 1:] = float("nan")
         else:
-            missing_final = [0.0] + missing  # first channel is time
-            assert Xi.size(-1) == len(
-                missing_final
+            assert (
+                Xi.size(-1) == len(missing) + 1
             ), "argument 'missing' must be same length as number of channels \
                 ({})".format(
                 Xi.size(-1)
             )
-            for channel, rate in enumerate(missing_final[1:]):
+            for channel, rate in enumerate(missing):
                 idx = _sample_indices(length, rate, generator)
-                Xi[idx, channel] = float("nan")
+                Xi[idx, channel + 1] = float("nan")
 
 
 # Download data ------------------------------------------------------------------------
