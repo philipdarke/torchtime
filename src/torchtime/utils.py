@@ -61,7 +61,8 @@ def _get_file_list(directories):
 
 
 def _simulate_missing(X, missing, generator=None, seed=None):
-    """Simulate missing data by modifying ``X`` in place."""
+    """Simulate missing data by modifying ``X`` in place. Note the first channel
+    is assumed to be time and is therefore no data are dropped."""
     length = X.size(1)
     if generator is None:
         generator = _generator(seed)
@@ -73,13 +74,14 @@ def _simulate_missing(X, missing, generator=None, seed=None):
             idx = _sample_indices(length, missing, generator)
             Xi[idx, 1:] = float("nan")
         else:
+            missing_final = [0.0] + missing  # first channel is time
             assert Xi.size(-1) == len(
-                missing
+                missing_final
             ), "argument 'missing' must be same length as number of channels \
                 ({})".format(
                 Xi.size(-1)
             )
-            for channel, rate in enumerate(missing):
+            for channel, rate in enumerate(missing_final[1:]):
                 idx = _sample_indices(length, rate, generator)
                 Xi[idx, channel] = float("nan")
 
