@@ -51,11 +51,11 @@ Output:
             [ 1.4700e+02,  1.4563e-01,  3.0977e-01, -1.4867e+00],
             [ 1.4800e+02,  1.2583e-01,  2.6765e-01, -1.2845e+00],
             [ 1.4900e+02,  9.7681e-02,  2.0777e-01, -9.9716e-01],
-            [ 1.5000e+02,         nan,         nan,         nan],
-            [ 1.5100e+02,         nan,         nan,         nan],
-            [ 1.5200e+02,         nan,         nan,         nan],
-            [ 1.5300e+02,         nan,         nan,         nan],
-            [ 1.5400e+02,         nan,         nan,         nan]])
+            [        nan,         nan,         nan,         nan],
+            [        nan,         nan,         nan,         nan],
+            [        nan,         nan,         nan,         nan],
+            [        nan,         nan,         nan,         nan],
+            [        nan,         nan,         nan,         nan]])
 
 ```
 
