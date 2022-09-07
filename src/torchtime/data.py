@@ -30,12 +30,14 @@ from torchtime.constants import (
     PHYSIONET_2012_CATEGORICAL,
     PHYSIONET_2012_DATASETS,
     PHYSIONET_2012_MEANS,
+    PHYSIONET_2012_ORDINAL,
     PHYSIONET_2012_OUTCOMES,
     PHYSIONET_2012_STATIC,
     PHYSIONET_2012_VARS,
     PHYSIONET_2019_CATEGORICAL,
     PHYSIONET_2019_DATASETS,
     PHYSIONET_2019_MEANS,
+    PHYSIONET_2019_ORDINAL,
     PHYSIONET_2019_STATIC,
     TQDM_FORMAT,
     UEA_DOWNLOAD_URL,
@@ -77,6 +79,7 @@ class _TimeSeriesDataset(Dataset):
         static: TODO
         categorical: List with channel indices of categorical variables. Only required
             if imputing data. Default ``[]`` i.e. no categorical variables.
+        ordinal: TODO
         channel_means: Override the calculated channel mean/mode when imputing data.
             Only used if imputing data. Dictionary with channel indices and values e.g.
             ``{1: 4.5, 3: 7.2}`` (default ``{}`` i.e. no overridden channel mean/modes).
@@ -128,6 +131,7 @@ class _TimeSeriesDataset(Dataset):
         impute: Union[str, Callable[[Tensor], Tensor]] = "none",
         static: List[int] = [],
         categorical: List[int] = [],
+        ordinal: List[int] = [],
         channel_means: Dict[int, float] = {},
         time: bool = True,
         mask: bool = False,
@@ -146,6 +150,7 @@ class _TimeSeriesDataset(Dataset):
         self.impute = impute
         self.static = static
         self.categorical = categorical
+        self.ordinal = ordinal
         self.channel_means = channel_means
         self.time = time
         self.mask = mask
@@ -557,12 +562,16 @@ class _TimeSeriesDataset(Dataset):
         """Impute missing data (time series channels)."""
         data_fill = torch.nanmean(self.X_train[:, :, self.data_idx], dim=(0, 1))
         data_idx = torch.tensor(self.data_idx)
-        # Impute with channel mode if categorical variable
-        if self.categorical != []:
+        # Impute with channel mode if categorical/ordinal variable
+        mode_impute_channels = self.categorical + self.ordinal
+        if mode_impute_channels != []:
             assert np.all(
-                [idx in self.data_idx or idx in self.static for idx in self.categorical]
-            ), "channels in argument 'static' are not included in the data"
-            for idx in self.categorical:
+                [
+                    idx in self.data_idx or idx in self.static
+                    for idx in mode_impute_channels
+                ]
+            ), "channels in argument 'categorical' or 'ordinal' are not included in the data"
+            for idx in mode_impute_channels:
                 if idx <= self.n_channels:
                     data_fill[idx - 1] = _nanmode(
                         self.X_train[:, :, idx - int(not self.time)]
@@ -765,8 +774,8 @@ class PhysioNet2012(_TimeSeriesDataset):
         Channels 38 to 44 do not vary with time. These channels are returned by the
         ``X_static`` attribute if the ``static`` argument is True.
 
-        Variables 11 (GCS) and 27 (pH) are assumed to be ordinal and are imputed using
-        the same method as a continuous variable.
+        Variable 11 (GCS) is assumed to be ordinal and are imputed using the same method
+        as a continuous variable.
 
         Variable 20 (MechVent) has value ``Nan`` (the majority of values) or 1. It is
         assumed that value 1 indicates that mechanical ventilation has been used and
@@ -853,9 +862,11 @@ class PhysioNet2012(_TimeSeriesDataset):
             split=split,
             train_prop=train_prop,
             val_prop=val_prop,
+            missing=0.0,
             impute=impute,
             static=static_idx,
             categorical=PHYSIONET_2012_CATEGORICAL,
+            ordinal=PHYSIONET_2012_ORDINAL,
             channel_means=PHYSIONET_2012_MEANS,
             time=time,
             mask=mask,
@@ -1057,9 +1068,11 @@ class PhysioNet2019(_TimeSeriesDataset):
             split=split,
             train_prop=train_prop,
             val_prop=val_prop,
+            missing=0.0,
             impute=impute,
             static=static_idx,
             categorical=PHYSIONET_2019_CATEGORICAL,
+            ordinal=PHYSIONET_2019_ORDINAL,
             channel_means=PHYSIONET_2019_MEANS,
             time=time,
             mask=mask,
@@ -1166,6 +1179,7 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
         val_prop: Proportion of data in the validation set (optional, see above).
         impute: Method used to impute missing data, either *none*, *zero*, *mean*,
             *forward* or a custom imputation function (default "none").
+        static: Split out static channels as above (default False).
         time: Append time stamp in the first channel (default True).
         mask: Append missing data mask for each channel (default False).
         delta: Append time since previous observation for each channel calculated as in
@@ -1217,6 +1231,7 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
         train_prop: float,
         val_prop: float = None,
         impute: Union[str, Callable[[Tensor], Tensor]] = "none",
+        static: bool = False,
         time: bool = True,
         mask: bool = False,
         delta: bool = False,
@@ -1228,12 +1243,21 @@ class PhysioNet2019Binary(_TimeSeriesDataset):
         self.DATASET_NAME = "physionet_2019binary"
         self.path_arg = path
         self.max_time = 72  # hours
+        if static:
+            static_idx = PHYSIONET_2019_STATIC
+        else:
+            static_idx = []
         super(PhysioNet2019Binary, self).__init__(
             dataset=self.DATASET_NAME,
             split=split,
             train_prop=train_prop,
             val_prop=val_prop,
+            missing=0.0,
             impute=impute,
+            static=static_idx,
+            categorical=PHYSIONET_2019_CATEGORICAL,
+            ordinal=PHYSIONET_2019_ORDINAL,
+            channel_means=PHYSIONET_2019_MEANS,
             time=time,
             mask=mask,
             delta=delta,
@@ -1418,7 +1442,9 @@ class UEA(_TimeSeriesDataset):
             val_prop=val_prop,
             missing=missing,
             impute=impute,
+            static=[],
             categorical=categorical,
+            ordinal=[],
             channel_means=channel_means,
             time=time,
             mask=mask,
