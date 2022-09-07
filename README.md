@@ -6,6 +6,8 @@
 [![License](https://img.shields.io/github/license/philipdarke/torchtime.svg)](https://github.com/philipdarke/torchtime/blob/main/LICENSE)
 [![DOI](https://img.shields.io/badge/DOI-10.48550%2FarXiv.2207.12503-blue)](https://doi.org/10.48550/arXiv.2207.12503)
 
+&#128204;&nbsp; **`torchtime` is under active development and major releases are likely to contain API changes**
+
 PyTorch data sets for supervised time series classification and prediction problems, including:
 
 * All UEA/UCR classification repository data sets
@@ -26,7 +28,7 @@ $ pip install torchtime
 
 ## Getting started
 
-Data classes have a common API. The `split` argument determines whether training ("*train*"), validation ("*val*") or test ("*test*") data are returned. The size of the splits are controlled with the `train_prop` and (optional) `val_prop` arguments.
+Data classes have a common API. The `split` argument determines whether training, validation or test data are returned by the `X` and `y` attributes. The size of the splits are controlled with the `train_prop` and (optional) `val_prop` arguments.
 
 ### PhysioNet data sets
 
