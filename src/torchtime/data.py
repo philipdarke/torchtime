@@ -282,6 +282,7 @@ class _TimeSeriesDataset(Dataset):
  - random seed = {}
  - static channels = {}
  - categorical channels = {}
+ - ordinal channels = {}
  - standardise = {}
  - X, y, length attributes return the {} split""".format(
             self.dataset,
@@ -295,6 +296,7 @@ class _TimeSeriesDataset(Dataset):
             self.seed,
             self.static,
             self.categorical,
+            self.ordinal,
             self.standardise,
             self.split,
         )
@@ -570,7 +572,7 @@ class _TimeSeriesDataset(Dataset):
                     idx in self.data_idx or idx in self.static
                     for idx in mode_impute_channels
                 ]
-            ), "channels in argument 'categorical' or 'ordinal' are not included in the data"
+            ), "channels in 'categorical' and/or 'ordinal' are not included in the data"
             for idx in mode_impute_channels:
                 if idx <= self.n_channels:
                     data_fill[idx - 1] = _nanmode(

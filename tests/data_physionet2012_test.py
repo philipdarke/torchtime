@@ -80,6 +80,45 @@ class TestPhysioNet2012:
         assert _get_SHA256(".torchtime/physionet_2012/y" + OBJ_EXT) == SHA_Y
         assert _get_SHA256(".torchtime/physionet_2012/length" + OBJ_EXT) == SHA_LENGTH
 
+    def test_print(self, capsys):
+        """Test print method."""
+        with capsys.disabled():
+            dataset = PhysioNet2012(
+                split="train",
+                train_prop=0.7,
+                seed=SEED,
+            )
+        print(dataset)
+        captured = capsys.readouterr()
+        assert (
+            captured.out
+            == """TimeSeriesDataset: {}
+ - cache location = {}
+ - data split = {:.0f}/{:.0f}/{:.0f}% (training/validation/test)
+ - time/mask/delta channels = {}/{}/{}
+ - random seed = {}
+ - static channels = {}
+ - categorical channels = {}
+ - ordinal channels = {}
+ - standardise = {}
+ - X, y, length attributes return the {} split\n""".format(
+                dataset.dataset,
+                dataset.path.resolve(),
+                100 * dataset.train_prop,
+                100 * dataset.val_prop,
+                100 * dataset.test_prop,
+                dataset.time,
+                dataset.mask,
+                dataset.delta,
+                dataset.seed,
+                dataset.static,
+                dataset.categorical,
+                dataset.ordinal,
+                dataset.standardise,
+                dataset.split,
+            )
+        )
+
     def test_train_val(self):
         """Test training/validation split sizes."""
         dataset = PhysioNet2012(
