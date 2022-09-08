@@ -15,6 +15,7 @@ SHA_X = "1a61d37501e7f45b38815e0588922f5104561cc77456de91896dcbf5f54191ad"
 SHA_Y = "5b9bf1f58ff02e04397f68ae776fc519e20cae6e66a632b01fa309693c3de3e9"
 SHA_LENGTH = "d4dbf3d19e9f03618f3113c57c5950031c22bad75c80744438e3121b1cff2204"
 N_DATA_CHANNELS = 44
+N_STATIC_CHANNELS = 7
 
 
 class TestPhysioNet2012:
@@ -358,24 +359,138 @@ class TestPhysioNet2012:
         assert torch.sum(torch.isnan(dataset.X_val)).item() == 20816762
         assert torch.sum(torch.isnan(dataset.X_test)).item() == 10416289
 
+    def test_no_static(self):
+        """Test X_static attributes."""
+        with pytest.raises(AttributeError):
+            dataset = PhysioNet2012(
+                split="train",
+                train_prop=0.7,
+                seed=SEED,
+            )
+            dataset.X_static
+            dataset.X_static_train
+            dataset.X_static_val
+            dataset.X_static_test
+
     def test_static(self):
-        """TODO"""
-        PhysioNet2012(
+        """Test static channels."""
+        dataset = PhysioNet2012(
             split="train",
             train_prop=0.7,
+            val_prop=0.2,
             static=True,
             seed=SEED,
         )
+        # Check data set size
+        assert dataset.X_train.shape == torch.Size(
+            [8400, 215, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_train.shape == torch.Size([8400, N_STATIC_CHANNELS])
+        assert dataset.y_train.shape == torch.Size([8400, 1])
+        assert dataset.length_train.shape == torch.Size([8400])
+        assert dataset.X_val.shape == torch.Size(
+            [2400, 215, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_val.shape == torch.Size([2400, N_STATIC_CHANNELS])
+        assert dataset.y_val.shape == torch.Size([2400, 1])
+        assert dataset.length_val.shape == torch.Size([2400])
+        assert dataset.X_test.shape == torch.Size(
+            [1200, 215, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_test.shape == torch.Size([1200, N_STATIC_CHANNELS])
+        assert dataset.y_test.shape == torch.Size([1200, 1])
+        assert dataset.length_test.shape == torch.Size([1200])
 
     def test_static_impute(self):
-        """TODO"""
-        PhysioNet2012(
+        """Test static channels with imputation."""
+        dataset = PhysioNet2012(
             split="train",
             train_prop=0.7,
+            val_prop=0.2,
             impute="mean",
             static=True,
             seed=SEED,
         )
+        # Check data set size
+        assert dataset.X_train.shape == torch.Size(
+            [8400, 215, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_train.shape == torch.Size([8400, N_STATIC_CHANNELS])
+        assert dataset.y_train.shape == torch.Size([8400, 1])
+        assert dataset.length_train.shape == torch.Size([8400])
+        assert dataset.X_val.shape == torch.Size(
+            [2400, 215, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_val.shape == torch.Size([2400, N_STATIC_CHANNELS])
+        assert dataset.y_val.shape == torch.Size([2400, 1])
+        assert dataset.length_val.shape == torch.Size([2400])
+        assert dataset.X_test.shape == torch.Size(
+            [1200, 215, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_test.shape == torch.Size([1200, N_STATIC_CHANNELS])
+        assert dataset.y_test.shape == torch.Size([1200, 1])
+        assert dataset.length_test.shape == torch.Size([1200])
+
+    def test_static_standardise(self):
+        """Test static channels with standardisation."""
+        dataset = PhysioNet2012(
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            static=True,
+            standardise="all",
+            seed=SEED,
+        )
+        # Check data set size
+        assert dataset.X_train.shape == torch.Size(
+            [8400, 215, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_train.shape == torch.Size([8400, N_STATIC_CHANNELS])
+        assert dataset.y_train.shape == torch.Size([8400, 1])
+        assert dataset.length_train.shape == torch.Size([8400])
+        assert dataset.X_val.shape == torch.Size(
+            [2400, 215, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_val.shape == torch.Size([2400, N_STATIC_CHANNELS])
+        assert dataset.y_val.shape == torch.Size([2400, 1])
+        assert dataset.length_val.shape == torch.Size([2400])
+        assert dataset.X_test.shape == torch.Size(
+            [1200, 215, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_test.shape == torch.Size([1200, N_STATIC_CHANNELS])
+        assert dataset.y_test.shape == torch.Size([1200, 1])
+        assert dataset.length_test.shape == torch.Size([1200])
+
+    def test_static_impute_standardise(self):
+        """Test static channels with imputation and standardisation."""
+        dataset = PhysioNet2012(
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            impute="forward",
+            static=True,
+            standardise="data",
+            seed=SEED,
+        )
+        # Check data set size
+        assert dataset.X_train.shape == torch.Size(
+            [8400, 215, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_train.shape == torch.Size([8400, N_STATIC_CHANNELS])
+        assert dataset.y_train.shape == torch.Size([8400, 1])
+        assert dataset.length_train.shape == torch.Size([8400])
+        assert dataset.X_val.shape == torch.Size(
+            [2400, 215, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_val.shape == torch.Size([2400, N_STATIC_CHANNELS])
+        assert dataset.y_val.shape == torch.Size([2400, 1])
+        assert dataset.length_val.shape == torch.Size([2400])
+        assert dataset.X_test.shape == torch.Size(
+            [1200, 215, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_test.shape == torch.Size([1200, N_STATIC_CHANNELS])
+        assert dataset.y_test.shape == torch.Size([1200, 1])
+        assert dataset.length_test.shape == torch.Size([1200])
 
     def test_overwrite_data(self):
         """Overwrite cache and validate data set."""

@@ -15,6 +15,7 @@ SHA_X = "53fe42b3529c4ca4ff4fb0728ec87be631ebd3c3bf6180dc5608788f0ff8292d"
 SHA_Y = "5f3cf8f30e4bebf166c5a4f9d4c2030dfb82d57729e6b4e67409047150345c0e"
 SHA_LENGTH = "209672aa41dc2f092a63e49accc4203598b2d4deb9b28b910cbbb4082518c618"
 N_DATA_CHANNELS = 39
+N_STATIC_CHANNELS = 5
 
 
 class TestPhysioNet2019:
@@ -79,6 +80,45 @@ class TestPhysioNet2019:
         assert _get_SHA256(".torchtime/physionet_2019/X" + OBJ_EXT) == SHA_X
         assert _get_SHA256(".torchtime/physionet_2019/y" + OBJ_EXT) == SHA_Y
         assert _get_SHA256(".torchtime/physionet_2019/length" + OBJ_EXT) == SHA_LENGTH
+
+    def test_print(self, capsys):
+        """Test print method."""
+        with capsys.disabled():
+            dataset = PhysioNet2019(
+                split="train",
+                train_prop=0.7,
+                seed=SEED,
+            )
+        print(dataset)
+        captured = capsys.readouterr()
+        assert (
+            captured.out
+            == """TimeSeriesDataset: {}
+ - cache location = {}
+ - data split = {:.0f}/{:.0f}/{:.0f}% (training/validation/test)
+ - time/mask/delta channels = {}/{}/{}
+ - random seed = {}
+ - static channels = {}
+ - categorical channels = {}
+ - ordinal channels = {}
+ - standardise = {}
+ - X, y, length attributes return the {} split\n""".format(
+                dataset.dataset,
+                dataset.path.resolve(),
+                100 * dataset.train_prop,
+                100 * dataset.val_prop,
+                100 * dataset.test_prop,
+                dataset.time,
+                dataset.mask,
+                dataset.delta,
+                dataset.seed,
+                dataset.static,
+                dataset.categorical,
+                dataset.ordinal,
+                dataset.standardise,
+                dataset.split,
+            )
+        )
 
     def test_train_val(self):
         """Test training/validation split sizes."""
@@ -328,6 +368,139 @@ class TestPhysioNet2019:
         assert torch.sum(torch.isnan(dataset.y_val)).item() == 2399984
         assert torch.sum(torch.isnan(dataset.X_test)).item() == 52332856
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 1199521
+
+    def test_no_static(self):
+        """Test X_static attributes."""
+        with pytest.raises(AttributeError):
+            dataset = PhysioNet2019(
+                split="train",
+                train_prop=0.7,
+                seed=SEED,
+            )
+            dataset.X_static
+            dataset.X_static_train
+            dataset.X_static_val
+            dataset.X_static_test
+
+    def test_static(self):
+        """Test static channels."""
+        dataset = PhysioNet2019(
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            static=True,
+            seed=SEED,
+        )
+        # Check data set size
+        assert dataset.X_train.shape == torch.Size(
+            [28236, 336, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_train.shape == torch.Size([28236, N_STATIC_CHANNELS])
+        assert dataset.y_train.shape == torch.Size([28236, 336, 1])
+        assert dataset.length_train.shape == torch.Size([28236])
+        assert dataset.X_val.shape == torch.Size(
+            [8067, 336, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_val.shape == torch.Size([8067, N_STATIC_CHANNELS])
+        assert dataset.y_val.shape == torch.Size([8067, 336, 1])
+        assert dataset.length_val.shape == torch.Size([8067])
+        assert dataset.X_test.shape == torch.Size(
+            [4033, 336, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_test.shape == torch.Size([4033, N_STATIC_CHANNELS])
+        assert dataset.y_test.shape == torch.Size([4033, 336, 1])
+        assert dataset.length_test.shape == torch.Size([4033])
+
+    def test_static_impute(self):
+        """Test static channels with imputation."""
+        dataset = PhysioNet2019(
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            impute="mean",
+            static=True,
+            seed=SEED,
+        )
+        # Check data set size
+        assert dataset.X_train.shape == torch.Size(
+            [28236, 336, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_train.shape == torch.Size([28236, N_STATIC_CHANNELS])
+        assert dataset.y_train.shape == torch.Size([28236, 336, 1])
+        assert dataset.length_train.shape == torch.Size([28236])
+        assert dataset.X_val.shape == torch.Size(
+            [8067, 336, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_val.shape == torch.Size([8067, N_STATIC_CHANNELS])
+        assert dataset.y_val.shape == torch.Size([8067, 336, 1])
+        assert dataset.length_val.shape == torch.Size([8067])
+        assert dataset.X_test.shape == torch.Size(
+            [4033, 336, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_test.shape == torch.Size([4033, N_STATIC_CHANNELS])
+        assert dataset.y_test.shape == torch.Size([4033, 336, 1])
+        assert dataset.length_test.shape == torch.Size([4033])
+
+    def test_static_standardise(self):
+        """Test static channels with standardisation."""
+        dataset = PhysioNet2019(
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            static=True,
+            standardise="all",
+            seed=SEED,
+        )
+        # Check data set size
+        assert dataset.X_train.shape == torch.Size(
+            [28236, 336, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_train.shape == torch.Size([28236, N_STATIC_CHANNELS])
+        assert dataset.y_train.shape == torch.Size([28236, 336, 1])
+        assert dataset.length_train.shape == torch.Size([28236])
+        assert dataset.X_val.shape == torch.Size(
+            [8067, 336, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_val.shape == torch.Size([8067, N_STATIC_CHANNELS])
+        assert dataset.y_val.shape == torch.Size([8067, 336, 1])
+        assert dataset.length_val.shape == torch.Size([8067])
+        assert dataset.X_test.shape == torch.Size(
+            [4033, 336, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_test.shape == torch.Size([4033, N_STATIC_CHANNELS])
+        assert dataset.y_test.shape == torch.Size([4033, 336, 1])
+        assert dataset.length_test.shape == torch.Size([4033])
+
+    def test_static_impute_standardise(self):
+        """Test static channels with imputation and standardisation."""
+        dataset = PhysioNet2019(
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            impute="forward",
+            static=True,
+            standardise="data",
+            seed=SEED,
+        )
+        # Check data set size
+        assert dataset.X_train.shape == torch.Size(
+            [28236, 336, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_train.shape == torch.Size([28236, N_STATIC_CHANNELS])
+        assert dataset.y_train.shape == torch.Size([28236, 336, 1])
+        assert dataset.length_train.shape == torch.Size([28236])
+        assert dataset.X_val.shape == torch.Size(
+            [8067, 336, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_val.shape == torch.Size([8067, N_STATIC_CHANNELS])
+        assert dataset.y_val.shape == torch.Size([8067, 336, 1])
+        assert dataset.length_val.shape == torch.Size([8067])
+        assert dataset.X_test.shape == torch.Size(
+            [4033, 336, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_test.shape == torch.Size([4033, N_STATIC_CHANNELS])
+        assert dataset.y_test.shape == torch.Size([4033, 336, 1])
+        assert dataset.length_test.shape == torch.Size([4033])
 
     def test_overwrite_data(self):
         """Overwrite cache and validate data set."""

@@ -15,6 +15,7 @@ SHA_X = "42d96c00f5062332f99e0d0d5edb4f959f5293874f37a0cfbd6b21ad44a51a09"
 SHA_Y = "dd78b55b728fe62798cadb28741d5cb0f243dfb3146aa6732baa26ecfe32ba40"
 SHA_LENGTH = "d0c1c809d47485cb237e650d11264bcc9225f2c56d5754d4ebeda41cc87c63ba"
 N_DATA_CHANNELS = 39
+N_STATIC_CHANNELS = 5
 
 
 class TestPhysioNet2019Binary:
@@ -81,6 +82,45 @@ class TestPhysioNet2019Binary:
         assert (
             _get_SHA256(".torchtime/physionet_2019binary/length" + OBJ_EXT)
             == SHA_LENGTH
+        )
+
+    def test_print(self, capsys):
+        """Test print method."""
+        with capsys.disabled():
+            dataset = PhysioNet2019Binary(
+                split="train",
+                train_prop=0.7,
+                seed=SEED,
+            )
+        print(dataset)
+        captured = capsys.readouterr()
+        assert (
+            captured.out
+            == """TimeSeriesDataset: {}
+ - cache location = {}
+ - data split = {:.0f}/{:.0f}/{:.0f}% (training/validation/test)
+ - time/mask/delta channels = {}/{}/{}
+ - random seed = {}
+ - static channels = {}
+ - categorical channels = {}
+ - ordinal channels = {}
+ - standardise = {}
+ - X, y, length attributes return the {} split\n""".format(
+                dataset.dataset,
+                dataset.path.resolve(),
+                100 * dataset.train_prop,
+                100 * dataset.val_prop,
+                100 * dataset.test_prop,
+                dataset.time,
+                dataset.mask,
+                dataset.delta,
+                dataset.seed,
+                dataset.static,
+                dataset.categorical,
+                dataset.ordinal,
+                dataset.standardise,
+                dataset.split,
+            )
         )
 
     def test_train_val(self):
@@ -332,6 +372,139 @@ class TestPhysioNet2019Binary:
         assert torch.sum(torch.isnan(dataset.y_val)).item() == 0
         assert torch.sum(torch.isnan(dataset.X_test)).item() == 9858312
         assert torch.sum(torch.isnan(dataset.y_test)).item() == 0
+
+    def test_no_static(self):
+        """Test X_static attributes."""
+        with pytest.raises(AttributeError):
+            dataset = PhysioNet2019Binary(
+                split="train",
+                train_prop=0.7,
+                seed=SEED,
+            )
+            dataset.X_static
+            dataset.X_static_train
+            dataset.X_static_val
+            dataset.X_static_test
+
+    def test_static(self):
+        """Test static channels."""
+        dataset = PhysioNet2019Binary(
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            static=True,
+            seed=SEED,
+        )
+        # Check data set size
+        assert dataset.X_train.shape == torch.Size(
+            [28234, 72, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_train.shape == torch.Size([28234, N_STATIC_CHANNELS])
+        assert dataset.y_train.shape == torch.Size([28234, 1])
+        assert dataset.length_train.shape == torch.Size([28234])
+        assert dataset.X_val.shape == torch.Size(
+            [8066, 72, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_val.shape == torch.Size([8066, N_STATIC_CHANNELS])
+        assert dataset.y_val.shape == torch.Size([8066, 1])
+        assert dataset.length_val.shape == torch.Size([8066])
+        assert dataset.X_test.shape == torch.Size(
+            [4033, 72, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_test.shape == torch.Size([4033, N_STATIC_CHANNELS])
+        assert dataset.y_test.shape == torch.Size([4033, 1])
+        assert dataset.length_test.shape == torch.Size([4033])
+
+    def test_static_impute(self):
+        """Test static channels with imputation."""
+        dataset = PhysioNet2019Binary(
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            impute="mean",
+            static=True,
+            seed=SEED,
+        )
+        # Check data set size
+        assert dataset.X_train.shape == torch.Size(
+            [28234, 72, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_train.shape == torch.Size([28234, N_STATIC_CHANNELS])
+        assert dataset.y_train.shape == torch.Size([28234, 1])
+        assert dataset.length_train.shape == torch.Size([28234])
+        assert dataset.X_val.shape == torch.Size(
+            [8066, 72, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_val.shape == torch.Size([8066, N_STATIC_CHANNELS])
+        assert dataset.y_val.shape == torch.Size([8066, 1])
+        assert dataset.length_val.shape == torch.Size([8066])
+        assert dataset.X_test.shape == torch.Size(
+            [4033, 72, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_test.shape == torch.Size([4033, N_STATIC_CHANNELS])
+        assert dataset.y_test.shape == torch.Size([4033, 1])
+        assert dataset.length_test.shape == torch.Size([4033])
+
+    def test_static_standardise(self):
+        """Test static channels with standardisation."""
+        dataset = PhysioNet2019Binary(
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            static=True,
+            standardise="all",
+            seed=SEED,
+        )
+        # Check data set size
+        assert dataset.X_train.shape == torch.Size(
+            [28234, 72, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_train.shape == torch.Size([28234, N_STATIC_CHANNELS])
+        assert dataset.y_train.shape == torch.Size([28234, 1])
+        assert dataset.length_train.shape == torch.Size([28234])
+        assert dataset.X_val.shape == torch.Size(
+            [8066, 72, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_val.shape == torch.Size([8066, N_STATIC_CHANNELS])
+        assert dataset.y_val.shape == torch.Size([8066, 1])
+        assert dataset.length_val.shape == torch.Size([8066])
+        assert dataset.X_test.shape == torch.Size(
+            [4033, 72, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_test.shape == torch.Size([4033, N_STATIC_CHANNELS])
+        assert dataset.y_test.shape == torch.Size([4033, 1])
+        assert dataset.length_test.shape == torch.Size([4033])
+
+    def test_static_impute_standardise(self):
+        """Test static channels with imputation and standardisation."""
+        dataset = PhysioNet2019Binary(
+            split="train",
+            train_prop=0.7,
+            val_prop=0.2,
+            impute="forward",
+            static=True,
+            standardise="data",
+            seed=SEED,
+        )
+        # Check data set size
+        assert dataset.X_train.shape == torch.Size(
+            [28234, 72, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_train.shape == torch.Size([28234, N_STATIC_CHANNELS])
+        assert dataset.y_train.shape == torch.Size([28234, 1])
+        assert dataset.length_train.shape == torch.Size([28234])
+        assert dataset.X_val.shape == torch.Size(
+            [8066, 72, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_val.shape == torch.Size([8066, N_STATIC_CHANNELS])
+        assert dataset.y_val.shape == torch.Size([8066, 1])
+        assert dataset.length_val.shape == torch.Size([8066])
+        assert dataset.X_test.shape == torch.Size(
+            [4033, 72, N_DATA_CHANNELS + 1 - N_STATIC_CHANNELS]
+        )
+        assert dataset.X_static_test.shape == torch.Size([4033, N_STATIC_CHANNELS])
+        assert dataset.y_test.shape == torch.Size([4033, 1])
+        assert dataset.length_test.shape == torch.Size([4033])
 
     def test_overwrite_data(self):
         """Overwrite cache and validate data set."""
