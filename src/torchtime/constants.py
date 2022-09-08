@@ -82,7 +82,7 @@ PHYSIONET_2019_DATASETS: Final[dict] = {
     "training": "https://archive.physionet.org/users/shared/challenge-2019/training_setA.zip",  # noqa: E501
     "training_setB": "https://archive.physionet.org/users/shared/challenge-2019/training_setB.zip",  # noqa: E501
 }
-PHYSIONET_2019_STATIC: Final[list] = [34, 35, 36, 37, 38, 39]
-PHYSIONET_2019_CATEGORICAL: Final[list] = [35, 36, 37]
+PHYSIONET_2019_STATIC: Final[list] = [35, 36, 37, 38, 39]
+PHYSIONET_2019_CATEGORICAL: Final[list] = [36, 37, 38]
 PHYSIONET_2019_ORDINAL: Final[list] = []
 PHYSIONET_2019_MEANS: Final[dict] = {}
