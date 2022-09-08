@@ -1369,6 +1369,7 @@ class UEA(_TimeSeriesDataset):
             above.
         categorical: List with channel indices of categorical variables. Only required
             if imputing data. Default ``[]`` i.e. no categorical variables.
+        ordinal: TODO
         channel_means: Override the calculated channel mean/mode when imputing data.
             Only used if imputing data. Dictionary with channel indices and values e.g.
             ``{1: 4.5, 3: 7.2}`` (default ``{}`` i.e. no overridden channel mean/modes).
@@ -1424,6 +1425,7 @@ class UEA(_TimeSeriesDataset):
         missing: Union[float, List[float]] = 0.0,
         impute: Union[str, Callable[[Tensor], Tensor]] = "none",
         categorical: List[int] = [],
+        ordinal: List[int] = [],
         channel_means: Dict[int, float] = {},
         time: bool = True,
         mask: bool = False,
@@ -1446,7 +1448,7 @@ class UEA(_TimeSeriesDataset):
             impute=impute,
             static=[],
             categorical=categorical,
-            ordinal=[],
+            ordinal=ordinal,
             channel_means=channel_means,
             time=time,
             mask=mask,
