@@ -10,11 +10,11 @@ repository = "https://github.com/philipdarke/torchtime"
 documentation = "https://philipdarke.com/torchtime"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.10"
+python = ">=3.8,<3.11"
 numpy = "^1.21.0"
 requests = "^2.27.1"
 scikit-learn = "^1.1.1"
-sktime = "^0.12.1"
+sktime = "^0.14"
 torch = "^1.11.0"
 tqdm = "^4.64.0"
 
