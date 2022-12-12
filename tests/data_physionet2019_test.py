@@ -73,15 +73,15 @@ class TestPhysioNet2019:
         )
         assert (
             _get_SHA256(".torchtime/physionet_2019/X" + OBJ_EXT)
-            == "ea94129dd03e594da80efae132b674b284499c613174d0314e13e8aaac179ba7"
+            == "6eb80cddc4eb4fe1c4cdcae8ad35becc75469737542ca66ac417fda90f3a1db3"
         )
         assert (
             _get_SHA256(".torchtime/physionet_2019/y" + OBJ_EXT)
-            == "5f3cf8f30e4bebf166c5a4f9d4c2030dfb82d57729e6b4e67409047150345c0e"
+            == "8fa4a9f7f8fc532aca0a9e0df6c6fe837c3ae3d070ceb28054259ff97c8241a5"
         )
         assert (
             _get_SHA256(".torchtime/physionet_2019/length" + OBJ_EXT)
-            == "209672aa41dc2f092a63e49accc4203598b2d4deb9b28b910cbbb4082518c618"
+            == "829c06fb86444f2ca806371583cd38fe2d0e29b9045ae6a4cad306bd4f4fad1f"
         )
 
     def test_train_val(self):

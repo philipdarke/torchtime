@@ -19,8 +19,8 @@ class TestUtils:
         """Fixture for checksum tests."""
         generator = torch.Generator().manual_seed(SEED)
         X = torch.rand((N, S, C), generator=generator)
-        sha = "60dd512baf28adcfe07484ee6d893d4c9f927cdd9865538a75d9664eb1ff9cde"
-        sha_error = "60dd512baf28adcfe07484ee6d893d4c9f927cdd9865538a75d9664eb1ff9pad"
+        sha = "3460c01e7ab9d6bfab46c1802e52362f997bf03c1723c7cf7fc70cd5df0de780"
+        sha_error = "3460c01e7ab9d6bfab46c1802e52362f997bf03c1723c7cf7fc70cd5df0de780pad"
         X_path = ".torchtime/X.pt"
         sha_path = ".torchtime/correct.sha256"
         error_path = ".torchtime/error.sha256"
