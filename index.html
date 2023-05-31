@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Benchmark time series data sets for PyTorch &mdash; torchtime</title>
@@ -13,10 +13,11 @@
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
-        <script src="_static/underscore.js"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
         <script src="_static/clipboard.min.js"></script>
         <script src="_static/copybutton.js"></script>
     <script src="_static/js/theme.js"></script>
@@ -30,14 +31,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="#" class="icon icon-home"> torchtime
+
+          
+          
+          <a href="#" class="icon icon-home">
+            torchtime
           </a>
               <div class="version">
-                0.5.1
+                0.6.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -61,8 +66,8 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
-      <li>Benchmark time series data sets for PyTorch</li>
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Benchmark time series data sets for PyTorch</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/philipdarke/torchtime/blob/main/docs/source/index.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -73,7 +78,7 @@
            <div itemprop="articleBody">
              
   <section id="benchmark-time-series-data-sets-for-pytorch">
-<h1>Benchmark time series data sets for PyTorch<a class="headerlink" href="#benchmark-time-series-data-sets-for-pytorch" title="Permalink to this headline"></a></h1>
+<h1>Benchmark time series data sets for PyTorch<a class="headerlink" href="#benchmark-time-series-data-sets-for-pytorch" title="Permalink to this heading"></a></h1>
 <p><a class="reference external" href="https://pypi.org/project/torchtime"><img alt="PyPi" src="https://img.shields.io/pypi/v/torchtime" /></a>
 <a class="reference external" href="https://github.com/philipdarke/torchtime/actions/workflows/build.yml"><img alt="Build status" src="https://img.shields.io/github/workflow/status/philipdarke/torchtime/build.svg" /></a>
 <img alt="Coverage" src="https://philipdarke.com/torchtime/assets/coverage-badge.svg?dummy=8484744" />
@@ -87,23 +92,29 @@
 <li><p>A binary prediction variant of the 2019 PhysioNet Challenge</p></li>
 </ul>
 <section id="why-use-torchtime">
-<h2>Why use <code class="docutils literal notranslate"><span class="pre">torchtime</span></code>?<a class="headerlink" href="#why-use-torchtime" title="Permalink to this headline"></a></h2>
+<h2>Why use <code class="docutils literal notranslate"><span class="pre">torchtime</span></code>?<a class="headerlink" href="#why-use-torchtime" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>Saves time. You don’t have to write your own PyTorch data classes.</p></li>
 <li><p>Better research. Use common, reproducible implementations of data sets for a level playing field when evaluating models.</p></li>
 </ol>
 </section>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$ pip install torchtime
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading"></a></h2>
+<p>Install PyTorch followed by <code class="docutils literal notranslate"><span class="pre">torchtime</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>torchtime
 </pre></div>
 </div>
+<p>or</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>conda<span class="w"> </span>install<span class="w"> </span>torchtime<span class="w"> </span>-c<span class="w"> </span>conda-forge
+</pre></div>
+</div>
+<p>There is currently no Windows build for <code class="docutils literal notranslate"><span class="pre">conda</span></code>. Feedback is welcome from <code class="docutils literal notranslate"><span class="pre">conda</span></code> users in particular.</p>
 </section>
 <section id="getting-started">
-<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this headline"></a></h2>
+<h2>Getting started<a class="headerlink" href="#getting-started" title="Permalink to this heading"></a></h2>
 <p>Data classes have a common API. The <code class="docutils literal notranslate"><span class="pre">split</span></code> argument determines whether training (”<em>train</em>”), validation (”<em>val</em>”) or test (”<em>test</em>”) data are returned. The size of the splits are controlled with the <code class="docutils literal notranslate"><span class="pre">train_prop</span></code> and (optional) <code class="docutils literal notranslate"><span class="pre">val_prop</span></code> arguments.</p>
 <section id="physionet-data-sets">
-<h3>PhysioNet data sets<a class="headerlink" href="#physionet-data-sets" title="Permalink to this headline"></a></h3>
+<h3>PhysioNet data sets<a class="headerlink" href="#physionet-data-sets" title="Permalink to this heading"></a></h3>
 <p>Three <a class="reference external" href="https://physionet.org/">PhysioNet</a> data sets are currently supported:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="https://philipdarke.com/torchtime/api/data.html#torchtime.data.PhysioNet2012"><code class="docutils literal notranslate"><span class="pre">torchtime.data.PhysioNet2012</span></code></a> returns the 2012 challenge (in-hospital mortality) <a class="reference external" href="https://physionet.org/content/challenge-2012/1.0.0/">[link]</a>.</p></li>
@@ -123,7 +134,7 @@
 </div>
 </section>
 <section id="uea-ucr-repository-data-sets">
-<h3>UEA/UCR repository data sets<a class="headerlink" href="#uea-ucr-repository-data-sets" title="Permalink to this headline"></a></h3>
+<h3>UEA/UCR repository data sets<a class="headerlink" href="#uea-ucr-repository-data-sets" title="Permalink to this heading"></a></h3>
 <p>The <a class="reference external" href="https://philipdarke.com/torchtime/api/data.html#torchtime.data.UEA"><code class="docutils literal notranslate"><span class="pre">torchtime.data.UEA</span></code></a> class returns the <a class="reference external" href="https://www.timeseriesclassification.com/">UEA/UCR repository</a> data set specified by the <code class="docutils literal notranslate"><span class="pre">dataset</span></code> argument, for example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
@@ -138,7 +149,7 @@
 </div>
 </section>
 <section id="using-the-dataloader">
-<h3>Using the DataLoader<a class="headerlink" href="#using-the-dataloader" title="Permalink to this headline"></a></h3>
+<h3>Using the DataLoader<a class="headerlink" href="#using-the-dataloader" title="Permalink to this heading"></a></h3>
 <p>Batches are dictionaries of tensors <code class="docutils literal notranslate"><span class="pre">X</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code> and <code class="docutils literal notranslate"><span class="pre">length</span></code>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">X</span></code> are the time series data. The package follows the <em>batch first</em> convention therefore <code class="docutils literal notranslate"><span class="pre">X</span></code> has shape (<em>n</em>, <em>s</em>, <em>c</em>) where <em>n</em> is batch size, <em>s</em> is (longest) trajectory length and <em>c</em> is the number of channels. By default, the first channel is a time stamp.</p></li>
@@ -156,7 +167,7 @@
 </section>
 </section>
 <section id="advanced-options">
-<h2>Advanced options<a class="headerlink" href="#advanced-options" title="Permalink to this headline"></a></h2>
+<h2>Advanced options<a class="headerlink" href="#advanced-options" title="Permalink to this heading"></a></h2>
 <ul class="simple">
 <li><p>Missing data can be imputed by setting <code class="docutils literal notranslate"><span class="pre">impute</span></code> to <em>mean</em> (replace with training data channel means) or <em>forward</em> (replace with previous observation). Alternatively a custom imputation function can be passed to the <code class="docutils literal notranslate"><span class="pre">impute</span></code> argument.</p></li>
 <li><p>A time stamp (added by default), missing data mask and the time since previous observation can be appended with the boolean arguments <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> respectively.</p></li>
@@ -168,16 +179,16 @@
 <p>See the <a class="reference external" href="https://philipdarke.com/torchtime/tutorials/">tutorials</a> and <a class="reference external" href="https://philipdarke.com/torchtime/api/">API</a> for more information.</p>
 </section>
 <section id="other-resources">
-<h2>Other resources<a class="headerlink" href="#other-resources" title="Permalink to this headline"></a></h2>
+<h2>Other resources<a class="headerlink" href="#other-resources" title="Permalink to this heading"></a></h2>
 <p>If you’re looking for the TensorFlow equivalent for PhysioNet data sets try <a class="reference external" href="https://github.com/ExpectationMax/medical_ts_datasets">medical_ts_datasets</a>.</p>
 </section>
 <section id="acknowledgements">
-<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this headline"></a></h2>
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Permalink to this heading"></a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">torchtime</span></code> uses some of the data processing ideas in Kidger et al, 2020 <a class="reference external" href="https://arxiv.org/abs/2005.08926">[1]</a> and Che et al, 2018 <a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">[2]</a>.</p>
 <p>This work is supported by the Engineering and Physical Sciences Research Council, Centre for Doctoral Training in Cloud Computing for Big Data, Newcastle University (grant number EP/L015358/1).</p>
 </section>
 <section id="citing-torchtime">
-<h2>Citing <code class="docutils literal notranslate"><span class="pre">torchtime</span></code><a class="headerlink" href="#citing-torchtime" title="Permalink to this headline"></a></h2>
+<h2>Citing <code class="docutils literal notranslate"><span class="pre">torchtime</span></code><a class="headerlink" href="#citing-torchtime" title="Permalink to this heading"></a></h2>
 <p>If you use this software, please cite the <a class="reference external" href="https://doi.org/10.48550/arXiv.2207.12503">paper</a>:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@software</span><span class="p">{</span><span class="n">darke_torchtime_2022</span><span class="p">,</span>
     <span class="n">author</span> <span class="o">=</span> <span class="n">Darke</span><span class="p">,</span> <span class="n">Philip</span> <span class="ow">and</span> <span class="n">Missier</span><span class="p">,</span> <span class="n">Paolo</span> <span class="ow">and</span> <span class="n">Bacardit</span><span class="p">,</span> <span class="n">Jaume</span><span class="p">,</span>
@@ -193,7 +204,7 @@
 <p>DOIs are also available for each version of the package <a class="reference external" href="https://doi.org/10.5281/zenodo.6402406">here</a>.</p>
 </section>
 <section id="references">
-<h2>References<a class="headerlink" href="#references" title="Permalink to this headline"></a></h2>
+<h2>References<a class="headerlink" href="#references" title="Permalink to this heading"></a></h2>
 <ol class="arabic simple">
 <li><p>Kidger, P, Morrill, J, Foster, J, <em>et al</em>. Neural Controlled Differential Equations for Irregular Time Series. <em>arXiv</em> 2005.08926 (2020). <a class="reference external" href="https://arxiv.org/abs/2005.08926">[arXiv]</a></p></li>
 <li><p>Che, Z, Purushotham, S, Cho, K, <em>et al</em>. Recurrent Neural Networks for Multivariate Time Series with Missing Values. <em>Sci Rep</em> 8, 6085 (2018). <a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">[doi]</a></p></li>
@@ -206,7 +217,7 @@
 </ol>
 </section>
 <section id="license">
-<h2>License<a class="headerlink" href="#license" title="Permalink to this headline"></a></h2>
+<h2>License<a class="headerlink" href="#license" title="Permalink to this heading"></a></h2>
 <p>Released under the MIT license.</p>
 <div class="toctree-wrapper compound">
 </div>

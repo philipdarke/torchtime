@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Working with missing data &mdash; torchtime</title>
@@ -13,10 +13,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -31,14 +32,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> torchtime
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            torchtime
           </a>
               <div class="version">
-                0.5.1
+                0.6.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -67,9 +72,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Tutorials</a> &raquo;</li>
-      <li>Working with missing data</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">Tutorials</a></li>
+      <li class="breadcrumb-item active">Working with missing data</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/philipdarke/torchtime/blob/main/docs/source/tutorials/missing_data.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -80,10 +85,10 @@
            <div itemprop="articleBody">
              
   <section id="working-with-missing-data">
-<h1>Working with missing data<a class="headerlink" href="#working-with-missing-data" title="Permalink to this headline"></a></h1>
+<h1>Working with missing data<a class="headerlink" href="#working-with-missing-data" title="Permalink to this heading"></a></h1>
 <p><em>This tutorial covers the <code class="docutils literal notranslate"><span class="pre">torchtime.data.UEA</span></code> class however the imputation examples also apply to other data sets.</em></p>
 <section id="simulating-missing-data">
-<h2>Simulating missing data<a class="headerlink" href="#simulating-missing-data" title="Permalink to this headline"></a></h2>
+<h2>Simulating missing data<a class="headerlink" href="#simulating-missing-data" title="Permalink to this heading"></a></h2>
 <p>PhysioNet data sets feature missing data however most UEA/UCR data sets are regularly sampled and fully observed.</p>
 <p>We often need our models to handle time series that are irregularly sampled, partially observed and of unequal length. To aid model development, missing data can be simulated in UEA/UCR data sets using the <code class="docutils literal notranslate"><span class="pre">missing</span></code> argument.</p>
 <div class="admonition note">
@@ -91,9 +96,9 @@
 <p>Data points are dropped independently at random. The <code class="docutils literal notranslate"><span class="pre">missing</span></code> argument represents the probability that a data point is missing. Results can be reproduced using the <code class="docutils literal notranslate"><span class="pre">seed</span></code> argument.</p>
 </div>
 <section id="regularly-sampled-data-with-missing-time-points">
-<h3>Regularly sampled data with missing time points<a class="headerlink" href="#regularly-sampled-data-with-missing-time-points" title="Permalink to this headline"></a></h3>
+<h3>Regularly sampled data with missing time points<a class="headerlink" href="#regularly-sampled-data-with-missing-time-points" title="Permalink to this heading"></a></h3>
 <p>If <code class="docutils literal notranslate"><span class="pre">missing</span></code> is a single value, data are dropped across all channels. This simulates regularly sampled data where some time points are not recorded e.g. dropped data over a network. Using the <a class="reference external" href="http://timeseriesclassification.com/description.php?Dataset=CharacterTrajectories">CharacterTrajectories</a> data set as an example:</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">DataLoader</span>
 <span class="kn">from</span> <span class="nn">torchtime.data</span> <span class="kn">import</span> <span class="n">UEA</span>
 
 <span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
@@ -123,9 +128,9 @@ tensor([[ 0.0000, -0.1849,  0.1978,  0.3263],
 </div>
 </section>
 <section id="regularly-sampled-data-with-partial-observation">
-<h3>Regularly sampled data with partial observation<a class="headerlink" href="#regularly-sampled-data-with-partial-observation" title="Permalink to this headline"></a></h3>
+<h3>Regularly sampled data with partial observation<a class="headerlink" href="#regularly-sampled-data-with-partial-observation" title="Permalink to this heading"></a></h3>
 <p>Alternatively, data can be dropped independently for each channel by passing a list representing the proportion missing for each channel. This simulates regularly sampled data with partial observation i.e. not all channels are recorded at each time point.</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
     <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
     <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
     <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
@@ -154,9 +159,9 @@ tensor([[ 0.0000,     nan,  0.1978,  0.3263],
 </section>
 </section>
 <section id="missing-data-masks">
-<h2>Missing data masks<a class="headerlink" href="#missing-data-masks" title="Permalink to this headline"></a></h2>
+<h2>Missing data masks<a class="headerlink" href="#missing-data-masks" title="Permalink to this heading"></a></h2>
 <p>In some applications, the absence/presence of data can itself be informative. For example, a doctor may be more likely to order a particular diagnostic test if they believe the patient has a medical condition. Missing data/observational masks can be used to inform models of missing data. These are appended by setting the <code class="docutils literal notranslate"><span class="pre">mask</span></code> argument to <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
     <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
     <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
     <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
@@ -185,9 +190,9 @@ tensor([[ 0.0000,     nan,  0.1978,  0.3263,  0.0000,  1.0000,  1.0000],
 <p>Note the final three channels indicate whether data were recorded.</p>
 </section>
 <section id="time-deltas">
-<h2>Time deltas<a class="headerlink" href="#time-deltas" title="Permalink to this headline"></a></h2>
+<h2>Time deltas<a class="headerlink" href="#time-deltas" title="Permalink to this heading"></a></h2>
 <p>Some models require the time since the previous observation as an input e.g. GRU-D. This can be added using the <code class="docutils literal notranslate"><span class="pre">delta</span></code> argument. See <a class="reference external" href="https://doi.org/10.1038/s41598-018-24271-9">Che et al, 2018</a> for implementation details.</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
     <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
     <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
     <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
@@ -216,9 +221,9 @@ tensor([[ 0.0000,     nan,  0.1978,  0.3263,  0.0000,  0.0000,  0.0000],
 <p>Note the second channel is observed at times 2 and 5 therefore the time delta at time 5 is 3 i.e. 3 time units since last observation. Note that time delta is 0 at time 0 by definition.</p>
 </section>
 <section id="combining-output-options">
-<h2>Combining output options<a class="headerlink" href="#combining-output-options" title="Permalink to this headline"></a></h2>
+<h2>Combining output options<a class="headerlink" href="#combining-output-options" title="Permalink to this heading"></a></h2>
 <p>The <code class="docutils literal notranslate"><span class="pre">time</span></code>, <code class="docutils literal notranslate"><span class="pre">mask</span></code> and <code class="docutils literal notranslate"><span class="pre">delta</span></code> arguments can be combined as required. The channel order is always time stamp, time series data, missing data mask then time delta.</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
     <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
     <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
     <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
@@ -263,16 +268,16 @@ tensor([[    nan,  0.1978,  0.3263,  0.0000,  1.0000,  1.0000,  0.0000,  0.0000,
 </div>
 </section>
 <section id="imputing-missing-data">
-<h2>Imputing missing data<a class="headerlink" href="#imputing-missing-data" title="Permalink to this headline"></a></h2>
+<h2>Imputing missing data<a class="headerlink" href="#imputing-missing-data" title="Permalink to this heading"></a></h2>
 <p>Missing data can be imputed using the <code class="docutils literal notranslate"><span class="pre">impute</span></code> argument. <code class="docutils literal notranslate"><span class="pre">torchtime</span></code> currently supports ``zero’’, mean and forward imputation as well as custom imputation functions.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>By design, imputation has no impact on the missing data mask or time delta channels!</p>
 </div>
 <section id="zero-imputation">
-<h3>Zero imputation<a class="headerlink" href="#zero-imputation" title="Permalink to this headline"></a></h3>
+<h3>Zero imputation<a class="headerlink" href="#zero-imputation" title="Permalink to this heading"></a></h3>
 <p>Missing values are set to zero:</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
     <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
     <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
     <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
@@ -300,9 +305,9 @@ tensor([[ 0.0000,  0.0000,  0.1978,  0.3263],
 </div>
 </section>
 <section id="mean-imputation">
-<h3>Mean imputation<a class="headerlink" href="#mean-imputation" title="Permalink to this headline"></a></h3>
+<h3>Mean imputation<a class="headerlink" href="#mean-imputation" title="Permalink to this heading"></a></h3>
 <p>Under mean imputation, missing data are replaced with the training data channel mean:</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
     <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
     <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
     <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
@@ -330,10 +335,10 @@ tensor([[ 0.0000,  0.1163,  0.1978,  0.3263],
 </div>
 </section>
 <section id="forward-imputation">
-<h3>Forward imputation<a class="headerlink" href="#forward-imputation" title="Permalink to this headline"></a></h3>
+<h3>Forward imputation<a class="headerlink" href="#forward-imputation" title="Permalink to this heading"></a></h3>
 <p>Under forward imputation, missing values are replaced with the previous channel observation. Note that this approach does not impute any initial missing values, therefore these are replaced with the training data channel mean.</p>
 <p>This approach ensures that knowledge of the time series at times <em>t &gt; i</em> is not used when imputing values at time <em>i</em>. This is required when developing models that make online predictions.</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>
     <span class="n">dataset</span><span class="o">=</span><span class="s2">&quot;CharacterTrajectories&quot;</span><span class="p">,</span>
     <span class="n">split</span><span class="o">=</span><span class="s2">&quot;train&quot;</span><span class="p">,</span>
     <span class="n">train_prop</span><span class="o">=</span><span class="mf">0.7</span><span class="p">,</span>
@@ -365,7 +370,7 @@ tensor([[ 0.0000,  0.1163,  0.1978,  0.3263],
 </div>
 </section>
 <section id="handling-categorical-variables">
-<h3>Handling categorical variables<a class="headerlink" href="#handling-categorical-variables" title="Permalink to this headline"></a></h3>
+<h3>Handling categorical variables<a class="headerlink" href="#handling-categorical-variables" title="Permalink to this heading"></a></h3>
 <p>The mean and forward imputation options above assume all variables are continuous. To impute missing values for a categorical variable using the channel mode (rather than the channel mean), pass the channel indices for each categorical channel in a list to the <code class="docutils literal notranslate"><span class="pre">categorical</span></code> argument.</p>
 <p>For additional flexibility, the calculated channel mean/mode can be overridden using the <code class="docutils literal notranslate"><span class="pre">override</span></code> argument. This accepts a dictionary as in the example below and can be used to impute missing data with a fixed value.</p>
 <p>For example, assuming mean imputation is used for a data set with 10 channels where the 2nd and 8th are categorical:</p>
@@ -376,9 +381,9 @@ tensor([[ 0.0000,  0.1163,  0.1978,  0.3263],
 <p>For a real-world example see the <a class="reference external" href="https://philipdarke.com/torchtime/_modules/torchtime/data.html#PhysioNet2012">implementation</a> of the PhysioNet2012 data set, where channel 20 (MechVent) is categorical (i.e. yes or no) with an overridden mode of zero.</p>
 </section>
 <section id="custom-imputation-functions">
-<h3>Custom imputation functions<a class="headerlink" href="#custom-imputation-functions" title="Permalink to this headline"></a></h3>
+<h3>Custom imputation functions<a class="headerlink" href="#custom-imputation-functions" title="Permalink to this heading"></a></h3>
 <p>Alternatively a custom imputation function can be passed to <code class="docutils literal notranslate"><span class="pre">impute</span></code>. This must accept <code class="docutils literal notranslate"><span class="pre">X</span></code> (raw time series), <code class="docutils literal notranslate"><span class="pre">y</span></code> (labels), <code class="docutils literal notranslate"><span class="pre">fill</span></code> (training data means/modes for each channel after overriding values as above) and <code class="docutils literal notranslate"><span class="pre">select</span></code> (the channels to impute) and return <code class="docutils literal notranslate"><span class="pre">X</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> tensors post imputation.</p>
-<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">five_imputation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">select</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">five_imputation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">select</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">X</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="mi">5</span><span class="p">),</span> <span class="n">y</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>  <span class="c1"># set missing values to five</span>
 
 <span class="n">char_traj</span> <span class="o">=</span> <span class="n">UEA</span><span class="p">(</span>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Missing data imputation &mdash; torchtime</title>
@@ -13,10 +13,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -31,14 +32,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> torchtime
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            torchtime
           </a>
               <div class="version">
-                0.5.1
+                0.6.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -48,8 +53,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="data.html">Time series data sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#torchtime.data.PhysioNet2012"><code class="docutils literal notranslate"><span class="pre">PhysioNet2012</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#torchtime.data.PhysioNet2019"><code class="docutils literal notranslate"><span class="pre">PhysioNet2019</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#torchtime.data.PhysioNet2019Binary"><code class="docutils literal notranslate"><span class="pre">PhysioNet2019Binary</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="data.html#torchtime.data.UEA"><code class="docutils literal notranslate"><span class="pre">UEA</span></code></a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Missing data imputation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#torchtime.impute.replace_missing"><code class="docutils literal notranslate"><span class="pre">replace_missing()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#torchtime.impute.forward_impute"><code class="docutils literal notranslate"><span class="pre">forward_impute()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="collate.html">Custom collate functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collate.html#torchtime.collate.sort_by_length"><code class="docutils literal notranslate"><span class="pre">sort_by_length()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="collate.html#torchtime.collate.packed_sequence"><code class="docutils literal notranslate"><span class="pre">packed_sequence()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -67,9 +80,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">API</a> &raquo;</li>
-      <li>Missing data imputation</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">API</a></li>
+      <li class="breadcrumb-item active">Missing data imputation</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/philipdarke/torchtime/blob/main/docs/source/api/impute.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -80,12 +93,13 @@
            <div itemprop="articleBody">
              
   <span class="target" id="module-torchtime.impute"></span><section id="missing-data-imputation">
-<h1>Missing data imputation<a class="headerlink" href="#missing-data-imputation" title="Permalink to this headline"></a></h1>
+<h1>Missing data imputation<a class="headerlink" href="#missing-data-imputation" title="Permalink to this heading"></a></h1>
 <p>The following functions are provided to impute missing time series data:</p>
 <ul class="simple">
 <li><p><a class="reference external" href="#torchtime.impute.replace_missing">Replace missing data with a fixed value</a></p></li>
 <li><p><a class="reference external" href="#torchtime.impute.forward_impute">Forward imputation</a></p></li>
 </ul>
+</section>
 <dl class="py function">
 <dt class="sig sig-object py" id="torchtime.impute.replace_missing">
 <span class="sig-prename descclassname"><span class="pre">torchtime.impute.</span></span><span class="sig-name descname"><span class="pre">replace_missing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">select</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchtime/impute.html#replace_missing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.impute.replace_missing" title="Permalink to this definition"></a></dt>
@@ -98,7 +112,7 @@ this approach, no knowledge of the time series at times <em>t &gt; i</em> is req
 imputing values at time <em>i</em>. This is essential if you are developing a model that
 will make online predictions.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – The tensor to impute. The final dimension must hold channel data.</p></li>
 <li><p><strong>fill</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – Fill values for each channel in the same order as the data. <code class="docutils literal notranslate"><span class="pre">fill</span></code> must
@@ -108,10 +122,10 @@ of channels in the data or the length of <code class="docutils literal notransla
 imputed).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Imputed time series.</p>
 </dd>
 </dl>
@@ -136,7 +150,7 @@ will make online predictions.</p>
 final dimension must hold channel data.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>) – The tensor to impute. The final dimension must hold channel data.</p></li>
 <li><p><strong>fill</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code>]) – Fill values for each channel in the same order as the data. <code class="docutils literal notranslate"><span class="pre">fill</span></code> must
@@ -146,16 +160,15 @@ of channels in the data or the length of <code class="docutils literal notransla
 imputed).</p></li>
 </ul>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Tensor</span></code></p>
 </dd>
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Imputed time series.</p>
 </dd>
 </dl>
 </dd></dl>
 
-</section>
 
 
            </div>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Time series data sets &mdash; torchtime</title>
@@ -13,10 +13,11 @@
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
-        <script src="../_static/underscore.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
         <script src="../_static/clipboard.min.js"></script>
         <script src="../_static/copybutton.js"></script>
     <script src="../_static/js/theme.js"></script>
@@ -31,14 +32,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html" class="icon icon-home"> torchtime
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            torchtime
           </a>
               <div class="version">
-                0.5.1
+                0.6.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -48,8 +53,16 @@
 <li class="toctree-l1"><a class="reference internal" href="../tutorials/index.html">Tutorials</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Time series data sets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#torchtime.data.PhysioNet2012"><code class="docutils literal notranslate"><span class="pre">PhysioNet2012</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#torchtime.data.PhysioNet2019"><code class="docutils literal notranslate"><span class="pre">PhysioNet2019</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#torchtime.data.PhysioNet2019Binary"><code class="docutils literal notranslate"><span class="pre">PhysioNet2019Binary</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#torchtime.data.UEA"><code class="docutils literal notranslate"><span class="pre">UEA</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="impute.html">Missing data imputation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="impute.html#torchtime.impute.replace_missing"><code class="docutils literal notranslate"><span class="pre">replace_missing()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="impute.html#torchtime.impute.forward_impute"><code class="docutils literal notranslate"><span class="pre">forward_impute()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="collate.html">Custom collate functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="collate.html#torchtime.collate.sort_by_length"><code class="docutils literal notranslate"><span class="pre">sort_by_length()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="collate.html#torchtime.collate.packed_sequence"><code class="docutils literal notranslate"><span class="pre">packed_sequence()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -67,9 +80,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">API</a> &raquo;</li>
-      <li>Time series data sets</li>
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="index.html">API</a></li>
+      <li class="breadcrumb-item active">Time series data sets</li>
       <li class="wy-breadcrumbs-aside">
               <a href="https://github.com/philipdarke/torchtime/blob/main/docs/source/api/data.md" class="fa fa-github"> Edit on GitHub</a>
       </li>
@@ -80,13 +93,14 @@
            <div itemprop="articleBody">
              
   <span class="target" id="module-torchtime.data"></span><section id="time-series-data-sets">
-<h1>Time series data sets<a class="headerlink" href="#time-series-data-sets" title="Permalink to this headline"></a></h1>
+<h1>Time series data sets<a class="headerlink" href="#time-series-data-sets" title="Permalink to this heading"></a></h1>
 <ul class="simple">
 <li><p><a class="reference external" href="#torchtime.data.PhysioNet2012">PhysioNet2012</a></p></li>
 <li><p><a class="reference external" href="#torchtime.data.PhysioNet2019">PhysioNet2019</a></p></li>
 <li><p><a class="reference external" href="#torchtime.data.PhysioNet2019Binary">PhysioNet2019Binary</a></p></li>
 <li><p><a class="reference external" href="#torchtime.data.UEA">UEA</a></p></li>
 </ul>
+</section>
 <dl class="py class">
 <dt class="sig sig-object py" id="torchtime.data.PhysioNet2012">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">torchtime.data.</span></span><span class="sig-name descname"><span class="pre">PhysioNet2012</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">split</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_prop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_prop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">impute</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">standardise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_cache</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/torchtime/data.html#PhysioNet2012"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#torchtime.data.PhysioNet2012" title="Permalink to this definition"></a></dt>
@@ -108,141 +122,141 @@ tutorial</a> for more
 information.</p>
 <p>Data channels are in the following order:</p>
 <dl class="field-list simple">
-<dt class="field-odd">0. Mins</dt>
+<dt class="field-odd">0. Mins<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Minutes since ICU admission. Derived from the PhysioNet time stamp.</p>
 </dd>
-<dt class="field-even">1. Albumin</dt>
+<dt class="field-even">1. Albumin<span class="colon">:</span></dt>
 <dd class="field-even"><p>Albumin (g/dL)</p>
 </dd>
-<dt class="field-odd">2. ALP</dt>
+<dt class="field-odd">2. ALP<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Alkaline phosphatase (IU/L)</p>
 </dd>
-<dt class="field-even">3. ALT</dt>
+<dt class="field-even">3. ALT<span class="colon">:</span></dt>
 <dd class="field-even"><p>Alanine transaminase (IU/L)</p>
 </dd>
-<dt class="field-odd">4. AST</dt>
+<dt class="field-odd">4. AST<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Aspartate transaminase (IU/L)</p>
 </dd>
-<dt class="field-even">5. Bilirubin</dt>
+<dt class="field-even">5. Bilirubin<span class="colon">:</span></dt>
 <dd class="field-even"><p>Bilirubin (mg/dL)</p>
 </dd>
-<dt class="field-odd">6. BUN</dt>
+<dt class="field-odd">6. BUN<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Blood urea nitrogen (mg/dL)</p>
 </dd>
-<dt class="field-even">7. Cholesterol</dt>
+<dt class="field-even">7. Cholesterol<span class="colon">:</span></dt>
 <dd class="field-even"><p>Cholesterol (mg/dL)</p>
 </dd>
-<dt class="field-odd">8. Creatinine</dt>
+<dt class="field-odd">8. Creatinine<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Serum creatinine (mg/dL)</p>
 </dd>
-<dt class="field-even">9. DiasABP</dt>
+<dt class="field-even">9. DiasABP<span class="colon">:</span></dt>
 <dd class="field-even"><p>Invasive diastolic arterial blood pressure (mmHg)</p>
 </dd>
-<dt class="field-odd">10. FiO2</dt>
+<dt class="field-odd">10. FiO2<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Fractional inspired O<sub>2</sub> (0-1)</p>
 </dd>
-<dt class="field-even">11. GCS</dt>
+<dt class="field-even">11. GCS<span class="colon">:</span></dt>
 <dd class="field-even"><p>Glasgow Coma Score (3-15)</p>
 </dd>
-<dt class="field-odd">12. Glucose</dt>
+<dt class="field-odd">12. Glucose<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Serum glucose (mg/dL)</p>
 </dd>
-<dt class="field-even">13. HCO3</dt>
+<dt class="field-even">13. HCO3<span class="colon">:</span></dt>
 <dd class="field-even"><p>Serum bicarbonate (mmol/L)</p>
 </dd>
-<dt class="field-odd">14. HCT</dt>
+<dt class="field-odd">14. HCT<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Hematocrit (%)</p>
 </dd>
-<dt class="field-even">15. HR</dt>
+<dt class="field-even">15. HR<span class="colon">:</span></dt>
 <dd class="field-even"><p>Heart rate (bpm)</p>
 </dd>
-<dt class="field-odd">16. K</dt>
+<dt class="field-odd">16. K<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Serum potassium (mEq/L)</p>
 </dd>
-<dt class="field-even">17. Lactate</dt>
+<dt class="field-even">17. Lactate<span class="colon">:</span></dt>
 <dd class="field-even"><p>Lactate (mmol/L)</p>
 </dd>
-<dt class="field-odd">18. Mg</dt>
+<dt class="field-odd">18. Mg<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Serum magnesium (mmol/L)</p>
 </dd>
-<dt class="field-even">19. MAP</dt>
+<dt class="field-even">19. MAP<span class="colon">:</span></dt>
 <dd class="field-even"><p>Invasive mean arterial blood pressure (mmHg)</p>
 </dd>
-<dt class="field-odd">20. MechVent</dt>
+<dt class="field-odd">20. MechVent<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Mechanical ventilation respiration (0:false, or 1:true)</p>
 </dd>
-<dt class="field-even">21. Na</dt>
+<dt class="field-even">21. Na<span class="colon">:</span></dt>
 <dd class="field-even"><p>Serum sodium (mEq/L)</p>
 </dd>
-<dt class="field-odd">22. NIDiasABP</dt>
+<dt class="field-odd">22. NIDiasABP<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Non-invasive diastolic arterial blood pressure (mmHg)</p>
 </dd>
-<dt class="field-even">23. NIMAP</dt>
+<dt class="field-even">23. NIMAP<span class="colon">:</span></dt>
 <dd class="field-even"><p>Non-invasive mean arterial blood pressure (mmHg)</p>
 </dd>
-<dt class="field-odd">24. NISysABP</dt>
+<dt class="field-odd">24. NISysABP<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Non-invasive systolic arterial blood pressure (mmHg)</p>
 </dd>
-<dt class="field-even">25. PaCO2</dt>
+<dt class="field-even">25. PaCO2<span class="colon">:</span></dt>
 <dd class="field-even"><p>Partial pressure of arterial CO<sub>2</sub> (mmHg)]</p>
 </dd>
-<dt class="field-odd">26. PaO2</dt>
+<dt class="field-odd">26. PaO2<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Partial pressure of arterial O<sub>2</sub> (mmHg)</p>
 </dd>
-<dt class="field-even">27. pH</dt>
+<dt class="field-even">27. pH<span class="colon">:</span></dt>
 <dd class="field-even"><p>Arterial pH (0-14)</p>
 </dd>
-<dt class="field-odd">28. Platelets</dt>
+<dt class="field-odd">28. Platelets<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Platelets (cells/nL)</p>
 </dd>
-<dt class="field-even">29. RespRate</dt>
+<dt class="field-even">29. RespRate<span class="colon">:</span></dt>
 <dd class="field-even"><p>Respiration rate (bpm)</p>
 </dd>
-<dt class="field-odd">30. SaO2</dt>
+<dt class="field-odd">30. SaO2<span class="colon">:</span></dt>
 <dd class="field-odd"><p>O<sub>2</sub> saturation in hemoglobin (%)</p>
 </dd>
-<dt class="field-even">31. SysABP</dt>
+<dt class="field-even">31. SysABP<span class="colon">:</span></dt>
 <dd class="field-even"><p>Invasive systolic arterial blood pressure (mmHg)</p>
 </dd>
-<dt class="field-odd">32. Temp</dt>
+<dt class="field-odd">32. Temp<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Temperature (°C)</p>
 </dd>
-<dt class="field-even">33. TroponinI</dt>
+<dt class="field-even">33. TroponinI<span class="colon">:</span></dt>
 <dd class="field-even"><p>Troponin-I (μg/L). Note this is labelled <em>TropI</em> in the PhysioNet
 data dictionary.</p>
 </dd>
-<dt class="field-odd">34. TroponinT</dt>
+<dt class="field-odd">34. TroponinT<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Troponin-T (μg/L). Note this is labelled <em>TropT</em> in the PhysioNet
 data dictionary.</p>
 </dd>
-<dt class="field-even">35. Urine</dt>
+<dt class="field-even">35. Urine<span class="colon">:</span></dt>
 <dd class="field-even"><p>Urine output (mL)</p>
 </dd>
-<dt class="field-odd">36. WBC</dt>
+<dt class="field-odd">36. WBC<span class="colon">:</span></dt>
 <dd class="field-odd"><p>White blood cell count (cells/nL)</p>
 </dd>
-<dt class="field-even">37. Weight</dt>
+<dt class="field-even">37. Weight<span class="colon">:</span></dt>
 <dd class="field-even"><p>Weight (kg)</p>
 </dd>
-<dt class="field-odd">38. Age</dt>
+<dt class="field-odd">38. Age<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Age (years) at ICU admission</p>
 </dd>
-<dt class="field-even">39. Gender</dt>
+<dt class="field-even">39. Gender<span class="colon">:</span></dt>
 <dd class="field-even"><p>Gender (0: female, or 1: male)</p>
 </dd>
-<dt class="field-odd">40. Height</dt>
+<dt class="field-odd">40. Height<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Height (cm) at ICU admission</p>
 </dd>
-<dt class="field-even">41. ICUType1</dt>
+<dt class="field-even">41. ICUType1<span class="colon">:</span></dt>
 <dd class="field-even"><p>Type of ICU unit (1: Coronary Care Unit)</p>
 </dd>
-<dt class="field-odd">42. ICUType2</dt>
+<dt class="field-odd">42. ICUType2<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Type of ICU unit (2: Cardiac Surgery Recovery Unit)</p>
 </dd>
-<dt class="field-even">43. ICUType3</dt>
+<dt class="field-even">43. ICUType3<span class="colon">:</span></dt>
 <dd class="field-even"><p>Type of ICU unit (3: Medical ICU)</p>
 </dd>
-<dt class="field-odd">44. ICUType4</dt>
+<dt class="field-odd">44. ICUType4<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Type of ICU unit (4: Surgical ICU)</p>
 </dd>
 </dl>
@@ -258,7 +272,7 @@ the channel mode is assumed to be zero.</p>
 <p>Variables 41-44 are the one-hot encoded value of ICUType.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The data split to return, either <em>train</em>, <em>val</em> (validation) or <em>test</em>.</p></li>
 <li><p><strong>train_prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the training set.</p></li>
@@ -295,7 +309,7 @@ time deltas.</p>
 <p>Note that PhysioNet trajectories are of unequal length and are therefore
 padded with <code class="docutils literal notranslate"><span class="pre">NaNs</span></code> to the length of the longest trajectory in the data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -307,7 +321,7 @@ padded with <code class="docutils literal notranslate"><span class="pre">NaNs</s
 <dd><p>In-hospital survival (the <code class="docutils literal notranslate"><span class="pre">In-hospital_death</span></code> variable) for each
 patient. <em>y</em> = 1 indicates an in-hospital death. A tensor of shape (<em>n</em>, 1).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -319,7 +333,7 @@ patient. <em>y</em> = 1 indicates an in-hospital death. A tensor of shape (<em>n
 <dd><p>Length of each trajectory prior to padding. A tensor of shape
 (<em>n</em>).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -333,7 +347,7 @@ example, <code class="docutils literal notranslate"><span class="pre">y_val</spa
 attributes are available regardless of the <code class="docutils literal notranslate"><span class="pre">split</span></code> argument.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A PyTorch Dataset object which can be passed to a DataLoader.</p>
 </dd>
 </dl>
@@ -359,7 +373,7 @@ validation or test data are returned.</p>
 tutorial</a> for more
 information.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The data split to return, either <em>train</em>, <em>val</em> (validation) or <em>test</em>.</p></li>
 <li><p><strong>train_prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the training set.</p></li>
@@ -397,7 +411,7 @@ time deltas.</p>
 <p>Note that PhysioNet trajectories are of unequal length and are therefore
 padded with <code class="docutils literal notranslate"><span class="pre">NaNs</span></code> to the length of the longest trajectory in the data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -408,7 +422,7 @@ padded with <code class="docutils literal notranslate"><span class="pre">NaNs</s
 <span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#torchtime.data.PhysioNet2019.y" title="Permalink to this definition"></a></dt>
 <dd><p><code class="docutils literal notranslate"><span class="pre">SepsisLabel</span></code> at each time point. A tensor of shape (<em>n</em>, <em>s</em>, 1).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -420,7 +434,7 @@ padded with <code class="docutils literal notranslate"><span class="pre">NaNs</s
 <dd><p>Length of each trajectory prior to padding. A tensor of shape
 (<em>n</em>).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -434,7 +448,7 @@ example, <code class="docutils literal notranslate"><span class="pre">y_val</spa
 attributes are available regardless of the <code class="docutils literal notranslate"><span class="pre">split</span></code> argument.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A PyTorch Dataset object which can be passed to a
 DataLoader.</p>
 </dd>
@@ -465,7 +479,7 @@ validation or test data are returned.</p>
 tutorial</a> for more
 information.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The data split to return, either <em>train</em>, <em>val</em> (validation) or <em>test</em>.</p></li>
 <li><p><strong>train_prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Proportion of data in the training set.</p></li>
@@ -503,7 +517,7 @@ time deltas.</p>
 <p>Note that PhysioNet trajectories are of unequal length and are therefore
 padded with <code class="docutils literal notranslate"><span class="pre">NaNs</span></code> to the length of the longest trajectory in the data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -515,7 +529,7 @@ padded with <code class="docutils literal notranslate"><span class="pre">NaNs</s
 <dd><p>Whether patient is diagnosed with sepsis at any time during
 hospitalisation. A tensor of shape (<em>n</em>, 1).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -527,7 +541,7 @@ hospitalisation. A tensor of shape (<em>n</em>, 1).</p>
 <dd><p>Length of each trajectory prior to padding. A tensor of shape
 (<em>n</em>).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -541,7 +555,7 @@ example, <code class="docutils literal notranslate"><span class="pre">y_val</spa
 attributes are available regardless of the <code class="docutils literal notranslate"><span class="pre">split</span></code> argument.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A PyTorch Dataset object which can be passed to a DataLoader.</p>
 </dd>
 </dl>
@@ -578,7 +592,7 @@ values.</p>
 value.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dataset</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The UEA/UCR data set from list <a class="reference external" href="https://timeseriesclassification.com/dataset.php">here</a>.</p></li>
 <li><p><strong>split</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The data split to return, either <em>train</em>, <em>val</em> (validation) or <em>test</em>.</p></li>
@@ -626,7 +640,7 @@ deltas.</p>
 <p>Where trajectories are of unequal lengths they are padded with <code class="docutils literal notranslate"><span class="pre">NaNs</span></code> to
 the length of the longest trajectory in the data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -638,7 +652,7 @@ the length of the longest trajectory in the data.</p>
 <dd><p>One-hot encoded label data. A tensor of shape (<em>n</em>, <em>l</em>) where <em>l</em>
 is the number of classes.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -650,7 +664,7 @@ is the number of classes.</p>
 <dd><p>Length of each trajectory prior to padding. A tensor of shape
 (<em>n</em>).</p>
 <dl class="field-list simple">
-<dt class="field-odd">Type</dt>
+<dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Tensor</p>
 </dd>
 </dl>
@@ -664,13 +678,12 @@ example, <code class="docutils literal notranslate"><span class="pre">y_val</spa
 attributes are available regardless of the <code class="docutils literal notranslate"><span class="pre">split</span></code> argument.</p>
 </div>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A PyTorch Dataset object which can be passed to a DataLoader.</p>
 </dd>
 </dl>
 </dd></dl>
 
-</section>
 
 
            </div>

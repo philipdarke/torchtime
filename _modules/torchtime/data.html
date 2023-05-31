@@ -12,10 +12,11 @@
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
-        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
         <script src="../../_static/clipboard.min.js"></script>
         <script src="../../_static/copybutton.js"></script>
     <script src="../../_static/js/theme.js"></script>
@@ -28,14 +29,18 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html" class="icon icon-home"> torchtime
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            torchtime
           </a>
               <div class="version">
-                0.5.1
+                0.6.0
               </div>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
     <input type="hidden" name="check_keywords" value="yes" />
     <input type="hidden" name="area" value="default" />
   </form>
@@ -59,9 +64,9 @@
         <div class="rst-content">
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../index.html">Module code</a> &raquo;</li>
-      <li>torchtime.data</li>
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">torchtime.data</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -122,7 +127,7 @@
 
 
 <span class="k">class</span> <span class="nc">_TimeSeriesDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;**Generic time series PyTorch Dataset.**</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;**Generic time series PyTorch Dataset.**</span>
 
 <span class="sd">    .. warning::</span>
 <span class="sd">        Overload the ``_get_data()`` method to define a data set.</span>
@@ -401,12 +406,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">length_val</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Print data set details.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;TimeSeriesDataset: </span><span class="si">{}</span><span class="s2"></span>
-<span class="s2"> - cache location = </span><span class="si">{}</span><span class="s2"></span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Print data set details.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;&quot;&quot;TimeSeriesDataset: </span><span class="si">{}</span>
+<span class="s2"> - cache location = </span><span class="si">{}</span>
 <span class="s2"> - data split = </span><span class="si">{:.0f}</span><span class="s2">/</span><span class="si">{:.0f}</span><span class="s2">/</span><span class="si">{:.0f}</span><span class="s2"> (training/validation/test)</span>
-<span class="s2"> - time/mask/delta channels = </span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2"></span>
-<span class="s2"> - random seed = </span><span class="si">{}</span><span class="s2"></span>
+<span class="s2"> - time/mask/delta channels = </span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span><span class="s2">/</span><span class="si">{}</span>
+<span class="s2"> - random seed = </span><span class="si">{}</span>
 <span class="s2"> - X, y, length attributes return the </span><span class="si">{}</span><span class="s2"> split&quot;&quot;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
@@ -421,7 +426,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_validate_arguments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Validate arguments and set imputation function/data splits.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate arguments and set imputation function/data splits.&quot;&quot;&quot;</span>
         <span class="c1"># Validate impute arguments</span>
         <span class="n">impute_options</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">IMPUTE_FUNCTIONS</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="n">impute_error</span> <span class="o">=</span> <span class="s2">&quot;argument &#39;impute&#39; must be a string in </span><span class="si">{}</span><span class="s2"> or a function&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
@@ -438,7 +443,7 @@
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">impute</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
             <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">impute</span> <span class="ow">in</span> <span class="n">impute_options</span><span class="p">,</span> <span class="n">impute_error</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">imputer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">IMPUTE_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">impute</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">impute</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="nb">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">impute</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">imputer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">impute</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">impute_error</span><span class="p">)</span>
@@ -463,19 +468,19 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_no_imputation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">select</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;No imputation.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;No imputation.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_zero_imputation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">select</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Zero imputation. Replace missing values with zeros.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Zero imputation. Replace missing values with zeros.&quot;&quot;&quot;</span>
         <span class="n">X_imputed</span> <span class="o">=</span> <span class="n">replace_missing</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">select</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)),</span> <span class="n">select</span><span class="o">=</span><span class="n">select</span><span class="p">)</span>
         <span class="n">y_imputed</span> <span class="o">=</span> <span class="n">replace_missing</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
         <span class="k">return</span> <span class="n">X_imputed</span><span class="p">,</span> <span class="n">y_imputed</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_mean_imputation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">select</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Mean imputation. Replace missing values in ``X`` from ``fill``. Replace</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Mean imputation. Replace missing values in ``X`` from ``fill``. Replace</span>
 <span class="sd">        missing values in ``y`` with zeros.&quot;&quot;&quot;</span>
         <span class="n">X_imputed</span> <span class="o">=</span> <span class="n">replace_missing</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">fill</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="n">select</span><span class="p">)</span>
         <span class="n">y_imputed</span> <span class="o">=</span> <span class="n">replace_missing</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
@@ -483,7 +488,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_forward_imputation</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">fill</span><span class="p">,</span> <span class="n">select</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Forward imputation. Replace missing values with previous observation. Replace</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward imputation. Replace missing values with previous observation. Replace</span>
 <span class="sd">        any initial missing values in ``X`` from ``fill``. Assume no missing initial</span>
 <span class="sd">        values in ``y`` but there may be trailing missing values due to padding.&quot;&quot;&quot;</span>
         <span class="n">X_imputed</span> <span class="o">=</span> <span class="n">forward_impute</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="n">fill</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="n">select</span><span class="p">)</span>
@@ -491,23 +496,23 @@
         <span class="k">return</span> <span class="n">X_imputed</span><span class="p">,</span> <span class="n">y_imputed</span>
 
     <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Overload this function to return ``X``, ``y`` and ``length`` tensors.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Overload this function to return ``X``, ``y`` and ``length`` tensors.&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_time_stamp</span><span class="p">(</span><span class="n">X</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate time stamp.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate time stamp.&quot;&quot;&quot;</span>
         <span class="n">time_stamp</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">time_stamp</span> <span class="o">=</span> <span class="n">time_stamp</span><span class="o">.</span><span class="n">tile</span><span class="p">((</span><span class="n">X</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">time_stamp</span>
 
     <span class="k">def</span> <span class="nf">_missing_mask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate missing data mask.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate missing data mask.&quot;&quot;&quot;</span>
         <span class="n">mask</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X</span><span class="p">[:,</span> <span class="p">:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span> <span class="p">:]))</span>
         <span class="k">return</span> <span class="n">mask</span>
 
     <span class="k">def</span> <span class="nf">_time_delta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate time delta calculated as in Che et al, 2018, see</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate time delta calculated as in Che et al, 2018, see</span>
 <span class="sd">        https://www.nature.com/articles/s41598-018-24271-9.&quot;&quot;&quot;</span>
         <span class="c1"># Add time and mask channels</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">:</span>
@@ -537,7 +542,7 @@
         <span class="k">return</span> <span class="n">time_delta</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_split_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">stratify</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Split data (``X``, ``y``, ``length``) into training, validation and</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Split data (``X``, ``y``, ``length``) into training, validation and</span>
 <span class="sd">        (optional) test sets using stratified sampling.&quot;&quot;&quot;</span>
         <span class="n">random_state</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_prop</span> <span class="o">&gt;</span> <span class="n">EPS</span><span class="p">:</span>
@@ -606,7 +611,7 @@
 
 
 <div class="viewcode-block" id="PhysioNet2012"><a class="viewcode-back" href="../../api/data.html#torchtime.data.PhysioNet2012">[docs]</a><span class="k">class</span> <span class="nc">PhysioNet2012</span><span class="p">(</span><span class="n">_TimeSeriesDataset</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;**Returns the PhysioNet Challenge 2012 data as a PyTorch Dataset.** See the</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;**Returns the PhysioNet Challenge 2012 data as a PyTorch Dataset.** See the</span>
 <span class="sd">    PhysioNet `website &lt;https://physionet.org/content/challenge-2012/1.0.0/&gt;`_ for a</span>
 <span class="sd">    description of the data set.</span>
 
@@ -771,7 +776,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Download data and form ``X``, ``y``, ``length`` tensors.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Download data and form ``X``, ``y``, ``length`` tensors.&quot;&quot;&quot;</span>
         <span class="n">outcome_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_path</span> <span class="o">/</span> <span class="s2">&quot;outcomes&quot;</span>
         <span class="n">all_X</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">PHYSIONET_2012_DATASETS</span><span class="p">]</span>
         <span class="c1"># Download and extract data</span>
@@ -803,7 +808,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_get_lengths</span><span class="p">(</span><span class="n">data_files</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get length of each time series.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get length of each time series.&quot;&quot;&quot;</span>
         <span class="n">lengths</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">data_files</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">file_j</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
@@ -823,7 +828,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_process_files</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">max_length</span><span class="p">,</span> <span class="n">channels</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Process ``.txt`` files.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process ``.txt`` files.&quot;&quot;&quot;</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">),</span> <span class="n">max_length</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">channels</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">))</span>
         <span class="n">template_dataframe</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">channels</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">file_i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
@@ -852,7 +857,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_get_labels</span><span class="p">(</span><span class="n">outcome_files</span><span class="p">,</span> <span class="n">data_files</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Process outcome files.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process outcome files.&quot;&quot;&quot;</span>
         <span class="n">y</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">file_i</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">outcome_files</span><span class="p">):</span>
             <span class="n">ids</span> <span class="o">=</span> <span class="n">data_files</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
@@ -867,7 +872,7 @@
 
 
 <div class="viewcode-block" id="PhysioNet2019"><a class="viewcode-back" href="../../api/data.html#torchtime.data.PhysioNet2019">[docs]</a><span class="k">class</span> <span class="nc">PhysioNet2019</span><span class="p">(</span><span class="n">_TimeSeriesDataset</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;**Returns the PhysioNet Challenge 2019 data as a PyTorch Dataset.** See the</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;**Returns the PhysioNet Challenge 2019 data as a PyTorch Dataset.** See the</span>
 <span class="sd">    PhysioNet `website &lt;https://physionet.org/content/challenge-2019/1.0.0/&gt;`_ for a</span>
 <span class="sd">    description of the data set.</span>
 
@@ -967,7 +972,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Download data and form ``X``, ``y``, ``length`` tensors.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Download data and form ``X``, ``y``, ``length`` tensors.&quot;&quot;&quot;</span>
         <span class="c1"># Download and extract data</span>
         <span class="n">_physionet_download</span><span class="p">(</span><span class="n">PHYSIONET_2019_DATASETS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overwrite_cache</span><span class="p">)</span>
         <span class="c1"># Prepare data</span>
@@ -987,7 +992,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_get_lengths_channels</span><span class="p">(</span><span class="n">data_files</span><span class="p">,</span> <span class="n">max_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Get length of each time series and number of channels. Time series can be</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get length of each time series and number of channels. Time series can be</span>
 <span class="sd">        truncated at a specific hour with the ``max_time`` argument.&quot;&quot;&quot;</span>
         <span class="n">lengths</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># sequence lengths</span>
         <span class="n">channels</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># number of channels</span>
@@ -1011,7 +1016,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_process_files</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">max_length</span><span class="p">,</span> <span class="n">channels</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Process ``.psv`` files.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process ``.psv`` files.&quot;&quot;&quot;</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">),</span> <span class="n">max_length</span><span class="p">,</span> <span class="n">channels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">))</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">),</span> <span class="n">max_length</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">file_i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
@@ -1029,7 +1034,7 @@
 
 
 <div class="viewcode-block" id="PhysioNet2019Binary"><a class="viewcode-back" href="../../api/data.html#torchtime.data.PhysioNet2019Binary">[docs]</a><span class="k">class</span> <span class="nc">PhysioNet2019Binary</span><span class="p">(</span><span class="n">_TimeSeriesDataset</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;**Returns a binary prediction variant of the PhysioNet Challenge 2019 data as a</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;**Returns a binary prediction variant of the PhysioNet Challenge 2019 data as a</span>
 <span class="sd">    PyTorch Dataset.**</span>
 
 <span class="sd">    In contrast with the full challenge, the first 72 hours of data are used to predict</span>
@@ -1137,7 +1142,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Download data and form ``X``, ``y``, ``length`` tensors.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Download data and form ``X``, ``y``, ``length`` tensors.&quot;&quot;&quot;</span>
         <span class="c1"># Download and extract data in &quot;physionet2019&quot; directory to avoid duplication</span>
         <span class="n">cache_path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">()</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">path_arg</span> <span class="o">/</span> <span class="s2">&quot;.torchtime&quot;</span> <span class="o">/</span> <span class="s2">&quot;physionet_2019&quot;</span>
         <span class="n">_physionet_download</span><span class="p">(</span><span class="n">PHYSIONET_2019_DATASETS</span><span class="p">,</span> <span class="n">cache_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overwrite_cache</span><span class="p">)</span>
@@ -1166,7 +1171,7 @@
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">length</span>
 
     <span class="k">def</span> <span class="nf">_process_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">max_length</span><span class="p">,</span> <span class="n">channels</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Process ``.psv`` files.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Process ``.psv`` files.&quot;&quot;&quot;</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">),</span> <span class="n">max_length</span><span class="p">,</span> <span class="n">channels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">))</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span> <span class="mf">0.0</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">file_i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span>
@@ -1185,7 +1190,7 @@
 
 
 <div class="viewcode-block" id="UEA"><a class="viewcode-back" href="../../api/data.html#torchtime.data.UEA">[docs]</a><span class="k">class</span> <span class="nc">UEA</span><span class="p">(</span><span class="n">_TimeSeriesDataset</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    **Returns a time series classification data set from the UEA/UCR</span>
 <span class="sd">    repository as a PyTorch Dataset.** See the UEA/UCR repository `website</span>
 <span class="sd">    &lt;https://www.timeseriesclassification.com/&gt;`_ for the data sets.</span>
@@ -1320,7 +1325,7 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_download_uea_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Download UEA data if not already downloaded.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Download UEA data if not already downloaded.&quot;&quot;&quot;</span>
         <span class="n">train_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span> <span class="o">+</span> <span class="s2">&quot;_TRAIN.ts&quot;</span><span class="p">)</span>
         <span class="n">test_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span> <span class="o">+</span> <span class="s2">&quot;_TEST.ts&quot;</span><span class="p">)</span>
         <span class="c1"># Download and extract archive</span>
@@ -1342,7 +1347,7 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_extract_ts_files</span><span class="p">(</span><span class="n">data_files</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Extract ``.ts`` data based on ``sktime.datasets.load_UCR_UEA_dataset()``.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Extract ``.ts`` data based on ``sktime.datasets.load_UCR_UEA_dataset()``.&quot;&quot;&quot;</span>
         <span class="n">X</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;object&quot;</span><span class="p">)</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="s2">&quot;object&quot;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">data_files</span><span class="p">:</span>
@@ -1353,7 +1358,7 @@
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span>
 
     <span class="k">def</span> <span class="nf">_get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Download data and form ``X``, ``y`` and ``length`` tensors.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Download data and form ``X``, ``y`` and ``length`` tensors.&quot;&quot;&quot;</span>
         <span class="n">data_files</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_download_uea_data</span><span class="p">(</span>
             <span class="n">UEA_DOWNLOAD_URL</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_name</span> <span class="o">+</span> <span class="s2">&quot;.zip&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">raw_path</span>
         <span class="p">)</span>
@@ -1375,7 +1380,7 @@
         <span class="k">return</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">length</span>
 
     <span class="k">def</span> <span class="nf">_pad</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Xi</span><span class="p">,</span> <span class="n">max_length</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Pad trajectories to length ``max_length``.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pad trajectories to length ``max_length``.&quot;&quot;&quot;</span>
         <span class="n">Xi</span> <span class="o">=</span> <span class="n">pad_sequence</span><span class="p">([</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">Xij</span><span class="p">)</span> <span class="k">for</span> <span class="n">Xij</span> <span class="ow">in</span> <span class="n">Xi</span><span class="p">])</span>
         <span class="n">out</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">full</span><span class="p">((</span><span class="n">max_length</span><span class="p">,</span> <span class="n">Xi</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;nan&quot;</span><span class="p">))</span>  <span class="c1"># shape (s, c)</span>
         <span class="n">out</span><span class="p">[</span><span class="mi">0</span> <span class="p">:</span> <span class="n">Xi</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">Xi</span>
