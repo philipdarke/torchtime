@@ -11,6 +11,9 @@ DATASET = "CharacterTrajectories"
 SEED = 456789
 RTOL = 1e-4
 ATOL = 1e-4
+CHECKSUM_X = "1a472cca64a9b26997f54fb230bc9408a242b08dbb3df3080b0a52203e723b2c"
+CHECKSUM_Y = "878a1aecdfc252cdd0bb3577616596f8a2c3b4e1f4b3e716cd8ddad304c7c8f6"
+CHECKSUM_LENGTH = "2da6d9cf15a847c1f5a90d95c94f5d42221d9329ca565ebacd3334ef0db68916"
 
 
 class TestUEACharacterTrajectories:
@@ -77,18 +80,19 @@ class TestUEACharacterTrajectories:
             train_prop=0.7,
             seed=SEED,
         )
-        assert (
-            _get_SHA256(".torchtime/uea_" + DATASET + "/X" + OBJ_EXT)
-            == "977be55b8ed063e88991dc459c5d871136839f092dd8056dd408aa59db7dd27f"
-        )
-        assert (
-            _get_SHA256(".torchtime/uea_" + DATASET + "/y" + OBJ_EXT)
-            == "59b53905692701ec7e6c5ca2e8b61d06c44ec531a3d29c0bbb38ddec7754da80"
-        )
-        assert (
-            _get_SHA256(".torchtime/uea_" + DATASET + "/length" + OBJ_EXT)
-            == "698d1ebefff52cff3c41da20feccbd141e856b16aa618b7e44c80daf54ab0e39"
-        )
+        if CHECKSUM_X:
+            assert (
+                _get_SHA256(".torchtime/uea_" + DATASET + "/X" + OBJ_EXT) == CHECKSUM_X
+            )
+        if CHECKSUM_Y:
+            assert (
+                _get_SHA256(".torchtime/uea_" + DATASET + "/y" + OBJ_EXT) == CHECKSUM_Y
+            )
+        if CHECKSUM_LENGTH:
+            assert (
+                _get_SHA256(".torchtime/uea_" + DATASET + "/length" + OBJ_EXT)
+                == CHECKSUM_LENGTH
+            )
 
     def test_train_val(self):
         """Test training/validation split sizes."""
@@ -388,18 +392,19 @@ class TestUEACharacterTrajectories:
             seed=SEED,
             overwrite_cache=True,
         )
-        assert (
-            _get_SHA256(".torchtime/uea_" + DATASET + "/X" + OBJ_EXT)
-            == "977be55b8ed063e88991dc459c5d871136839f092dd8056dd408aa59db7dd27f"
-        )
-        assert (
-            _get_SHA256(".torchtime/uea_" + DATASET + "/y" + OBJ_EXT)
-            == "59b53905692701ec7e6c5ca2e8b61d06c44ec531a3d29c0bbb38ddec7754da80"
-        )
-        assert (
-            _get_SHA256(".torchtime/uea_" + DATASET + "/length" + OBJ_EXT)
-            == "698d1ebefff52cff3c41da20feccbd141e856b16aa618b7e44c80daf54ab0e39"
-        )
+        if CHECKSUM_X:
+            assert (
+                _get_SHA256(".torchtime/uea_" + DATASET + "/X" + OBJ_EXT) == CHECKSUM_X
+            )
+        if CHECKSUM_Y:
+            assert (
+                _get_SHA256(".torchtime/uea_" + DATASET + "/y" + OBJ_EXT) == CHECKSUM_Y
+            )
+        if CHECKSUM_LENGTH:
+            assert (
+                _get_SHA256(".torchtime/uea_" + DATASET + "/length" + OBJ_EXT)
+                == CHECKSUM_LENGTH
+            )
 
     def test_time(self):
         """Test time argument."""

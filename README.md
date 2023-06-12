@@ -20,9 +20,19 @@ PyTorch data sets for supervised time series classification and prediction probl
 
 ## Installation
 
+Install PyTorch followed by `torchtime`:
+
 ```bash
 $ pip install torchtime
 ```
+
+or
+
+```bash
+$ conda install torchtime -c conda-forge
+```
+
+There is currently no Windows build for `conda`. Feedback is welcome from `conda` users in particular.
 
 ## Getting started
 

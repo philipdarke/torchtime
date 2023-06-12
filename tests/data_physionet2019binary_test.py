@@ -10,6 +10,9 @@ from torchtime.utils import _get_SHA256
 SEED = 456789
 RTOL = 1e-4
 ATOL = 1e-4
+CHECKSUM_X = "99dc8eb22eecb82f57ef301b63bac37f7656ce691d158f3e1e8db80205ce8ba1"
+CHECKSUM_Y = "4d0c286a4c84ec9cffbb16babf7812365ee8b9220e7ea7fcfdb690b31ec26a87"
+CHECKSUM_LENGTH = "718660039c834375d1d547fe93788b50d4eb7e8a4323bbb5ee0fe531ba27f8bb"
 
 
 class TestPhysioNet2019Binary:
@@ -71,18 +74,19 @@ class TestPhysioNet2019Binary:
             train_prop=0.7,
             seed=SEED,
         )
-        assert (
-            _get_SHA256(".torchtime/physionet_2019binary/X" + OBJ_EXT)
-            == "52b28760d1d2420b27d8003531ae42cdca14c6e408b024273c81a65d39c2f2df"
-        )
-        assert (
-            _get_SHA256(".torchtime/physionet_2019binary/y" + OBJ_EXT)
-            == "dd78b55b728fe62798cadb28741d5cb0f243dfb3146aa6732baa26ecfe32ba40"
-        )
-        assert (
-            _get_SHA256(".torchtime/physionet_2019binary/length" + OBJ_EXT)
-            == "d0c1c809d47485cb237e650d11264bcc9225f2c56d5754d4ebeda41cc87c63ba"
-        )
+        if CHECKSUM_X:
+            assert (
+                _get_SHA256(".torchtime/physionet_2019binary/X" + OBJ_EXT) == CHECKSUM_X
+            )
+        if CHECKSUM_Y:
+            assert (
+                _get_SHA256(".torchtime/physionet_2019binary/y" + OBJ_EXT) == CHECKSUM_Y
+            )
+        if CHECKSUM_LENGTH:
+            assert (
+                _get_SHA256(".torchtime/physionet_2019binary/length" + OBJ_EXT)
+                == CHECKSUM_LENGTH
+            )
 
     def test_train_val(self):
         """Test training/validation split sizes."""
@@ -342,18 +346,19 @@ class TestPhysioNet2019Binary:
             seed=SEED,
             overwrite_cache=True,
         )
-        assert (
-            _get_SHA256(".torchtime/physionet_2019binary/X" + OBJ_EXT)
-            == "52b28760d1d2420b27d8003531ae42cdca14c6e408b024273c81a65d39c2f2df"
-        )
-        assert (
-            _get_SHA256(".torchtime/physionet_2019binary/y" + OBJ_EXT)
-            == "dd78b55b728fe62798cadb28741d5cb0f243dfb3146aa6732baa26ecfe32ba40"
-        )
-        assert (
-            _get_SHA256(".torchtime/physionet_2019binary/length" + OBJ_EXT)
-            == "d0c1c809d47485cb237e650d11264bcc9225f2c56d5754d4ebeda41cc87c63ba"
-        )
+        if CHECKSUM_X:
+            assert (
+                _get_SHA256(".torchtime/physionet_2019binary/X" + OBJ_EXT) == CHECKSUM_X
+            )
+        if CHECKSUM_Y:
+            assert (
+                _get_SHA256(".torchtime/physionet_2019binary/y" + OBJ_EXT) == CHECKSUM_Y
+            )
+        if CHECKSUM_LENGTH:
+            assert (
+                _get_SHA256(".torchtime/physionet_2019binary/length" + OBJ_EXT)
+                == CHECKSUM_LENGTH
+            )
 
     def test_time(self):
         """Test time argument."""

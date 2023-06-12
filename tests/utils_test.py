@@ -3,6 +3,7 @@ import os
 import pytest
 import torch
 
+from torchtime.constants import CHECKSUM_EXT, OBJ_EXT
 from torchtime.utils import _check_SHA256, _get_SHA256
 
 SEED = 456789
@@ -19,11 +20,11 @@ class TestUtils:
         """Fixture for checksum tests."""
         generator = torch.Generator().manual_seed(SEED)
         X = torch.rand((N, S, C), generator=generator)
-        sha = "60dd512baf28adcfe07484ee6d893d4c9f927cdd9865538a75d9664eb1ff9cde"
-        sha_error = "60dd512baf28adcfe07484ee6d893d4c9f927cdd9865538a75d9664eb1ff9pad"
-        X_path = ".torchtime/X.pt"
-        sha_path = ".torchtime/correct.sha256"
-        error_path = ".torchtime/error.sha256"
+        sha = "3460c01e7ab9d6bfab46c1802e52362f997bf03c1723c7cf7fc70cd5df0de780"
+        sha_error = "1111111111111111111111111111111111111111111111111111111111111111"
+        X_path = ".torchtime/X" + OBJ_EXT
+        sha_path = ".torchtime/correct" + CHECKSUM_EXT
+        error_path = ".torchtime/error" + CHECKSUM_EXT
         # Save files
         torch.save(X, X_path)
         with open(sha_path, "w") as f:

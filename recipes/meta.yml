@@ -1,0 +1,62 @@
+{% set name = "torchtime" %}
+{% set version = "0.5.1" %}
+{% set torch_proc_type = "cuda" if cuda_compiler_version != "None" else "cpu" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/torchtime-{{ version }}.tar.gz
+  sha256: 45ce7d95fa9974f0c6edb967cf08546f68b00e49d0f997a6a69281900f3de886
+
+build:
+  number: 0
+  skip: true  # [win or py<38 or py>39]
+
+requirements:
+  build:
+    - python                                 # [build_platform != target_platform]
+    - cross-python_{{ target_platform }}     # [build_platform != target_platform]
+    - pytorch                                # [build_platform != target_platform]
+    - pytorch =*={{ torch_proc_type }}*      # [build_platform != target_platform]
+    - {{ compiler('c') }}
+    - {{ compiler('cxx') }}
+    - {{ compiler('cuda') }}  # [cuda_compiler_version not in (undefined, 'None')]
+  host:
+    - python
+    - pip
+    - poetry
+    - pytorch =*={{ torch_proc_type }}*
+  run:
+    - python
+    - sktime
+    - requests
+    - scikit-learn
+    - tqdm
+  run_constrained:
+    - pytorch =*={{ torch_proc_type }}*
+    - numpy >=1.21.0,<1.22
+
+test:
+  imports:
+    - torchtime
+    - torchtime.collate
+    - torchtime.constants
+    - torchtime.data
+    - torchtime.utils
+  commands:
+    - pip check
+  requires:
+    - pip
+
+about:
+  home: https://philipdarke.com/torchtime
+  summary: Benchmark time series data sets for PyTorch
+  license: MIT
+  license_file:
+    - LICENSE
+
+extra:
+  recipe-maintainers:
+    - philipdarke

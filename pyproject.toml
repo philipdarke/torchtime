@@ -10,36 +10,36 @@ repository = "https://github.com/philipdarke/torchtime"
 documentation = "https://philipdarke.com/torchtime"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<3.10"
-numpy = "^1.21.0"
+python = ">=3.8.1,<3.12"
+numpy = "^1.21"
 requests = "^2.27.1"
-scikit-learn = "^1.1.1"
-sktime = "^0.12.1"
-torch = "^1.11.0"
+scikit-learn = "^1.1"
+sktime = ">=0.17,<0.19"
+torch = ">=1.12,<2.1"
 tqdm = "^4.64.0"
 
-[tool.poetry.dev-dependencies]
-black = "^22.1.0"
-flake8 = "^4.0.1"
-isort = "^5.10.1"
-pre-commit = "^2.17.0"
-pytest = "^7.1.1"
-pytest-cov = "^3.0.0"
-Sphinx = "^4.4.0"
-myst-parser = "^0.17.0"
-sphinx-autodoc-typehints = "^1.17.0"
-sphinx-rtd-theme = "^1.0.0"
-sphinx-copybutton = "^0.5.0"
-Pygments = "^2.11.2"
-genbadge = {extras = ["all"], version = "^1.0.6"}
+[tool.poetry.group.dev.dependencies]
+black = "23.3.0"
+flake8 = "6.0.0"
+genbadge = {extras = ["all"], version = "1.1.0"}
+isort = "5.12.0"
+myst-parser = "1.0.0"
+pre-commit = "3.3.2"
+Pygments = "2.15.1"
+pytest = "7.3.1"
+pytest-cov = "4.1.0"
+Sphinx = "6.2.1"
+sphinx-autodoc-typehints = "1.23.0"
+sphinx-rtd-theme = "1.2.1"
+sphinx-copybutton = "0.5.2"
 
 [tool.black]
 include = '\.pyi?$'
-target-version = ['py38']
+target-version = ['py310']
 
 [tool.isort]
 profile = "black"
-py_version = 38
+py_version = 310
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

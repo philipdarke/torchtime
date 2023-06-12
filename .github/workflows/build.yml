@@ -6,15 +6,15 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        python-version: [3.8]
-        poetry-version: [1.1.13]
+        python-version: [3.10.6]
+        poetry-version: [1.5.1]
         os: [macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Poetry
@@ -33,31 +33,35 @@ jobs:
           python3 -m poetry run make doctest html --directory docs/
           python3 -m poetry run genbadge coverage -v -i coverage.xml -o docs/_build/html/assets/coverage-badge.svg
       - name: Upload code coverage
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v3
         with:
           name: coverage
           path: coverage.xml
 
   cd:
+    strategy:
+      fail-fast: false
     needs: ci
     if: startsWith(github.ref, 'refs/tags/')
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     env:
-      python_version: 3.8
-      poetry_version: 1.1.13
+      python_version: 3.10.6
+      poetry_version: 1.5.1
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ env.python_version }}
       - name: Install Poetry
         run: pip install poetry==${{ env.poetry_version }}
+      - name: Fix PyTorch version for Linux runner
+        run: python3 -m poetry add torch==1.12.0
       - name: Install package and dependencies
         run: python3 -m poetry install
       - name: Get code coverage
-        uses: actions/download-artifact@master
+        uses: actions/download-artifact@v3
         with:
           name: coverage
       - name: Build documentation
@@ -65,7 +69,7 @@ jobs:
           python3 -m poetry run make doctest html --directory docs/
           python3 -m poetry run genbadge coverage -v -i coverage.xml -o docs/_build/html/assets/coverage-badge.svg
       - name: Update GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3.7.3
+        uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: docs/_build/html
@@ -78,7 +82,7 @@ jobs:
       - name: Build package
         run: python3 -m poetry build
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@v1.5.0
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
