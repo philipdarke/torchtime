@@ -57,7 +57,7 @@ jobs:
       - name: Install Poetry
         run: pip install poetry==${{ env.poetry_version }}
       - name: Fix PyTorch version for Linux runner
-        run: python3 -m 
+        run: python3 -m poetry add torch==1.12.0
       - name: Install package and dependencies
         run: python3 -m poetry install
       - name: Get code coverage
