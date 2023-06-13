@@ -79,6 +79,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CHANGELOG_FILE: "CHANGELOG.md"
           ALLOW_EMPTY_CHANGELOG: "false"
+      - name: Revert to package PyTorch version
+        run: python3 -m poetry add torch@">=1.12,<2.1"
       - name: Build package
         run: python3 -m poetry build
       - name: Publish to PyPI

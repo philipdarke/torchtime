@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+* Support for PyTorch 1.13.x to 2.0.x
 * GitHub Actions badge
 
 ## [0.6.0] - 2023-06-12
