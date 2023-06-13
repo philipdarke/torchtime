@@ -1,7 +1,7 @@
 # Benchmark time series data sets for PyTorch
 
 [![PyPi](https://img.shields.io/pypi/v/torchtime)](https://pypi.org/project/torchtime)
-[![Build status](https://img.shields.io/github/workflow/status/philipdarke/torchtime/build.svg)](https://github.com/philipdarke/torchtime/actions/workflows/build.yml)
+[![Build status](https://img.shields.io/github/actions/workflow/status/philipdarke/torchtime/build.yml?branch=main)](https://github.com/philipdarke/torchtime/actions/workflows/build.yml)
 ![Coverage](https://philipdarke.com/torchtime/assets/coverage-badge.svg?dummy=8484744)
 [![License](https://img.shields.io/github/license/philipdarke/torchtime.svg)](https://github.com/philipdarke/torchtime/blob/main/LICENSE)
 [![DOI](https://img.shields.io/badge/DOI-10.48550%2FarXiv.2207.12503-blue)](https://doi.org/10.48550/arXiv.2207.12503)
