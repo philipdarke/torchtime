@@ -12,7 +12,7 @@ TQDM_FORMAT: Final[
 ] = "{percentage:3.0f}%|{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]"
 
 # UEA/UCR
-UEA_DOWNLOAD_URL: Final[str] = "https://www.timeseriesclassification.com/Downloads/"
+UEA_DOWNLOAD_URL: Final[str] = "https://www.timeseriesclassification.com/aeon-toolkit/"
 
 # PhysioNet 2012
 PHYSIONET_2012_DATASETS: Final[dict] = {
